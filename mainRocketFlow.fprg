@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<flowgorithm fileversion="3.0">
+    <attributes>
+        <attribute name="name" value=""/>
+        <attribute name="authors" value="ethan"/>
+        <attribute name="about" value=""/>
+        <attribute name="saved" value="2022-09-10 11:03:01 AM"/>
+        <attribute name="created" value="ZXRoYW47TEFQVE9QLVJPRzsyMDIyLTA5LTA5OzExOjA4OjE0IFBNOzI1NTI="/>
+        <attribute name="edited" value="ZXRoYW47TEFQVE9QLVJPRzsyMDIyLTA5LTEwOzExOjAzOjAxIEFNOzg7MjYzNQ=="/>
+    </attributes>
+    <function name="Main" type="None" variable="">
+        <parameters/>
+        <body>
+            <call expression="startup"/>
+            <call expression="spawnParallelCommunicationProcess"/>
+            <assign variable="inFlight" expression="False"/>
+            <assign variable="cycle" expression="0"/>
+            <declare name="acclerations" type="Real" array="True" size="5"/>
+            <while expression="working">
+                <while expression="time &lt; (cycle + 1) * .2"/>
+                <assign variable="cycle" expression="cycle + 1"/>
+                <call expression="getSensorData&#13;&#10;"/>
+                <call expression="updateAcclerations"/>
+                <call expression="getGroundData"/>
+                <if expression="abort == True">
+                    <then>
+                        <call expression="deployChute"/>
+                    </then>
+                    <else/>
+                </if>
+                <call expression="sendDataToGround"/>
+                <call expression="updateDataFile"/>
+                <call expression="estimateApogee"/>
+                <if expression="inFlight = False and velocity &gt; 20">
+                    <then>
+                        <assign variable="inFlight" expression="True"/>
+                    </then>
+                    <else/>
+                </if>
+                <if expression="inFlight = True and median(acclerations) &lt; 10">
+                    <then>
+                        <call expression="deployParachute&#13;&#10;"/>
+                    </then>
+                    <else/>
+                </if>
+            </while>
+        </body>
+    </function>
+    <function name="getGroundData" type="Integer" variable="">
+        <parameters/>
+        <body>
+            <call expression="requestFromModemCache"/>
+            <if expression="data == good">
+                <then>
+                    <if expression="data == abort">
+                        <then>
+                            <assign variable="abort" expression="True"/>
+                        </then>
+                        <else/>
+                    </if>
+                </then>
+                <else/>
+            </if>
+        </body>
+    </function>
+</flowgorithm>
