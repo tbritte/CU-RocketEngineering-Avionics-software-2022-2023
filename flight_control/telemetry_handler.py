@@ -7,7 +7,7 @@ class TelemetryHandler():
     def __init__(self):
         self.sense = SenseHat()
 
-    def get_data(self):
+    def get_data(self) -> dict:
         """Gets all data from the Sense Hat Raspberry Pi Accessory and returns it as a dictionary.
 
         Data Info:
@@ -39,12 +39,15 @@ class TelemetryHandler():
         north = self.sense.get_compass()
         raw_magnetometer = self.sense.get_compass_raw()
 
-        data = {'humidity': humidity, 'humidity_temp': humidity_temp, 'pressure_temp': pressure_temp, 'temp': temp, 'pressure': pressure,
-                'orientation': orientation, 'north': north, 'raw_magnetometer': raw_magnetometer, 'raw_accelerometer': raw_accelerometer}
+        data = {'humidity': humidity, 'pressure': pressure, 'humidity_temp': humidity_temp, 'pressure_temp': pressure_temp, 'temp': temp,
+                'orientation': orientation, 'raw_accelerometer': raw_accelerometer, 'north': north, 'raw_magnetometer': raw_magnetometer}
 
         return data
 
     def print_data(self):
+        """Prints out all data from the Sense Hat.
+        """
+        
         data = get_data()
         for key, value in data.items():
             print(f"{key}: {value}")
