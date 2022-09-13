@@ -1,7 +1,7 @@
 import pandas as pd
 import time
 
-from _typing import DFData
+from ._typing import DFData
 
 class Logger():
     def __init__(self, file_name: str, columns:list, start_time:float = time.time()):
