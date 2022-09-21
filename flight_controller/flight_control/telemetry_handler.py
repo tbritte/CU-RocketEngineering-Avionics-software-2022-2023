@@ -6,6 +6,9 @@ from sense_hat import SenseHat
 class TelemetryHandler():
     def __init__(self):
         self.sense = SenseHat()
+        
+        self.pressure_arr = [self.sense.get_pressure() for i in range(10)]
+        self.launch_pressure = self.sense.get_pressure()
 
     def get_data(self) -> dict:
         """Gets all data from the Sense Hat Raspberry Pi Accessory and returns it as a dictionary.
@@ -38,7 +41,10 @@ class TelemetryHandler():
         
         north = self.sense.get_compass()
         raw_magnetometer = self.sense.get_compass_raw()
-
+        
+        self.add_pressure(pressure)
+        altitude = self.calculate_altitude()
+        
         data = {'humidity': humidity, 'pressure': pressure, 'humidity_temp': humidity_temp, 'pressure_temp': pressure_temp, 'temp': temp,
                 'orientation': orientation, 'raw_accelerometer': raw_accelerometer, 'north': north, 'raw_magnetometer': raw_magnetometer}
 
@@ -51,3 +57,25 @@ class TelemetryHandler():
         data = get_data()
         for key, value in data.items():
             print(f"{key}: {value}")
+    
+    def add_pressure(self, pressure: float):
+        """Adds a pressure value to the pressure array.
+
+        Args:
+            pressure (float): The pressure to add to the array.
+        """
+        self.pressure_arr.append(pressure)
+        self.pressure_arr.pop(0)
+    
+    def calculate_altitude(self, pressure: float) -> float:
+        """Calculates the altitude of the rocket based on the pressure.
+
+        Args:
+            pressure (float): The pressure of the rocket.
+
+        Returns:
+            float: The altitude of the rocket.
+        """
+        average_pressure = sum(self.pressure_arr) / len(self.pressure_arr)
+        altitude = 44330 * (1 - pow(pressure / average_pressure, 1 / 5.255))
+        return altitude
