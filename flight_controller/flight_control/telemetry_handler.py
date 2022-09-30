@@ -1,5 +1,4 @@
 from pkgutil import get_data
-from this import d
 from sense_hat import SenseHat
 
 
