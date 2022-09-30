@@ -1,5 +1,5 @@
 from pkgutil import get_data
-from sense_hat import SenseHat
+from sense_emu import SenseHat
 
 
 class TelemetryHandler():
@@ -53,7 +53,7 @@ class TelemetryHandler():
         """Prints out all data from the Sense Hat.
         """
         
-        data = get_data()
+        data = self.get_data()
         for key, value in data.items():
             print(f"{key}: {value}")
     
@@ -66,7 +66,7 @@ class TelemetryHandler():
         self.pressure_arr.append(pressure)
         self.pressure_arr.pop(0)
     
-    def calculate_altitude(self, pressure: float) -> float:
+    def calculate_altitude(self) -> float:
         """Calculates the altitude of the rocket based on the pressure.
 
         Args:
@@ -76,5 +76,5 @@ class TelemetryHandler():
             float: The altitude of the rocket.
         """
         average_pressure = sum(self.pressure_arr) / len(self.pressure_arr)
-        altitude = 44330 * (1 - pow(pressure / average_pressure, 1 / 5.255))
+        altitude = 44330 * (1 - pow(average_pressure, 1 / 5.255))
         return altitude
