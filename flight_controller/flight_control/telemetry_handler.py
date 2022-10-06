@@ -1,5 +1,7 @@
 from pkgutil import get_data
-from sense_hat import SenseHat
+from sense_emu import SenseHat
+
+import logging
 
 
 class TelemetryHandler():
@@ -30,6 +32,9 @@ class TelemetryHandler():
         humidity = self.sense.get_humidity()
         pressure = self.sense.get_pressure()
         
+        self.add_pressure(pressure)
+        altitude = self.calculate_altitude()
+        
         humidity_temp = self.sense.get_temperature_from_humidity()
         pressure_temp = self.sense.get_temperature_from_pressure()
         # Averages humidity_temp and pressure_temp
@@ -41,10 +46,7 @@ class TelemetryHandler():
         north = self.sense.get_compass()
         raw_magnetometer = self.sense.get_compass_raw()
         
-        self.add_pressure(pressure)
-        altitude = self.calculate_altitude()
-        
-        data = {'humidity': humidity, 'pressure': pressure, 'humidity_temp': humidity_temp, 'pressure_temp': pressure_temp, 'temp': temp,
+        data = {'humidity': humidity, 'pressure': pressure, 'altitude': altitude, 'humidity_temp': humidity_temp, 'pressure_temp': pressure_temp, 'temp': temp,
                 'orientation': orientation, 'raw_accelerometer': raw_accelerometer, 'north': north, 'raw_magnetometer': raw_magnetometer}
 
         return data
@@ -53,9 +55,9 @@ class TelemetryHandler():
         """Prints out all data from the Sense Hat.
         """
         
-        data = get_data()
+        data = self.get_data()
         for key, value in data.items():
-            print(f"{key}: {value}")
+            logging.info(f"{key}: {value}")
     
     def add_pressure(self, pressure: float):
         """Adds a pressure value to the pressure array.
@@ -66,7 +68,7 @@ class TelemetryHandler():
         self.pressure_arr.append(pressure)
         self.pressure_arr.pop(0)
     
-    def calculate_altitude(self, pressure: float) -> float:
+    def calculate_altitude(self) -> float:
         """Calculates the altitude of the rocket based on the pressure.
 
         Args:
@@ -76,5 +78,5 @@ class TelemetryHandler():
             float: The altitude of the rocket.
         """
         average_pressure = sum(self.pressure_arr) / len(self.pressure_arr)
-        altitude = 44330 * (1 - pow(pressure / average_pressure, 1 / 5.255))
+        altitude = 44330 * (1 - pow(average_pressure/1013.25, 1 / 5.255))
         return altitude
