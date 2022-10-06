@@ -1,6 +1,6 @@
 import pandas as pd
 
-from flight_control import Logger
+from flight_control import DataLogger
 
 def test_logger():
     logger = Logger('test.csv', ['test', 'data'])
