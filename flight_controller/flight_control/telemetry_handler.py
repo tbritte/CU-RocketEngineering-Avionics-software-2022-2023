@@ -1,4 +1,3 @@
-from pkgutil import get_data
 from sense_emu import SenseHat
 
 import logging
