@@ -1,12 +1,12 @@
 from enum import Enum
 
 class Stage(Enum):
-    pre_flight = 1
-    liftoff = 2
-    in_flight = 3
-    apogee = 4
-    descent = 5
-    post_flight = 6
+    PRE_FLIGHT = 1
+    LIFTOFF = 2
+    IN_FLIGHT = 3
+    APOGEE = 4
+    DESCENT = 5
+    POST_FLIGHT = 6
 
 
 class FlightStatus:
@@ -49,8 +49,8 @@ class FlightStatus:
         self.add_altitude(telemetry['altitude'])
         self.acceleration = telemetry['raw_accelerometer']
         
-        if (sum(self.altitude_list[0:5]) / 5) > (sum(self.altitude_list[5:10]) / 5) and self.stage <= Stage.liftoff:
+        if (sum(self.altitude_list[0:5]) / 5) > (sum(self.altitude_list[5:10]) / 5) and self.stage.value <= Stage.liftoff.value:
             self.stage = Stage.in_flight
-        elif (sum(self.altitude_list[0:5]) / 5) < (sum(self.altitude_list[5:10]) / 5) and self.stage <= Stage.apogee:
+        elif (sum(self.altitude_list[0:5]) / 5) < (sum(self.altitude_list[5:10]) / 5) and self.stage.value <= Stage.apogee.value:
             self.stage = Stage.descent
         
