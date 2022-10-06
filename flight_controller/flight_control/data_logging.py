@@ -3,7 +3,7 @@ import time
 
 from ._typing import DFData
 
-class Logger():
+class DataLogger():
     def __init__(self, file_name: str, columns:list, start_time:float = time.time()):
         self.file_name = file_name
         self.START_TIME = start_time
