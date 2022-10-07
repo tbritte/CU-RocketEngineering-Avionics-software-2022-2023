@@ -1,6 +1,5 @@
 from sense_emu import SenseHat
 
-
 class TelemetryHandler():
     def __init__(self):
         self.sense = SenseHat()
@@ -54,7 +53,7 @@ class TelemetryHandler():
         
         data = self.get_data()
         for key, value in data.items():
-            print(f"{key}: {value}")
+            logging.info(f"{key}: {value}")
     
     def add_pressure(self, pressure: float):
         """Adds a pressure value to the pressure array.
