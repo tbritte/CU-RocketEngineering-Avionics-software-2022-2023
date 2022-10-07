@@ -1,8 +1,5 @@
 from sense_emu import SenseHat
 
-import logging
-
-
 class TelemetryHandler():
     def __init__(self):
         self.sense = SenseHat()

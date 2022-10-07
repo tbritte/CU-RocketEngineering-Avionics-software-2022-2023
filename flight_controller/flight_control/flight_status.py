@@ -1,7 +1,6 @@
 from enum import Enum
 from statistics import median
 
-
 class Stage(Enum):
     PRE_FLIGHT = 1
     LIFTOFF = 2
@@ -10,7 +9,6 @@ class Stage(Enum):
     DESCENT = 5
     POST_FLIGHT = 6
 
-
 class FlightStatus:
     def __init__(self):
         self.stage = Stage.PRE_FLIGHT
@@ -18,6 +16,12 @@ class FlightStatus:
         self.altitude_list = [0.0 for i in range(64)]  # 64 is the number of altitude samples to leave in memory
         self.acceleration = 0
 
+class FlightStatus:
+    def __init__(self):
+        self.stage = Stage.pre_flight
+        self.altitude_list = [0 for i in range(64)] # 64 is the number of altitude samples to leave in memory
+        self.acceleration = 0
+    
     def current_stage(self) -> Stage:
         """Returns the current stage of the rocket.
 
@@ -25,7 +29,7 @@ class FlightStatus:
             Stage: The current stage of the rocket.
         """
         return self.stage
-
+    
     def current_stage_name(self) -> str:
         """Returns the current stage of the rocket as a string.
 
@@ -36,7 +40,7 @@ class FlightStatus:
 
     def add_altitude(self, altitude: float) -> None:
         """Adds an altitude to the altitude list and sets the current altitude.
-
+        
         Args:
             altitude (float): The altitude to add to the list.
         """
