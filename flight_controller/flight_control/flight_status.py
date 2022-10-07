@@ -1,4 +1,6 @@
 from enum import Enum
+from statistics import median
+
 
 class Stage(Enum):
     PRE_FLIGHT = 1
@@ -11,10 +13,11 @@ class Stage(Enum):
 
 class FlightStatus:
     def __init__(self):
-        self.stage = Stage.pre_flight
-        self.altitude_list = [0 for i in range(64)] # 64 is the number of altitude samples to leave in memory
+        self.stage = Stage.PRE_FLIGHT
+        # A sample is taken at 16hz
+        self.altitude_list = [0.0 for i in range(64)]  # 64 is the number of altitude samples to leave in memory
         self.acceleration = 0
-    
+
     def current_stage(self) -> Stage:
         """Returns the current stage of the rocket.
 
@@ -22,7 +25,7 @@ class FlightStatus:
             Stage: The current stage of the rocket.
         """
         return self.stage
-    
+
     def current_stage_name(self) -> str:
         """Returns the current stage of the rocket as a string.
 
@@ -40,6 +43,15 @@ class FlightStatus:
         self.altitude_list.append(altitude)
         self.altitude_list.pop(0)
 
+    def check_apogee(self):  # Checks if the rocket is past the apogee
+        """
+        If the median of the last second of altitude values is less than the
+        median of the previous values, declare apogee has passed
+        """
+        lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
+        fm = median(self.altitude_list[:64-8])  # Oldest 56 samples (3.5 seconds)
+        return lm < fm
+
     def new_telemetry(self, telemetry: dict) -> None:
         """Updates the flight status based on the new telemetry.
 
@@ -48,9 +60,3 @@ class FlightStatus:
         """
         self.add_altitude(telemetry['altitude'])
         self.acceleration = telemetry['raw_accelerometer']
-        
-        if (sum(self.altitude_list[0:5]) / 5) > (sum(self.altitude_list[5:10]) / 5) and self.stage.value <= Stage.liftoff.value:
-            self.stage = Stage.in_flight
-        elif (sum(self.altitude_list[0:5]) / 5) < (sum(self.altitude_list[5:10]) / 5) and self.stage.value <= Stage.apogee.value:
-            self.stage = Stage.descent
-        
