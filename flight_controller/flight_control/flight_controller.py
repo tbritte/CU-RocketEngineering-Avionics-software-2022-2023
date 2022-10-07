@@ -33,7 +33,7 @@ def main():
             telemetry_logger.log_data(data)
             telemetryDownlink.send_data(data)
         
-        if flight_status.get_status() == FlightStatus.flight:
+        if flight_status.current_stage() == FlightStatus.flight:
             parachute = Parachute()
             parachute.deploy()
             flight_status.set_status(FlightStatus.post_flight)
