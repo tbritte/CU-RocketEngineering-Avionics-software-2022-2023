@@ -40,10 +40,14 @@ class FlightStatus:
         self.altitude_list.append(altitude)
         self.altitude_list.pop(0)
 
-    def check_apogee(self):  # Checks if the rocket is past the apogee
-        """
+    def check_apogee(self) -> bool:  # Checks if the rocket is past the apogee
+        """Determines if the rocket has passed the apogee.
+        
         If the median of the last second of altitude values is less than the
         median of the previous values, declare apogee has passed
+        
+        Returns:
+            bool: True if the rocket has passed the apogee, False otherwise.
         """
         lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
         fm = median(self.altitude_list[:64-8])  # Oldest 56 samples (3.5 seconds)
