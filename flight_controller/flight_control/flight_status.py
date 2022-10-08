@@ -11,13 +11,6 @@ class Stage(Enum):
 
 class FlightStatus:
     def __init__(self):
-        self.stage = Stage.PRE_FLIGHT
-        # A sample is taken at 16hz
-        self.altitude_list = [0.0 for i in range(64)]  # 64 is the number of altitude samples to leave in memory
-        self.acceleration = 0
-
-class FlightStatus:
-    def __init__(self):
         self.stage = Stage.pre_flight
         self.altitude_list = [0 for i in range(64)] # 64 is the number of altitude samples to leave in memory
         self.acceleration = 0
