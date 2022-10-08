@@ -6,7 +6,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(18, GPIO.OUT)
 
 def test_blink():
-    for i in range(10):
+    for i in range(1):
         GPIO.output(18, True)
         time.sleep(1)
         GPIO.output(18, False)
