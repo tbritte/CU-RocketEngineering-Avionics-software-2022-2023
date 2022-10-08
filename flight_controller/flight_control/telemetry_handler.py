@@ -1,8 +1,4 @@
-from pkgutil import get_data
 from sense_emu import SenseHat
-
-import logging
-
 
 class TelemetryHandler():
     def __init__(self):
@@ -57,7 +53,7 @@ class TelemetryHandler():
         
         data = self.get_data()
         for key, value in data.items():
-            logging.info(f"{key}: {value}")
+            print(f"{key}: {value}")
     
     def add_pressure(self, pressure: float):
         """Adds a pressure value to the pressure array.
@@ -78,5 +74,5 @@ class TelemetryHandler():
             float: The altitude of the rocket.
         """
         average_pressure = sum(self.pressure_arr) / len(self.pressure_arr)
-        altitude = 44330 * (1 - pow(average_pressure/1013.25, 1 / 5.255))
+        altitude = 44330 * (1 - pow(average_pressure/1013.25, 1 / 5.255)) # Get reading at launch pad and use it for base altitude
         return altitude

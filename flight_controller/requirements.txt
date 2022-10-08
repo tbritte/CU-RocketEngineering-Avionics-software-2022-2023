@@ -1,0 +1,4 @@
+pandas
+sense_hat
+sense_emu
+pytest
