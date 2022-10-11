@@ -1,8 +1,10 @@
+from subprocess import call
 import time
 
 from .parachute import Parachute
 
 from .flight_status import FlightStatus
+from .flight_status import Stage
 
 from .telemetry_downlink import TelemetryDownlink
 from .telemetry_handler import TelemetryHandler
@@ -26,19 +28,21 @@ def main():
     last_data_pull = time.time()
     
     while not terminate:
-        if last_data_pull - time.time() > 0.25:
+        if last_data_pull - time.time() > 0.0625:
             last_data_pull = time.time()
             
             data = telemetryHandler.get_data()
             telemetry_logger.log_data(data)
             telemetryDownlink.send_data(data)
         
-        if flight_status.current_stage() == FlightStatus.flight:
+        if flight_status.current_stage() == Stage.DESCENT:
             parachute = Parachute()
             parachute.deploy()
-            flight_status.set_status(FlightStatus.post_flight)
+        
+        if flight_status.current_stage() == Stage.ON_GROUND:
             terminate = True
-
+    
+    call(['shutdown', '-h', 'now'], shell=False)
 
 if __name__ == '__main__':
     main()
