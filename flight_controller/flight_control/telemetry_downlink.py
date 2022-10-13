@@ -7,4 +7,4 @@ class TelemetryDownlink():
         self.thread_ID = thread_ID
     
     def run(self):
-        print(str(self.thread_name) +" "+ str(self.thread_ID));
+        print(str(self.thread_name) +" "+ str(self.thread_ID))
