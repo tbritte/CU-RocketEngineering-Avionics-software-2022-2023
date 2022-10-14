@@ -15,34 +15,38 @@ from .data_logging import DataLogger
 start_time = time.time()
 telemetry_logger = DataLogger('telemetry_log.csv', ['time', 'humidity', 'pressure', 'altitude', 'humidity_temp',
                           'pressure_temp', 'temp', 'orientation', 'raw_accelerometer', 'north', 'raw_magnetometer'], start_time)
-flight_status = FlightStatus.pre_flight
+flight_status = FlightStatus()
 
 def main():
     telemetryHandler = TelemetryHandler()
     telemetryDownlink = TelemetryDownlink("Telemetry Downlink", 1000)
 
-    telemetryDownlink.start()
+    #telemetryDownlink.run()
     
     terminate = False
     
     last_data_pull = time.time()
     
     while not terminate:
-        if last_data_pull - time.time() > 0.0625:
+        if time.time() - last_data_pull > 0.0625:
             last_data_pull = time.time()
             
             data = telemetryHandler.get_data()
+            print(data)
             telemetry_logger.log_data(data)
-            telemetryDownlink.send_data(data)
+            #telemetryDownlink.send_data(data)
+            flight_status.new_telemetry(data)
         
         if flight_status.current_stage() == Stage.DESCENT:
+            print('Descent')
             parachute = Parachute()
             parachute.deploy()
         
         if flight_status.current_stage() == Stage.ON_GROUND:
+            print('On Ground')
             terminate = True
     
-    call(['shutdown', '-h', 'now'], shell=False)
+    #call(['shutdown', '-h', 'now'], shell=False)
 
 if __name__ == '__main__':
     main()
