@@ -4,14 +4,14 @@ class Parachute():
     def __init__(self) -> None:
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(12, GPIO.OUT)
+        GPIO.setup(18, GPIO.OUT)
     
-    def parachute_deployment():
+    def deploy(self):
         """Deploys the parachute.
         """
-        GPIO.output(12,GPIO.HIGH)
+        GPIO.output(18,GPIO.HIGH)
         
-    def kill_parachute_signal():
+    def kill_signal(self):
         """Kills the parachute signal to save electricity and prevent anything weird from happening.
         """
-        GPIO.output(12,GPIO.LOW)
+        GPIO.output(18,GPIO.LOW)

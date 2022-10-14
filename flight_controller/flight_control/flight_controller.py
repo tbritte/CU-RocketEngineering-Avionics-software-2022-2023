@@ -30,20 +30,17 @@ def main():
     while not terminate:
         if time.time() - last_data_pull > 0.0625:
             last_data_pull = time.time()
-            
+            print(flight_status.stage.name)
             data = telemetryHandler.get_data()
-            print(data)
             telemetry_logger.log_data(data)
             #telemetryDownlink.send_data(data)
-            flight_status.new_telemetry(data)
-        
+            flight_status.new_telemetry(data) 
         if flight_status.current_stage() == Stage.DESCENT:
-            print('Descent')
             parachute = Parachute()
             parachute.deploy()
         
         if flight_status.current_stage() == Stage.ON_GROUND:
-            print('On Ground')
+            parachute.kill_signal()
             terminate = True
     
     #call(['shutdown', '-h', 'now'], shell=False)

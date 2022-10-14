@@ -12,7 +12,7 @@ class Stage(Enum):
 class FlightStatus:
     def __init__(self):
         self.stage = Stage.PRE_FLIGHT
-        self.altitude_list = [0 for i in range(64)] # 64 is the number of altitude samples to leave in memory
+        self.altitude_list = [] # 64 is the number of altitude samples to leave in memory
         self.acceleration = 0
     
     def current_stage(self) -> Stage:
@@ -38,7 +38,10 @@ class FlightStatus:
             altitude (float): The altitude to add to the list.
         """
         self.altitude_list.append(altitude)
-        self.altitude_list.pop(0)
+        if len(self.altitude_list) == 65:
+            self.altitude_list.pop(0)
+        elif len(self.altitude_list) > 65:
+            print('CRITICAL ERROR: Too many altitude variables stored')
     
     def check_liftoff(self) -> bool:
         """Determines if the rocket has liftoff.
@@ -84,9 +87,10 @@ class FlightStatus:
         self.add_altitude(telemetry['altitude'])
         self.acceleration = telemetry['raw_accelerometer']
         
-        if self.stage.value == Stage.PRE_FLIGHT.value and self.check_liftoff():
-            self.stage = Stage.IN_FLIGHT
-        elif self.stage.value <= Stage.IN_FLIGHT.value and self.check_apogee():
-            self.stage = Stage.DESCENT
-        elif self.stage.value <= Stage.DESCENT.value and self.check_landed():
-            self.stage = Stage.ON_GROUND
+        if len(self.altitude_list) >= 64:
+            if self.stage.value == Stage.PRE_FLIGHT.value and self.check_liftoff():
+                self.stage = Stage.IN_FLIGHT
+            elif self.stage.value <= Stage.IN_FLIGHT.value and self.check_apogee():
+                self.stage = Stage.DESCENT
+            elif self.stage.value <= Stage.DESCENT.value and self.check_landed():
+                self.stage = Stage.ON_GROUND
