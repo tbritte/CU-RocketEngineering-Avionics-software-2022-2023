@@ -1,0 +1,7 @@
+import serial
+
+ser = serial.Serial("/dev/ttyUSB0",baudrate=57600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=0)
+
+data = '01101001'
+while True:
+    ser.write(data)
