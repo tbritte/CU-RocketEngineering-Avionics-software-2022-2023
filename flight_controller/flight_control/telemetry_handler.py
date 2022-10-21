@@ -1,11 +1,30 @@
+import time
+import numpy as np
+
 from sense_emu import SenseHat
 
 class TelemetryHandler():
     def __init__(self):
         self.sense = SenseHat()
         
-        self.pressure_arr = [self.sense.get_pressure() for i in range(10)]
-        self.launch_pressure = self.sense.get_pressure()
+        self.pressure_arr = [self.sense.get_pressure() for i in range(8)]
+        self.base_pressure = 0
+        self.base_altitude = 0
+    
+    def setup(self) -> None:
+        """Setup the telemetry handler.
+        """
+        
+        base_pressure_arr = []
+        last_data_pull = time.time()
+        while len(base_pressure_arr) < 64:
+            if time.time() - last_data_pull > 0.0625:
+                last_data_pull = time.time()
+                base_pressure_arr.append(self.sense.get_pressure())
+        
+        self.base_pressure = np.mean(base_pressure_arr)
+        self.base_altitude = self.calculate_altitude(base_pressure_arr)
+
 
     def get_data(self) -> dict:
         """Gets all data from the Sense Hat Raspberry Pi Accessory and returns it as a dictionary.
@@ -29,7 +48,7 @@ class TelemetryHandler():
         pressure = self.sense.get_pressure()
         
         self.add_pressure(pressure)
-        altitude = self.calculate_altitude()
+        altitude = self.current_altitude()
         
         humidity_temp = self.sense.get_temperature_from_humidity()
         pressure_temp = self.sense.get_temperature_from_pressure()
@@ -64,7 +83,7 @@ class TelemetryHandler():
         self.pressure_arr.append(pressure)
         self.pressure_arr.pop(0)
     
-    def calculate_altitude(self) -> float:
+    def calculate_altitude(self, pressure_arr) -> float:
         """Calculates the altitude of the rocket based on the pressure.
 
         Args:
@@ -73,6 +92,14 @@ class TelemetryHandler():
         Returns:
             float: The altitude of the rocket.
         """
-        average_pressure = sum(self.pressure_arr) / len(self.pressure_arr)
+        average_pressure = np.mean(pressure_arr)
         altitude = 44330 * (1 - pow(average_pressure/1013.25, 1 / 5.255)) # Get reading at launch pad and use it for base altitude
-        return altitude
+        return altitude - self.base_altitude
+    
+    def current_altitude(self) -> float:
+        """Returns the current altitude of the rocket.
+
+        Returns:
+            float: The current altitude of the rocket.
+        """
+        return self.calculate_altitude(self.pressure_arr)
