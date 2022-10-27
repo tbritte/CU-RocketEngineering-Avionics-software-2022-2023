@@ -41,12 +41,13 @@ def main():
             telemetry_logger.log_data(data)
             #telemetryDownlink.send_data(data)
             flight_status.new_telemetry(data) 
-        if flight_status.current_stage() == Stage.DESCENT:
+        
+        if flight_status.current_stage() == Stage.DESCENT and not parachute.deployed:
             parachute = Parachute()
             parachute.deploy()
-        
-        if flight_status.current_stage() == Stage.ON_GROUND:
+        elif flight_status.current_stage() == Stage.DESCENT and parachute.deployed:
             parachute.kill_signal()
+        elif flight_status.current_stage() == Stage.ON_GROUND:
             terminate = True
     
     #call(['shutdown', '-h', 'now'], shell=False)

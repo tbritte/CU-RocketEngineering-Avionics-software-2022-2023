@@ -3,7 +3,7 @@ import RPi.GPIO as GPIO
 class Parachute():
     def __init__(self) -> None:
         GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BCM)
+        GPIO.setmode(GPIO.BOARD)
         GPIO.setup(18, GPIO.OUT)
     
     def deploy(self):

@@ -83,17 +83,18 @@ class TelemetryHandler():
         self.pressure_arr.append(pressure)
         self.pressure_arr.pop(0)
     
-    def calculate_altitude(self, pressure_arr) -> float:
+    def calculate_altitude(self, pressure_arr: list, seaLevelPressure: float = 1013.25) -> float:
         """Calculates the altitude of the rocket based on the pressure.
 
         Args:
-            pressure (float): The pressure of the rocket.
+            pressure_arr (list): The current air pressure, in list format.
+            seaLevelPressure (float, optional): The pressure at sea level. Defaults to 1013.25.
 
         Returns:
-            float: The altitude of the rocket.
+            float: The altitude of the rocket in meters.
         """
         average_pressure = np.mean(pressure_arr)
-        altitude = 44330 * (1 - pow(average_pressure/1013.25, 1 / 5.255)) # Get reading at launch pad and use it for base altitude
+        altitude = 44330 * (1.0 - pow(average_pressure / seaLevelPressure, 1 / 5.255)) # Used formula from https://github.com/adafruit/Adafruit_BMP280_Library
         return altitude - self.base_altitude
     
     def current_altitude(self) -> float:
