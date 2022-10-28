@@ -49,7 +49,7 @@ class FlightStatus:
         """
         lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
         fm = median(self.altitude_list[:64-8])  # Oldest 56 samples (3.5 seconds)
-        return lm - fm > 10
+        return lm > self.base_altitude + 15
     
     
     # IMPORTANT: SHOULD WE USE LESS OLDER SAMPLES TO DETECT APOGEE SOONER???
