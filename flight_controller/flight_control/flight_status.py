@@ -88,5 +88,5 @@ class FlightStatus:
                 self.stage = Stage.IN_FLIGHT
             elif self.stage.value == Stage.IN_FLIGHT.value and self.check_apogee():
                 self.stage = Stage.DESCENT
-            elif Stage >= self.stage.value == Stage.DESCENT.value and self.check_landed():
+            elif self.stage.value == Stage.DESCENT.value and self.check_landed():
                 self.stage = Stage.ON_GROUND

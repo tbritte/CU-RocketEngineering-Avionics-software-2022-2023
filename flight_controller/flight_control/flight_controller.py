@@ -27,6 +27,7 @@ def main():
     startup(telemetryHandler=telemetryHandler, telemetryDownlink=telemetryDownlink)
     
     flight_status = FlightStatus(telemetryHandler.base_altitude)
+    parachute = Parachute()
     
     terminate = False
     
@@ -43,7 +44,6 @@ def main():
             flight_status.new_telemetry(data) 
         
         if flight_status.current_stage() == Stage.DESCENT and not parachute.deployed:
-            parachute = Parachute()
             parachute.deploy()
         elif flight_status.current_stage() == Stage.DESCENT and parachute.deployed:
             parachute.kill_signal()
