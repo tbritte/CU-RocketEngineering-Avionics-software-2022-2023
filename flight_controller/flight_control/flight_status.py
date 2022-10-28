@@ -73,8 +73,7 @@ class FlightStatus:
             bool: True if the rocket has landed, False otherwise.
         """
         lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
-        fm = median(self.altitude_list[:64-8])  # Oldest 56 samples (3.5 seconds)
-        return lm - fm < self.base_altitude + 10
+        return lm < self.base_altitude + 10
 
     def new_telemetry(self, telemetry: dict) -> None:
         """Updates the flight status based on the new telemetry.
