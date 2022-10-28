@@ -10,7 +10,7 @@ class Stage(Enum):
 class FlightStatus:
     def __init__(self, base_altitude: float = 0):
         self.stage = Stage.PRE_FLIGHT
-        self.altitude_list = [] # 64 is the number of altitude samples to leave in memory
+        self.altitude_list = []  # 64 is the number of altitude samples to leave in memory
         self.base_altitude = base_altitude
     
     def current_stage(self) -> Stage:
@@ -63,7 +63,7 @@ class FlightStatus:
             bool: True if the rocket has passed the apogee, False otherwise.
         """
         lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
-        fm = median(self.altitude_list[:64-8])  # Oldest 56 samples (3.5 seconds)
+        fm = median(self.altitude_list[64-16:64-8])  # Second newest 8 samples .5 to 1 second ago)
         return lm < fm
     
     def check_landed(self) -> bool:
