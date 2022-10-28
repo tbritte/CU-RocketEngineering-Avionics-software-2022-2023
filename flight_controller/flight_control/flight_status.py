@@ -3,17 +3,15 @@ from statistics import median
 
 class Stage(Enum):
     PRE_FLIGHT = 1
-    LIFTOFF = 2
-    IN_FLIGHT = 3
-    APOGEE = 4
-    DESCENT = 5
-    ON_GROUND = 6
+    IN_FLIGHT = 2
+    DESCENT = 3
+    ON_GROUND = 4
 
 class FlightStatus:
-    def __init__(self):
+    def __init__(self, base_altitude: float = 0):
         self.stage = Stage.PRE_FLIGHT
-        self.altitude_list = [] # 64 is the number of altitude samples to leave in memory
-        self.acceleration = 0
+        self.altitude_list = []  # 64 is the number of altitude samples to leave in memory
+        self.base_altitude = base_altitude
     
     def current_stage(self) -> Stage:
         """Returns the current stage of the rocket.
@@ -51,7 +49,7 @@ class FlightStatus:
         """
         lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
         fm = median(self.altitude_list[:64-8])  # Oldest 56 samples (3.5 seconds)
-        return lm - fm > 10
+        return lm > self.base_altitude + 15
     
     
     # IMPORTANT: SHOULD WE USE LESS OLDER SAMPLES TO DETECT APOGEE SOONER???
@@ -65,7 +63,7 @@ class FlightStatus:
             bool: True if the rocket has passed the apogee, False otherwise.
         """
         lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
-        fm = median(self.altitude_list[:64-8])  # Oldest 56 samples (3.5 seconds)
+        fm = median(self.altitude_list[64-16:64-8])  # Second newest 8 samples .5 to 1 second ago)
         return lm < fm
     
     def check_landed(self) -> bool:
@@ -75,8 +73,7 @@ class FlightStatus:
             bool: True if the rocket has landed, False otherwise.
         """
         lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
-        fm = median(self.altitude_list[:64-8])  # Oldest 56 samples (3.5 seconds)
-        return lm - fm < 3
+        return lm < self.base_altitude + 10
 
     def new_telemetry(self, telemetry: dict) -> None:
         """Updates the flight status based on the new telemetry.
@@ -85,12 +82,11 @@ class FlightStatus:
             telemetry (dict): Current telemetry from the Sense Hat.
         """
         self.add_altitude(telemetry['altitude'])
-        self.acceleration = telemetry['raw_accelerometer']
         
         if len(self.altitude_list) >= 64:
             if self.stage.value == Stage.PRE_FLIGHT.value and self.check_liftoff():
                 self.stage = Stage.IN_FLIGHT
-            elif self.stage.value <= Stage.IN_FLIGHT.value and self.check_apogee():
+            elif self.stage.value == Stage.IN_FLIGHT.value and self.check_apogee():
                 self.stage = Stage.DESCENT
-            elif self.stage.value <= Stage.DESCENT.value and self.check_landed():
+            elif self.stage.value == Stage.DESCENT.value and self.check_landed():
                 self.stage = Stage.ON_GROUND
