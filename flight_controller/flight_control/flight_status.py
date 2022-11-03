@@ -10,7 +10,7 @@ class Stage(Enum):
 class FlightStatus:
     def __init__(self, base_altitude: float = 0):
         self.stage = Stage.PRE_FLIGHT
-        self.altitude_list = []  # 64 is the number of altitude samples to leave in memory
+        self.altitude_list = [base_altitude for _ in range(64)]  # 64 is the number of altitude samples to leave in memory
         self.base_altitude = base_altitude
     
     def current_stage(self) -> Stage:
@@ -90,3 +90,5 @@ class FlightStatus:
                 self.stage = Stage.DESCENT
             elif self.stage.value == Stage.DESCENT.value and self.check_landed():
                 self.stage = Stage.ON_GROUND
+        else:
+            print("ALTITUDE LIST IS SOMEHOW LESS THAN 64 IN NEW_TELEMETRY")
