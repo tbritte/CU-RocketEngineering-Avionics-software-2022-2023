@@ -73,7 +73,7 @@ class FlightStatus:
             bool: True if the rocket has landed, False otherwise.
         """
         lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
-        return lm < self.base_altitude + 10
+        return lm < 10  # Altitude is already relative to base altitude. Checking if we are below 10 meters above base altitude
 
     def new_telemetry(self, telemetry: dict) -> None:
         """Updates the flight status based on the new telemetry.
