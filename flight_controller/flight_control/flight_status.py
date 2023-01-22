@@ -8,10 +8,9 @@ class Stage(Enum):
     ON_GROUND = 4
 
 class FlightStatus:
-    def __init__(self, base_altitude: float = 0):
+    def __init__(self):
         self.stage = Stage.PRE_FLIGHT
-        self.altitude_list = [base_altitude for _ in range(64)]  # 64 is the number of altitude samples to leave in memory
-        self.base_altitude = base_altitude
+        self.altitude_list = []
     
     def current_stage(self) -> Stage:
         """Returns the current stage of the rocket.
@@ -49,7 +48,7 @@ class FlightStatus:
         """
         lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
         fm = median(self.altitude_list[:64-8])  # Oldest 56 samples (3.5 seconds)
-        return lm > self.base_altitude + 15
+        return lm > fm + 10
     
     
     # IMPORTANT: SHOULD WE USE LESS OLDER SAMPLES TO DETECT APOGEE SOONER???
@@ -91,4 +90,4 @@ class FlightStatus:
             elif self.stage.value == Stage.DESCENT.value and self.check_landed():
                 self.stage = Stage.ON_GROUND
         else:
-            print("ALTITUDE LIST IS SOMEHOW LESS THAN 64 IN NEW_TELEMETRY")
+            print("Need more altitude, collecting...")

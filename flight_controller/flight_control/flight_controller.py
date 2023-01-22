@@ -26,7 +26,7 @@ def main():
     
     startup(telemetryHandler=telemetryHandler, telemetryDownlink=telemetryDownlink)
     
-    flight_status = FlightStatus(telemetryHandler.base_altitude)
+    flight_status = FlightStatus()
     parachute = Parachute()
     
     terminate = False
