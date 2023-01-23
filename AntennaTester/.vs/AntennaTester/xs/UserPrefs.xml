@@ -1,4 +1,23 @@
 ﻿<Properties StartupConfiguration="{859F1CB3-698A-4C6A-8742-4935965DB324}|Default">
-  <MonoDevelop.Ide.ItemProperties.AntennaTester FirstBuild="True" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.AntennaTester PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="AntennaTester/Program.cs">
+    <Files>
+      <File FileName="AntennaTester/Program.cs" Line="10" Column="52" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="AntennaTester" expanded="True">
+            <Node name="AntennaTester" expanded="True" />
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
   <MultiItemStartupConfigurations />
 </Properties>
