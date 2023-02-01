@@ -24,9 +24,10 @@ def startup(telemetryHandler: TelemetryHandler, telemetryDownlink: TelemetryDown
 
 def main():
     telemetry_handler = TelemetryHandler()
-    telemetry_downlink = TelemetryDownlink("Telemetry Downlink", 1000)
+    # telemetry_downlink = TelemetryDownlink("Telemetry Downlink", 1000)
     
-    startup(telemetryHandler=telemetry_handler, telemetryDownlink=telemetry_downlink)
+    # startup(telemetryHandler=telemetry_handler, telemetryDownlink=telemetry_downlink)
+    telemetry_handler.setup()
     
     flight_status = FlightStatus(telemetry_handler.sense)
     parachute = Parachute()
