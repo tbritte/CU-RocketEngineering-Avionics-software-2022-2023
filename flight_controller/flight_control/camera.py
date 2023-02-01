@@ -13,7 +13,7 @@ class Camera():
         self.recording = False
         self.save_dir = save_dir
         
-        os.mkdirs(save_dir, exist_ok=True)
+        os.makedirs(save_dir, exist_ok=True)
     
     def start_recording(self):
         """Starts the camera recording and double checks that the camera is not already recording
