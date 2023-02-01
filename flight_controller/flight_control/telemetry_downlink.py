@@ -8,7 +8,7 @@ class TelemetryDownlink(threading.Thread):
         threading.Thread.__init__(self)
         self.thread_name = thread_name
         self.thread_ID = thread_ID
-        self.ser = serial.Serial("/dev/ttyUSB0", baudrate=57600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=0)
+        self.ser = serial.Serial("/dev/ttyUSB1", baudrate=57600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=0)
     
     def run(self):
         print(str(self.thread_name) +" "+ str(self.thread_ID))
