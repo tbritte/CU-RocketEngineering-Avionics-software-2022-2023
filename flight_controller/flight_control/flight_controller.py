@@ -11,6 +11,8 @@ from .telemetry_handler import TelemetryHandler
 
 from .data_logging import DataLogger
 
+from .camera import Camera
+from .LED_controller import LEDController
 
 start_time = time.time()
 telemetry_logger = DataLogger('telemetry_log.csv', ['time', 'humidity', 'pressure', 'altitude', 'humidity_temp',
@@ -21,13 +23,16 @@ def startup(telemetryHandler: TelemetryHandler, telemetryDownlink: TelemetryDown
     telemetryDownlink.run()
 
 def main():
-    telemetryHandler = TelemetryHandler()
-    telemetryDownlink = TelemetryDownlink("Telemetry Downlink", 1000)
+    telemetry_handler = TelemetryHandler()
+    telemetry_downlink = TelemetryDownlink("Telemetry Downlink", 1000)
     
-    startup(telemetryHandler=telemetryHandler, telemetryDownlink=telemetryDownlink)
+    startup(telemetryHandler=telemetry_handler, telemetryDownlink=telemetry_downlink)
     
     flight_status = FlightStatus()
     parachute = Parachute()
+    
+    camera = Camera()
+    led_controller = LEDController(telemetry_handler.sense, flight_status, camera)
     
     terminate = False
     
@@ -38,7 +43,7 @@ def main():
             last_data_pull = time.time()
             
             print(flight_status.stage.name)
-            data = telemetryHandler.get_data()
+            data = telemetry_handler.get_data()
             telemetry_logger.log_data(data)
             #telemetryDownlink.send_data(data)
             flight_status.new_telemetry(data) 

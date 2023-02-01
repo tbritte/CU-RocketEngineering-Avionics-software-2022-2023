@@ -1,7 +1,7 @@
 import time
 import numpy as np
 
-from sense_emu import SenseHat
+from sense_hat import SenseHat
 
 class TelemetryHandler():
     def __init__(self):
