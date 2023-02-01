@@ -12,7 +12,7 @@ class Stage(Enum):
 class FlightStatus:
     # REMOVE THIS LATER PLEASE DONT FORGET TO REMOVE SENSE
     def __init__(self, sense):
-        self.stage = Stage.PRE_FLIGHT
+        self.stage = Stage.UNARMED
         self.altitude_list = []
         
         self.sense = sense
