@@ -3,7 +3,7 @@ import datetime
 from picamera import PiCamera
 
 class Camera():
-    def __init__(self, save_dir:str="/home/pi/rocket_logs/") -> None:
+    def __init__(self, save_dir:str="~/rocket_logs/") -> None:
         """Creates a new camera object
 
         Args:

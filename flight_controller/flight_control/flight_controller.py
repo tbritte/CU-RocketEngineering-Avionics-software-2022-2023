@@ -28,10 +28,10 @@ def main():
     
     startup(telemetryHandler=telemetry_handler, telemetryDownlink=telemetry_downlink)
     
-    flight_status = FlightStatus()
+    flight_status = FlightStatus(telemetry_handler.sense)
     parachute = Parachute()
     
-    camera = Camera()
+    camera = Camera("/home/curocket/Rocket/")
     led_controller = LEDController(telemetry_handler.sense, flight_status, camera)
     
     terminate = False
@@ -47,12 +47,18 @@ def main():
             telemetry_logger.log_data(data)
             #telemetryDownlink.send_data(data)
             flight_status.new_telemetry(data) 
-        
+            led_controller.update_lights()
+            
+        if flight_status.current_stage() == Stage.PRE_FLIGHT:
+            if not camera.recording:
+                camera.start_recording()
         if flight_status.current_stage() == Stage.DESCENT and not parachute.deployed:
             parachute.deploy()
         elif flight_status.current_stage() == Stage.DESCENT and parachute.deployed:
             parachute.kill_signal()
         elif flight_status.current_stage() == Stage.ON_GROUND:
+            if camera.recording:
+                camera.stop_recording()
             terminate = True
     
     #call(['shutdown', '-h', 'now'], shell=False)

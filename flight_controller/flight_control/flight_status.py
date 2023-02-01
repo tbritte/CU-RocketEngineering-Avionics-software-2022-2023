@@ -1,16 +1,21 @@
 from enum import Enum
 from statistics import median
 
+
 class Stage(Enum):
+    UNARMED = 0
     PRE_FLIGHT = 1
     IN_FLIGHT = 2
     DESCENT = 3
     ON_GROUND = 4
 
 class FlightStatus:
-    def __init__(self):
+    # REMOVE THIS LATER PLEASE DONT FORGET TO REMOVE SENSE
+    def __init__(self, sense):
         self.stage = Stage.PRE_FLIGHT
         self.altitude_list = []
+        
+        self.sense = sense
     
     def current_stage(self) -> Stage:
         """Returns the current stage of the rocket.
@@ -39,6 +44,15 @@ class FlightStatus:
             self.altitude_list.pop(0)
         elif len(self.altitude_list) > 65:
             print('CRITICAL ERROR: Too many altitude variables stored')
+    
+    def check_armed(self) -> bool:
+        """Determines if the rocket is armed.
+        """
+        for event in self.sense.stick.get_events():
+            if event.action == "pressed":
+                if event.direction == "up":
+                    return True
+        return False
     
     def check_liftoff(self) -> bool:
         """Determines if the rocket has liftoff.
@@ -83,7 +97,9 @@ class FlightStatus:
         self.add_altitude(telemetry['altitude'])
         
         if len(self.altitude_list) >= 64:
-            if self.stage.value == Stage.PRE_FLIGHT.value and self.check_liftoff():
+            if self.stage.value == Stage.UNARMED.value and self.check_armed():
+                self.stage = Stage.PRE_FLIGHT
+            elif self.stage.value == Stage.PRE_FLIGHT.value and self.check_liftoff():
                 self.stage = Stage.IN_FLIGHT
             elif self.stage.value == Stage.IN_FLIGHT.value and self.check_apogee():
                 self.stage = Stage.DESCENT
