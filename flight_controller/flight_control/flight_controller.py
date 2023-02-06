@@ -13,6 +13,7 @@ from .data_logging import DataLogger
 
 from .camera import Camera
 from .LED_controller import LEDController
+from .buzzer import Buzzer
 
 start_time = time.time()
 telemetry_logger = DataLogger('telemetry_log.csv', ['time', 'humidity', 'pressure', 'altitude', 'humidity_temp',
@@ -34,6 +35,9 @@ def main():
     
     camera = Camera("/home/curocket/Rocket/")
     led_controller = LEDController(telemetry_handler.sense, flight_status, camera)
+    buzzer = Buzzer()
+
+    buzzer.start_up_buzz()  # Three short beeps to indicate that main is being run
     
     terminate = False
     
@@ -49,6 +53,7 @@ def main():
             #telemetryDownlink.send_data(data)
             flight_status.new_telemetry(data) 
             led_controller.update_lights()
+            buzzer.update()
             
         if flight_status.current_stage() == Stage.PRE_FLIGHT:
             if not camera.recording:
