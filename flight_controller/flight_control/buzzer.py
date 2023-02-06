@@ -82,7 +82,7 @@ class Buzzer:
         Uses the oldest beep in the queue until it becomes out of date
         Should be called every cycle within the main loop
         """
-        beep = self.beep_list[0]
+        beep = self.beep_list[0]  # Collecting the beep at the front the queue
         if beep.should_beep():
             # Starts buzzing if between this beep's beeping window
             self._turn_on()
