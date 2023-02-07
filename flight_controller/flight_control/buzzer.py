@@ -55,6 +55,19 @@ class Buzzer:
         end_time = start_time + duration_of_beep
         self.beep_list.append(Beep(start_time, end_time))
 
+    def _add_beep_group(self, delay_to_start, time_between_beeps, duration_of_beep, beep_count):
+        """
+        Allows a collection of beeps to be added to the queue easily. Use when all the beeps are uniform.
+        :param delay_to_start: How long this group should wait after the previous beep before starting
+        :param time_between_beeps: How long to wait between each beep
+        :param duration_of_beep: How long each beep lasts for
+        :param beep_count: How many uniform beeps are in the group
+        """
+        if beep_count > 0:
+            self._add_beep(delay_to_start, duration_of_beep)
+        for _ in range(beep_count - 1):
+            self._add_beep(time_between_beeps, duration_of_beep)
+
     def _turn_on(self):
         """
         Turns the buzzer on, does nothing if it is already on.
@@ -99,3 +112,21 @@ class Buzzer:
         """
         for _ in range(3):
             self._add_beep(delay_from_previous_beep=.25, duration_of_beep=.25)
+
+    def main_chute_deploy_alt_buzz(self, main_chute_deploy_alt):
+        """
+        Beeps for every thousand feet (1/2 second on, 1/2 second off)
+        Repeats once
+        """
+        beep_count = int(main_chute_deploy_alt / 1000)
+
+        self._add_beep_group(delay_to_start=4, time_between_beeps=.5, duration_of_beep=.5, beep_count=beep_count)
+
+        # Second time for redundancy
+        self._add_beep_group(delay_to_start=4, time_between_beeps=.5, duration_of_beep=.5, beep_count=beep_count)
+
+    def armed_beeps(self):
+        """
+        Beeps 20 times really quickly at 1/10 second on, 1/10 second off
+        """
+        self._add_beep_group(delay_to_start=4, time_between_beeps=.1, duration_of_beep=.1, beep_count=20)

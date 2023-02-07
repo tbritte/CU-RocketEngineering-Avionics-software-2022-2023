@@ -11,11 +11,12 @@ class Stage(Enum):
 
 class FlightStatus:
     # REMOVE THIS LATER PLEASE DONT FORGET TO REMOVE SENSE
-    def __init__(self, sense):
+    def __init__(self, sense, buzzer):
         self.stage = Stage.UNARMED
         self.altitude_list = []
         
         self.sense = sense
+        self.buzzer = buzzer
     
     def current_stage(self) -> Stage:
         """Returns the current stage of the rocket.
@@ -99,6 +100,7 @@ class FlightStatus:
         if len(self.altitude_list) >= 64:
             if self.stage.value == Stage.UNARMED.value and self.check_armed():
                 self.stage = Stage.PRE_FLIGHT
+                self.buzzer.armed_beeps()  # Plays 20 quick beeps
             elif self.stage.value == Stage.PRE_FLIGHT.value and self.check_liftoff():
                 self.stage = Stage.IN_FLIGHT
             elif self.stage.value == Stage.IN_FLIGHT.value and self.check_apogee():
