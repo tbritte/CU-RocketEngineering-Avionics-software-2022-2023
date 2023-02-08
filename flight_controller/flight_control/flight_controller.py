@@ -20,7 +20,7 @@ telemetry_logger = DataLogger('telemetry_log.csv', ['time', 'humidity', 'pressur
                                                     'pressure_temp', 'temp', 'orientation', 'raw_accelerometer',
                                                     'north', 'raw_magnetometer'], start_time)
 
-MAIN_CHUTE_DEPLOY_ALT = 8000
+MAIN_CHUTE_DEPLOY_ALT = 1500
 
 
 def startup(telemetryHandler: TelemetryHandler, telemetryDownlink: TelemetryDownlink):

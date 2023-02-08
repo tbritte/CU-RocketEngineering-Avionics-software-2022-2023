@@ -115,10 +115,10 @@ class Buzzer:
 
     def main_chute_deploy_alt_buzz(self, main_chute_deploy_alt):
         """
-        Beeps for every thousand feet (1/2 second on, 1/2 second off)
+        Beeps for every one hundred feet (1/2 second on, 1/2 second off)
         Repeats once
         """
-        beep_count = int(main_chute_deploy_alt / 1000)
+        beep_count = int(main_chute_deploy_alt / 100)
 
         self._add_beep_group(delay_to_start=4, time_between_beeps=.5, duration_of_beep=.5, beep_count=beep_count)
 
