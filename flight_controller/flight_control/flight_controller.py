@@ -42,7 +42,7 @@ def main():
     flight_status = FlightStatus(telemetry_handler.sense, buzzer)
     parachute = Parachute()
 
-    camera = Camera("/home/curocket/Rocket/")
+    camera = Camera()
     led_controller = LEDController(telemetry_handler.sense, flight_status, camera)
 
     buzzer.start_up_buzz()  # Three short beeps to indicate that main is being run

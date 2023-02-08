@@ -62,7 +62,7 @@ class TelemetryHandler():
         raw_magnetometer = self.sense.get_compass_raw()
         
         data = {'humidity': humidity, 'pressure': pressure, 'altitude': altitude, 'humidity_temp': humidity_temp, 'pressure_temp': pressure_temp, 'temp': temp,
-                'orientation': orientation, 'raw_accelerometer': raw_accelerometer, 'north': north, 'raw_magnetometer': raw_magnetometer}
+                'orientation': str(orientation), 'raw_accelerometer': str(raw_accelerometer), 'north': north, 'raw_magnetometer': str(raw_magnetometer)}
 
         return data
 

@@ -3,7 +3,7 @@ import datetime
 from picamera import PiCamera
 
 class Camera():
-    def __init__(self, save_dir:str="~/rocket_logs/") -> None:
+    def __init__(self, save_dir:str="./video_recordings/") -> None:
         """Creates a new camera object
 
         Args:
@@ -21,7 +21,7 @@ class Camera():
         if self.recording:
             print("Camera is already recording")
         else:
-            date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             self.camera.start_recording(os.path.join(self.save_dir, date + "recording.h264"))
             self.recording = True
     
