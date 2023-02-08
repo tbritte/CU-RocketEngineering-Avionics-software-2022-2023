@@ -59,7 +59,13 @@ void ReadPort(SerialPort serialPort)
 
 void ProcessBytes(byte[] bytes)
 {
-    
+    foreach(byte b in bytes)
+    {
+        if(b == (byte)'C')
+        {
+
+        }
+    }
 }
 
 void WritePort(SerialPort serialPort)
@@ -86,6 +92,22 @@ void WritePort(SerialPort serialPort)
         i++;
     }
 
+    message[i] = ComputeAdditionChecksum(message);
+    i++;
+
     serialPort.Write(message, 0, i + 1);
+}
+
+byte ComputeAdditionChecksum(byte[] data)
+{
+    byte sum = 0;
+    unchecked // Let overflow occur without exceptions
+    {
+        foreach (byte b in data)
+        {
+            sum += b;
+        }
+    }
+    return sum;
 }
 
