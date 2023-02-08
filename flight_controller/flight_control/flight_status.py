@@ -61,8 +61,8 @@ class FlightStatus:
         Returns:
             bool: True if the rocket has liftoff, False otherwise.
         """
-        lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
-        fm = median(self.altitude_list[:64-8])  # Oldest 56 samples (3.5 seconds)
+        lm = median(self.altitude_list[64-8:])  # Newest 8 samples (1 seconds)
+        fm = median(self.altitude_list[:64-8])  # Oldest 56 samples (7 seconds)
         return lm > fm + 10
     
     
@@ -76,8 +76,8 @@ class FlightStatus:
         Returns:
             bool: True if the rocket has passed the apogee, False otherwise.
         """
-        lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
-        fm = median(self.altitude_list[64-16:64-8])  # Second newest 8 samples .5 to 1 second ago)
+        lm = median(self.altitude_list[64-8:])  # Newest 8 samples (1 seconds)
+        fm = median(self.altitude_list[64-16:64-8])  # Second newest 8 samples 1 to 2 second ago)
         return lm < fm
     
     def check_landed(self) -> bool:

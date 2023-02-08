@@ -35,7 +35,7 @@ class Beep:
 class Buzzer:
     def __init__(self) -> None:
         GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BOARD)
+        GPIO.setmode(GPIO.BCM)
         GPIO.setup(BUZZPIN, GPIO.OUT)
         self.buzzing = False
         self.beep_list = []
@@ -48,12 +48,12 @@ class Buzzer:
         is started. If there are no beeps already queued, then the beep will start immediately
         """
         if len(self.beep_list) > 0:  # Checking if there is another beep in the queue
-            start_time = self.beep_list[-1].end_time + delay_from_previous_beep
+            start_time = self.beep_list[-1].stop_time + delay_from_previous_beep
         else:
             start_time = time.time()  # Can start immediately if not waiting for other beeps
 
-        end_time = start_time + duration_of_beep
-        self.beep_list.append(Beep(start_time, end_time))
+        stop_time = start_time + duration_of_beep
+        self.beep_list.append(Beep(start_time, stop_time))
 
     def _add_beep_group(self, delay_to_start, time_between_beeps, duration_of_beep, beep_count):
         """
@@ -95,16 +95,19 @@ class Buzzer:
         Uses the oldest beep in the queue until it becomes out of date
         Should be called every cycle within the main loop
         """
-        beep = self.beep_list[0]  # Collecting the beep at the front the queue
-        if beep.should_beep():
-            # Starts buzzing if between this beep's beeping window
-            self._turn_on()
-        else:
-            # Stops buzzing if outside this beep's window
-            self._turn_off()
+        if len(self.beep_list) > 0:  # Only use beeps if there are beeps
+            beep = self.beep_list[0]  # Collecting the beep at the front the queue
+            if beep.should_beep():
+                # Starts buzzing if between this beep's beeping window
+                self._turn_on()
+            else:
+                # Stops buzzing if outside this beep's window
+                self._turn_off()
 
-        if beep.out_dated():
-            self.beep_list.pop(0)  # Removes the outdated beep
+            if beep.out_dated():
+                self.beep_list.pop(0)  # Removes the outdated beep
+        else:
+            self._turn_off()
 
     def start_up_buzz(self):
         """
@@ -127,6 +130,6 @@ class Buzzer:
 
     def armed_beeps(self):
         """
-        Beeps 20 times really quickly at 1/10 second on, 1/10 second off
+        Beeps 20 times really quickly at 1/5 second on, 1/5 second off
         """
-        self._add_beep_group(delay_to_start=4, time_between_beeps=.1, duration_of_beep=.1, beep_count=20)
+        self._add_beep_group(delay_to_start=4, time_between_beeps=.2, duration_of_beep=.2, beep_count=20)

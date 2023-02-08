@@ -1,5 +1,6 @@
 from subprocess import call
 import time
+import datetime
 
 from .parachute import Parachute
 
@@ -16,9 +17,10 @@ from .LED_controller import LEDController
 from .buzzer import Buzzer
 
 start_time = time.time()
-telemetry_logger = DataLogger('telemetry_log.csv', ['time', 'humidity', 'pressure', 'altitude', 'humidity_temp',
+date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
+telemetry_logger = DataLogger(date + '-telemetry_log.csv', ['time', 'cycle', 'data_pulls', 'humidity', 'pressure', 'altitude', 'humidity_temp',
                                                     'pressure_temp', 'temp', 'orientation', 'raw_accelerometer',
-                                                    'north', 'raw_magnetometer'], start_time)
+                                                    'north', 'raw_magnetometer', 'state'], start_time)
 
 MAIN_CHUTE_DEPLOY_ALT = 1500
 
@@ -51,17 +53,25 @@ def main():
 
     last_data_pull = time.time()
 
-    while not terminate:
-        if time.time() - last_data_pull > 0.0625:
-            last_data_pull = time.time()
+    cycle = 0
+    data_pulls = 0
 
+    while not terminate:
+        cycle += 1
+        if time.time() - last_data_pull > 0.125:  # Changed to 8hz because get_data can't run at 16hz
+            last_data_pull = time.time()
+            data_pulls += 1
             print(flight_status.stage.name)
             data = telemetry_handler.get_data()
+            data['state'] = flight_status.current_stage_name()
+            data['cycle'] = cycle
+            data['data_pulls'] = data_pulls
             telemetry_logger.log_data(data)
             # telemetryDownlink.send_data(data)
             flight_status.new_telemetry(data)
             led_controller.update_lights()
-            buzzer.update()
+
+        buzzer.update()
 
         if flight_status.current_stage() == Stage.PRE_FLIGHT:
             if not camera.recording:
