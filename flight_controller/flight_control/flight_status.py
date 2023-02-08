@@ -11,11 +11,12 @@ class Stage(Enum):
 
 class FlightStatus:
     # REMOVE THIS LATER PLEASE DONT FORGET TO REMOVE SENSE
-    def __init__(self, sense):
+    def __init__(self, sense, buzzer):
         self.stage = Stage.UNARMED
         self.altitude_list = []
         
         self.sense = sense
+        self.buzzer = buzzer
     
     def current_stage(self) -> Stage:
         """Returns the current stage of the rocket.
@@ -60,8 +61,8 @@ class FlightStatus:
         Returns:
             bool: True if the rocket has liftoff, False otherwise.
         """
-        lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
-        fm = median(self.altitude_list[:64-8])  # Oldest 56 samples (3.5 seconds)
+        lm = median(self.altitude_list[64-8:])  # Newest 8 samples (1 seconds)
+        fm = median(self.altitude_list[:64-8])  # Oldest 56 samples (7 seconds)
         return lm > fm + 10
     
     
@@ -75,8 +76,8 @@ class FlightStatus:
         Returns:
             bool: True if the rocket has passed the apogee, False otherwise.
         """
-        lm = median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
-        fm = median(self.altitude_list[64-16:64-8])  # Second newest 8 samples .5 to 1 second ago)
+        lm = median(self.altitude_list[64-8:])  # Newest 8 samples (1 seconds)
+        fm = median(self.altitude_list[64-16:64-8])  # Second newest 8 samples 1 to 2 second ago)
         return lm < fm
     
     def check_landed(self) -> bool:
@@ -99,6 +100,7 @@ class FlightStatus:
         if len(self.altitude_list) >= 64:
             if self.stage.value == Stage.UNARMED.value and self.check_armed():
                 self.stage = Stage.PRE_FLIGHT
+                self.buzzer.armed_beeps()  # Plays 20 quick beeps
             elif self.stage.value == Stage.PRE_FLIGHT.value and self.check_liftoff():
                 self.stage = Stage.IN_FLIGHT
             elif self.stage.value == Stage.IN_FLIGHT.value and self.check_apogee():

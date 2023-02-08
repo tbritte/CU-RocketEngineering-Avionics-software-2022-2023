@@ -1,5 +1,6 @@
 from subprocess import call
 import time
+import datetime
 
 from .parachute import Parachute
 
@@ -13,43 +14,65 @@ from .data_logging import DataLogger
 
 from .camera import Camera
 from .LED_controller import LEDController
+from .buzzer import Buzzer
 
 start_time = time.time()
-telemetry_logger = DataLogger('telemetry_log.csv', ['time', 'humidity', 'pressure', 'altitude', 'humidity_temp',
-                          'pressure_temp', 'temp', 'orientation', 'raw_accelerometer', 'north', 'raw_magnetometer'], start_time)
+date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
+telemetry_logger = DataLogger(date + '-telemetry_log.csv', ['time', 'cycle', 'data_pulls', 'humidity', 'pressure', 'altitude', 'humidity_temp',
+                                                    'pressure_temp', 'temp', 'orientation', 'raw_accelerometer',
+                                                    'north', 'raw_magnetometer', 'state'], start_time)
+
+MAIN_CHUTE_DEPLOY_ALT = 1500
+
 
 def startup(telemetryHandler: TelemetryHandler, telemetryDownlink: TelemetryDownlink):
     telemetryHandler.setup()
     telemetryDownlink.run()
 
+
 def main():
     telemetry_handler = TelemetryHandler()
     # telemetry_downlink = TelemetryDownlink("Telemetry Downlink", 1000)
-    
+
     # startup(telemetryHandler=telemetry_handler, telemetryDownlink=telemetry_downlink)
     telemetry_handler.setup()
-    
-    flight_status = FlightStatus(telemetry_handler.sense)
+
+    buzzer = Buzzer()
+
+    flight_status = FlightStatus(telemetry_handler.sense, buzzer)
     parachute = Parachute()
-    
+
     camera = Camera("/home/curocket/Rocket/")
     led_controller = LEDController(telemetry_handler.sense, flight_status, camera)
-    
+
+    buzzer.start_up_buzz()  # Three short beeps to indicate that main is being run
+
+    buzzer.main_chute_deploy_alt_buzz(MAIN_CHUTE_DEPLOY_ALT)  # Indicates the altitude for main chute deployment
+
     terminate = False
-    
+
     last_data_pull = time.time()
-    
+
+    cycle = 0
+    data_pulls = 0
+
     while not terminate:
-        if time.time() - last_data_pull > 0.0625:
+        cycle += 1
+        if time.time() - last_data_pull > 0.125:  # Changed to 8hz because get_data can't run at 16hz
             last_data_pull = time.time()
-            
+            data_pulls += 1
             print(flight_status.stage.name)
             data = telemetry_handler.get_data()
+            data['state'] = flight_status.current_stage_name()
+            data['cycle'] = cycle
+            data['data_pulls'] = data_pulls
             telemetry_logger.log_data(data)
-            #telemetryDownlink.send_data(data)
-            flight_status.new_telemetry(data) 
+            # telemetryDownlink.send_data(data)
+            flight_status.new_telemetry(data)
             led_controller.update_lights()
-            
+
+        buzzer.update()
+
         if flight_status.current_stage() == Stage.PRE_FLIGHT:
             if not camera.recording:
                 camera.start_recording()
@@ -61,8 +84,9 @@ def main():
             if camera.recording:
                 camera.stop_recording()
             terminate = True
-    
-    #call(['shutdown', '-h', 'now'], shell=False)
+
+    # call(['shutdown', '-h', 'now'], shell=False)
+
 
 if __name__ == '__main__':
     main()
