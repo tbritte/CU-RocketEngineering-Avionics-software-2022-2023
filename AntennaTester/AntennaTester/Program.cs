@@ -59,11 +59,28 @@ void ReadPort(SerialPort serialPort)
 
 void ProcessBytes(byte[] bytes)
 {
-    foreach(byte b in bytes)
+    for(int i = 0; i < bytes.Length; i++)
     {
-        if(b == (byte)'C')
+        string message = "";
+        if (bytes[i] == (byte)'C' && bytes[i + 1] == (byte)'R' && bytes[i + 2] == (byte)'E')
         {
+            message += "CRE";
+            message += (int)(bytes[i + 3]);
+            for(int j = 0; j < 5; j++)
+            {
+                message += (char)(bytes[i + 4 + j]);
+            }
 
+            byte[] messageBytes = new byte[10];
+            Array.Copy(bytes, i, messageBytes, 0, 9);
+            byte checksum = ComputeAdditionChecksum(messageBytes);
+            if(checksum == bytes[i+9])
+            {
+                Console.WriteLine(message);
+            } else
+            {
+                Console.WriteLine("Message Failed Checksum");
+            }
         }
     }
 }
@@ -111,3 +128,4 @@ byte ComputeAdditionChecksum(byte[] data)
     return sum;
 }
 
+Main();
