@@ -60,7 +60,15 @@ void port_OnRecivedDataBinary(object sender, SerialDataReceivedEventArgs e)
     int bytesToRead = serialPort.BytesToRead;
     byte[] buffer = new byte[bytesToRead];
     serialPort.Read(buffer, 0, bytesToRead);
-    Console.WriteLine(buffer);
+
+    foreach (byte b in buffer)
+    {
+        Console.WriteLine((char)b);
+        //StringBuilder hex = new StringBuilder();
+        //hex.AppendFormat("{0:x2}", b);
+        //Console.WriteLine(hex.ToString());
+    }
+    Console.WriteLine();
 }
 
 void ReadPort(SerialPort serialPort)
@@ -116,6 +124,9 @@ void WritePort(SerialPort serialPort)
     serialPort.Open();
     while (true)
     {
+        Console.Write("Hit Enter to Send:");
+        Console.ReadLine();
+        Console.WriteLine("Sent");
         int i = 0;
         byte[] message = new byte[10];
 
