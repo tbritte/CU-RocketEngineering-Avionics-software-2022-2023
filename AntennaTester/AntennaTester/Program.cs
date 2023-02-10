@@ -113,32 +113,36 @@ void ProcessBytes(byte[] bytes)
 
 void WritePort(SerialPort serialPort)
 {
-    int i = 0;
-    byte[] message = new byte[10];
-
-    string header = "CRE";
-    foreach (byte b in Encoding.ASCII.GetBytes(header))
+    while (true)
     {
-        message[i] = b;
+        serialPort.Open();
+        int i = 0;
+        byte[] message = new byte[10];
+
+        string header = "CRE";
+        foreach (byte b in Encoding.ASCII.GetBytes(header))
+        {
+            message[i] = b;
+            i++;
+        }
+
+        Random rnd = new Random();
+        message[i] = (byte)rnd.Next(0, 256);
         i++;
-    }
 
-    Random rnd = new Random();
-    message[i] = (byte)rnd.Next(0, 256);
-    i++;
+        string chars = "Hello";
+        Encoding.ASCII.GetBytes(chars);
+        foreach (byte b in Encoding.ASCII.GetBytes(header))
+        {
+            message[i] = b;
+            i++;
+        }
 
-    string chars = "Hello";
-    Encoding.ASCII.GetBytes(chars);
-    foreach (byte b in Encoding.ASCII.GetBytes(header))
-    {
-        message[i] = b;
+        message[i] = ComputeAdditionChecksum(message);
         i++;
+
+        serialPort.Write(message, 0, i + 1);
     }
-
-    message[i] = ComputeAdditionChecksum(message);
-    i++;
-
-    serialPort.Write(message, 0, i + 1);
 }
 
 byte ComputeAdditionChecksum(byte[] data)
