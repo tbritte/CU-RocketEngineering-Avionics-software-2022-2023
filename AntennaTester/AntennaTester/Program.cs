@@ -113,9 +113,9 @@ void ProcessBytes(byte[] bytes)
 
 void WritePort(SerialPort serialPort)
 {
+    serialPort.Open();
     while (true)
     {
-        serialPort.Open();
         int i = 0;
         byte[] message = new byte[10];
 
