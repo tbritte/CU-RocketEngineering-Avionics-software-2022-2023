@@ -1,0 +1,13 @@
+/Users/alexanderkorte/Desktop/AntennaTester/AntennaTester
+/Users/alexanderkorte/Desktop/AntennaTester/AntennaTester.dll
+/Users/alexanderkorte/Desktop/AntennaTester/AntennaTester.deps.json
+/Users/alexanderkorte/Desktop/AntennaTester/AntennaTester.runtimeconfig.json
+/Users/alexanderkorte/Desktop/AntennaTester/AntennaTester.pdb
+/Users/alexanderkorte/Desktop/AntennaTester/System.IO.Ports.dll
+/Users/alexanderkorte/Desktop/AntennaTester/runtimes/linux-arm/native/libSystem.IO.Ports.Native.so
+/Users/alexanderkorte/Desktop/AntennaTester/runtimes/linux-arm64/native/libSystem.IO.Ports.Native.so
+/Users/alexanderkorte/Desktop/AntennaTester/runtimes/linux-x64/native/libSystem.IO.Ports.Native.so
+/Users/alexanderkorte/Desktop/AntennaTester/runtimes/osx-arm64/native/libSystem.IO.Ports.Native.dylib
+/Users/alexanderkorte/Desktop/AntennaTester/runtimes/osx-x64/native/libSystem.IO.Ports.Native.dylib
+/Users/alexanderkorte/Desktop/AntennaTester/runtimes/unix/lib/net7.0/System.IO.Ports.dll
+/Users/alexanderkorte/Desktop/AntennaTester/runtimes/win/lib/net7.0/System.IO.Ports.dll
