@@ -23,9 +23,9 @@ void Main() {
     }
 
     // Get which port to use
-    Console.WriteLine("Send or Recive test data (S or R)? ");
+    Console.WriteLine("Send or Recive test data (S or R or RB)? ");
     string sOR = Console.ReadLine().ToLower();
-    while (sOR != "s" && sOR != "r")
+    while (sOR != "s" && sOR != "r" && sOR != "rb")
     {
         Console.WriteLine("Please enter a valid choice:");
         comPort = Console.ReadLine().ToLower();
@@ -41,21 +41,47 @@ void Main() {
         case "r":
             ReadPort(serialPort);
             break;
+        case "rb":
+            ReadPortBinary(serialPort);
+            break;
     }
  }
 
+void ReadPortBinary(SerialPort serialPort)
+{
+    serialPort.Open();
+    serialPort.DataReceived += new SerialDataReceivedEventHandler(port_OnRecivedDataBinary);
+    while (true) { }
+}
+
+void port_OnRecivedDataBinary(object sender, SerialDataReceivedEventArgs e)
+{
+    SerialPort serialPort = (SerialPort)sender;
+    int bytesToRead = serialPort.BytesToRead;
+    byte[] buffer = new byte[bytesToRead];
+    serialPort.Read(buffer, 0, bytesToRead);
+    Console.WriteLine(buffer);
+}
 
 void ReadPort(SerialPort serialPort)
 {
     serialPort.Open();
+    serialPort.DataReceived += new SerialDataReceivedEventHandler(port_OnRecivedData);
+    while (true) { }
+}
 
-    while (true)
+void port_OnRecivedData(object sender, SerialDataReceivedEventArgs e)
+{
+    SerialPort serialPort = (SerialPort)sender;
+    int bytesToRead = serialPort.BytesToRead;
+    if (bytesToRead >= 10)
     {
-        int bytesToRead = serialPort.BytesToRead;
         byte[] buffer = new byte[bytesToRead];
         serialPort.Read(buffer, 0, bytesToRead);
+        ProcessBytes(buffer);
     }
 }
+
 
 void ProcessBytes(byte[] bytes)
 {
