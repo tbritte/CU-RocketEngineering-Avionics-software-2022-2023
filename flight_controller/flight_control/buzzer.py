@@ -131,5 +131,7 @@ class Buzzer:
     def armed_beeps(self):
         """
         Beeps 20 times really quickly at 1/5 second on, 1/5 second off
+        Also clears beep queue
         """
+        self.clear_beep_queue()
         self._add_beep_group(delay_to_start=4, time_between_beeps=.2, duration_of_beep=.2, beep_count=20)

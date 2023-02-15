@@ -1,6 +1,7 @@
 from subprocess import call
 import time
 import datetime
+import random
 
 from .parachute import Parachute
 
@@ -18,9 +19,9 @@ from .buzzer import Buzzer
 
 start_time = time.time()
 date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
-telemetry_logger = DataLogger(date + '-telemetry_log.csv', ['time', 'cycle', 'data_pulls', 'humidity', 'pressure', 'altitude', 'humidity_temp',
-                                                    'pressure_temp', 'temp', 'orientation', 'raw_accelerometer',
-                                                    'north', 'raw_magnetometer', 'state'], start_time)
+telemetry_logger = DataLogger(date + '-telemetry_log' + "-r" + str(random.randint(1000, 9999)) + '.csv', ['time','state', 'altitude', 'data_pulls', 'humidity', 'pressure', 'humidity_temp',
+                                                    'pressure_temp', 'temp', 'roll', 'pitch', 'yaw', 'aclx', 'acly', 'aclz',
+                                                    'north', 'magx', 'magy', 'magz'], start_time)
 
 MAIN_CHUTE_DEPLOY_ALT = 1500
 
@@ -64,7 +65,6 @@ def main():
             print(flight_status.stage.name)
             data = telemetry_handler.get_data()
             data['state'] = flight_status.current_stage_name()
-            data['cycle'] = cycle
             data['data_pulls'] = data_pulls
             telemetry_logger.log_data(data)
             # telemetryDownlink.send_data(data)
@@ -85,7 +85,7 @@ def main():
                 camera.stop_recording()
             terminate = True
 
-    # call(['shutdown', '-h', 'now'], shell=False)
+    call(['shutdown', '-h', 'now'], shell=False)
 
 
 if __name__ == '__main__':

@@ -60,9 +60,19 @@ class TelemetryHandler():
         
         north = self.sense.get_compass()
         raw_magnetometer = self.sense.get_compass_raw()
+
         
         data = {'humidity': humidity, 'pressure': pressure, 'altitude': altitude, 'humidity_temp': humidity_temp, 'pressure_temp': pressure_temp, 'temp': temp,
-                'orientation': str(orientation), 'raw_accelerometer': str(raw_accelerometer), 'north': north, 'raw_magnetometer': str(raw_magnetometer)}
+                'north': north,
+                'magx': raw_magnetometer['x'],
+                'magy': raw_magnetometer['y'],
+                'magz': raw_magnetometer['z'],
+                'aclx': raw_accelerometer['x'],
+                'acly': raw_accelerometer['y'],
+                'aclz': raw_accelerometer['z'],
+                'roll': orientation['roll'],
+                'pitch': orientation['pitch'],
+                'yaw': orientation['yaw']}
 
         return data
 
