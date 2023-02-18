@@ -29,7 +29,7 @@ class LEDController:
             alt_ft = stat.median(self.flight_status.altitude_list) * 3.28
             stage_num = self.flight_status.stage.value
             self.fill_row(0, stage_num - 1, [0, 0, 255])
-            self.fill_row(1, min(math.floor(alt_ft / 10), 7), [255, 0, 0])
+            self.fill_row(1, min(math.floor(alt_ft / 1000), 7), [255, 0, 0])
 
             # Blinking green status light
             if self.tick < 10:

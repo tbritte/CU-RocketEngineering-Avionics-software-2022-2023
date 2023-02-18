@@ -17,11 +17,13 @@ from .camera import Camera
 from .LED_controller import LEDController
 from .buzzer import Buzzer
 
+from gpiozero import CPUTemperature
+
 start_time = time.time()
 date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
 telemetry_logger = DataLogger(date + '-telemetry_log' + "-r" + str(random.randint(1000, 9999)) + '.csv', ['time','state', 'altitude', 'data_pulls', 'humidity', 'pressure', 'humidity_temp',
                                                     'pressure_temp', 'temp', 'roll', 'pitch', 'yaw', 'aclx', 'acly', 'aclz',
-                                                    'north', 'magx', 'magy', 'magz'], start_time)
+                                                    'north', 'magx', 'magy', 'magz', 'cputemp'], start_time)
 
 MAIN_CHUTE_DEPLOY_ALT = 1500
 
@@ -42,6 +44,8 @@ def main():
 
     flight_status = FlightStatus(telemetry_handler.sense, buzzer)
     parachute = Parachute()
+
+    cpu = CPUTemperature()  # For getting the CPU temperature
 
     camera = Camera()
     led_controller = LEDController(telemetry_handler.sense, flight_status, camera)
@@ -66,6 +70,8 @@ def main():
             data = telemetry_handler.get_data()
             data['state'] = flight_status.current_stage_name()
             data['data_pulls'] = data_pulls
+            data['cputemp'] = cpu.temperature
+
             telemetry_logger.log_data(data)
             # telemetryDownlink.send_data(data)
             flight_status.new_telemetry(data)
