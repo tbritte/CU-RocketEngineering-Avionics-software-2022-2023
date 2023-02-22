@@ -86,12 +86,12 @@ def main():
             parachute.deploy()
         elif flight_status.current_stage() == Stage.DESCENT and parachute.deployed:
             parachute.kill_signal()
-        elif flight_status.current_stage() == Stage.ON_GROUND:
-            if camera.recording:
-                camera.stop_recording()
-            terminate = True
-
-    call(['shutdown', '-h', 'now'], shell=False)
+        # elif flight_status.current_stage() == Stage.ON_GROUND:
+    #         if camera.recording:
+    #             camera.stop_recording()
+    #         terminate = True
+    #
+    # call(['shutdown', '-h', 'now'], shell=False)
 
 
 if __name__ == '__main__':
