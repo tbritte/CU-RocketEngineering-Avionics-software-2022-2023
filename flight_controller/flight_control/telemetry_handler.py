@@ -2,6 +2,8 @@ import time
 import numpy as np
 
 from sense_hat import SenseHat
+from ublox_gps import UbloxGps
+import serial
 
 class TelemetryHandler():
     def __init__(self):
@@ -24,6 +26,9 @@ class TelemetryHandler():
         
         self.base_pressure = np.mean(base_pressure_arr)
         self.base_altitude = self.calculate_altitude(base_pressure_arr)
+        port = serial.Serial('/dev/serial0', baudrate=38400, timeout=1)
+        self.gps = UbloxGps(port)
+
 
 
     def get_data(self) -> dict:
@@ -37,7 +42,7 @@ class TelemetryHandler():
         temp: float - Average temperature in Celsius taken from the pressure and humidity temp values.
         north: float - Magnetic north in degrees.
         orientation: dict - Orientation of the Sense Hat in degrees. (keys: pitch, roll, yaw)
-        raw_magnetometer: dict - Raw magnetometer data. (WILL BE REPLACED BY A FAR MORE ACCURATE ONE IN THE FUTURE BY KYLE JONES)
+        raw_magnetometer: dict - Raw magnetometer data.
         raw_accelerometer: dict - Raw accelerometer data, is the acceleration intensity of the axis in Gs. (keys: x, y, z)
 
         Returns:
@@ -62,7 +67,18 @@ class TelemetryHandler():
         raw_magnetometer = self.sense.get_compass_raw()
 
         
-        data = {'humidity': humidity, 'pressure': pressure, 'altitude': altitude, 'humidity_temp': humidity_temp, 'pressure_temp': pressure_temp, 'temp': temp,
+        try: 
+            coords = gps.geo_coords()
+        except (ValueError, IOError) as err:
+            print(err)
+
+        
+        data = {'humidity': humidity,
+                'pressure': pressure,
+                'altitude': altitude,
+                'humidity_temp': humidity_temp,
+                'pressure_temp': pressure_temp,
+                'temp': temp,
                 'north': north,
                 'magx': raw_magnetometer['x'],
                 'magy': raw_magnetometer['y'],
@@ -72,7 +88,9 @@ class TelemetryHandler():
                 'aclz': raw_accelerometer['z'],
                 'roll': orientation['roll'],
                 'pitch': orientation['pitch'],
-                'yaw': orientation['yaw']}
+                'yaw': orientation['yaw'],
+                'gps': {'lon': coords.lon, 'lat': coords.lat}
+                }
 
         return data
 
