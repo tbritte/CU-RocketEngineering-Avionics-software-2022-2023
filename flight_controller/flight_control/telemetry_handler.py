@@ -73,22 +73,17 @@ class TelemetryHandler():
             print(err)
 
         
-        data = {'humidity': humidity,
+        data = {
+                'humidity': humidity,
                 'pressure': pressure,
                 'altitude': altitude,
                 'humidity_temp': humidity_temp,
                 'pressure_temp': pressure_temp,
                 'temp': temp,
                 'north': north,
-                'magx': raw_magnetometer['x'],
-                'magy': raw_magnetometer['y'],
-                'magz': raw_magnetometer['z'],
-                'aclx': raw_accelerometer['x'],
-                'acly': raw_accelerometer['y'],
-                'aclz': raw_accelerometer['z'],
-                'roll': orientation['roll'],
-                'pitch': orientation['pitch'],
-                'yaw': orientation['yaw'],
+                'mag': raw_magnetometer,
+                'acl': raw_accelerometer,
+                'gyro': orientation,
                 'gps': {'lon': coords.lon, 'lat': coords.lat}
                 }
 

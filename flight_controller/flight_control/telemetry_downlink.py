@@ -30,23 +30,24 @@ class TelemetryDownlink(threading.Thread):
         2 - FRAME COUNT
         2 - FRAME COUNT2
         4 - Altitude
-        4 - AcclZ
-        4 - AcclY
-        4 - AcclX
-        4 - GyroZ
-        4 - GyroY
-        4 - GyroX
+        4 - Acceleration_Z
+        4 - Acceleration_Y
+        4 - Acceleration_X
+        4 - Gyro_Z
+        4 - Gyro_Y
+        4 - Gyro_X
+        4 - Heading
         4 - Magnetometer_Z
         4 - Magnetometer_Y
         4 - Magnetometer_X
-        4 - Temp
-        4 - P_Apogee
+        4 - Temperature
+        4 - Predicted apogee
         4 - Humidity
-        4 - GPS LAT
-        4 - GPS LONG
+        4 - GPS Latitude
+        4 - GPS Longitude
         4 - GPS Altitude
-        4 - Time
-        2 - Stage
+        4 - Time of data collection
+        2 - Status
         1 - Checksum
         """
         print(data)
