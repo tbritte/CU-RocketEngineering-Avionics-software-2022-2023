@@ -3,28 +3,28 @@ import numpy as np
 
 from sense_hat import SenseHat
 
+
 class TelemetryHandler():
     def __init__(self):
         self.sense = SenseHat()
-        
+
         self.pressure_arr = [self.sense.get_pressure() for i in range(8)]
         self.base_pressure = 0
         self.base_altitude = 0
-    
+
     def setup(self) -> None:
         """Setup the telemetry handler.
         """
-        
+
         base_pressure_arr = []
         last_data_pull = time.time()
         while len(base_pressure_arr) < 64:
             if time.time() - last_data_pull > 0.0625:
                 last_data_pull = time.time()
                 base_pressure_arr.append(self.sense.get_pressure())
-        
+
         self.base_pressure = np.mean(base_pressure_arr)
         self.base_altitude = self.calculate_altitude(base_pressure_arr)
-
 
     def get_data(self) -> dict:
         """Gets all data from the Sense Hat Raspberry Pi Accessory and returns it as a dictionary.
@@ -46,23 +46,23 @@ class TelemetryHandler():
 
         humidity = self.sense.get_humidity()
         pressure = self.sense.get_pressure()
-        
+
         self.add_pressure(pressure)
         altitude = self.current_altitude()
-        
+
         humidity_temp = self.sense.get_temperature_from_humidity()
         pressure_temp = self.sense.get_temperature_from_pressure()
         # Averages humidity_temp and pressure_temp
         temp = (humidity_temp + pressure_temp) / 2
-        
+
         orientation = self.sense.get_orientation_degrees()
         raw_accelerometer = self.sense.get_accelerometer_raw()
-        
+
         north = self.sense.get_compass()
         raw_magnetometer = self.sense.get_compass_raw()
 
-        
-        data = {'humidity': humidity, 'pressure': pressure, 'altitude': altitude, 'humidity_temp': humidity_temp, 'pressure_temp': pressure_temp, 'temp': temp,
+        data = {'humidity': humidity, 'pressure': pressure, 'altitude': altitude, 'humidity_temp': humidity_temp,
+                'pressure_temp': pressure_temp, 'temp': temp,
                 'north': north,
                 'magx': raw_magnetometer['x'],
                 'magy': raw_magnetometer['y'],
@@ -76,14 +76,21 @@ class TelemetryHandler():
 
         return data
 
+    @staticmethod
+    def get_data_header_list():
+        columns = ['time', 'state', 'altitude', 'data_pulls', 'humidity', 'pressure', 'humidity_temp',
+                   'pressure_temp', 'temp', 'roll', 'pitch', 'yaw', 'aclx', 'acly', 'aclz',
+                   'north', 'magx', 'magy', 'magz', 'cputemp']
+        return columns
+
     def print_data(self):
         """Prints out all data from the Sense Hat.
         """
-        
+
         data = self.get_data()
         for key, value in data.items():
             print(f"{key}: {value}")
-    
+
     def add_pressure(self, pressure: float):
         """Adds a pressure value to the pressure array.
 
@@ -92,7 +99,7 @@ class TelemetryHandler():
         """
         self.pressure_arr.append(pressure)
         self.pressure_arr.pop(0)
-    
+
     def calculate_altitude(self, pressure_arr: list, seaLevelPressure: float = 1013.25) -> float:
         """Calculates the altitude of the rocket based on the pressure.
 
@@ -104,9 +111,10 @@ class TelemetryHandler():
             float: The altitude of the rocket in meters.
         """
         average_pressure = np.mean(pressure_arr)
-        altitude = 44330 * (1.0 - pow(average_pressure / seaLevelPressure, 1 / 5.255)) # Used formula from https://github.com/adafruit/Adafruit_BMP280_Library
+        altitude = 44330 * (1.0 - pow(average_pressure / seaLevelPressure,
+                                      1 / 5.255))  # Used formula from https://github.com/adafruit/Adafruit_BMP280_Library
         return altitude - self.base_altitude
-    
+
     def current_altitude(self) -> float:
         """Returns the current altitude of the rocket.
 

@@ -135,3 +135,18 @@ class Buzzer:
         """
         self.clear_beep_queue()
         self._add_beep_group(delay_to_start=4, time_between_beeps=.2, duration_of_beep=.2, beep_count=20)
+
+    def add_status_beeps(self, armed:bool):
+        """
+        If the beep queue is empty, it adds little reminder beeps to the queue
+        When the rocket is unarmed, the beeps are double
+        When the rocket is armed, the beeps are single
+        """
+        try:
+            if len(self.beep_list) == 0:
+                if armed:
+                    self._add_beep_group(2, .5, .1, 1)  # Single beep to indicate it is armed
+                else:
+                    self._add_beep_group(2, .5, .1, 2)  # Double
+        except:
+            print("Status Beep Failure")

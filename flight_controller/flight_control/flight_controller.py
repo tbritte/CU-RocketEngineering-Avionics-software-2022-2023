@@ -9,7 +9,9 @@ from .flight_status import FlightStatus
 from .flight_status import Stage
 
 from .telemetry_downlink import TelemetryDownlink
+
 from .telemetry_handler import TelemetryHandler
+from .ext_telemetry_handler import ExtTelemetryHandler
 
 from .data_logging import DataLogger
 
@@ -21,11 +23,9 @@ from gpiozero import CPUTemperature
 
 start_time = time.time()
 date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
-telemetry_logger = DataLogger(date + '-telemetry_log' + "-r" + str(random.randint(1000, 9999)) + '.csv', ['time','state', 'altitude', 'data_pulls', 'humidity', 'pressure', 'humidity_temp',
-                                                    'pressure_temp', 'temp', 'roll', 'pitch', 'yaw', 'aclx', 'acly', 'aclz',
-                                                    'north', 'magx', 'magy', 'magz', 'cputemp'], start_time)
 
 MAIN_CHUTE_DEPLOY_ALT = 1500
+USING_SENSE_HAT = False
 
 
 def startup(telemetryHandler: TelemetryHandler, telemetryDownlink: TelemetryDownlink):
@@ -34,21 +34,31 @@ def startup(telemetryHandler: TelemetryHandler, telemetryDownlink: TelemetryDown
 
 
 def main():
-    telemetry_handler = TelemetryHandler()
-    # telemetry_downlink = TelemetryDownlink("Telemetry Downlink", 1000)
+    if USING_SENSE_HAT:
+        telemetry_handler = TelemetryHandler()  # Collects data from the sense hat
+    else:
+        telemetry_handler = ExtTelemetryHandler()  # Collects data from the external sensors
 
-    # startup(telemetryHandler=telemetry_handler, telemetryDownlink=telemetry_downlink)
+    # Creates a new data logger for the telemetry data depending on what sensors are being used
+    telemetry_logger = DataLogger(date + '-telemetry_log' + "-r" + str(random.randint(1000, 9999)) + '.csv',
+                                  telemetry_handler.get_data_header_list(), start_time)
+
     telemetry_handler.setup()
 
     buzzer = Buzzer()
 
-    flight_status = FlightStatus(telemetry_handler.sense, buzzer)
+    flight_status = FlightStatus(buzzer)
     parachute = Parachute()
 
     cpu = CPUTemperature()  # For getting the CPU temperature
 
     camera = Camera()
-    led_controller = LEDController(telemetry_handler.sense, flight_status, camera)
+
+    # Only set up the LED controller if the sense hat is being used
+    if USING_SENSE_HAT:
+        led_controller = LEDController(telemetry_handler.sense, flight_status, camera)
+    else:
+        led_controller = None
 
     buzzer.start_up_buzz()  # Three short beeps to indicate that main is being run
 
@@ -75,9 +85,12 @@ def main():
             telemetry_logger.log_data(data)
             # telemetryDownlink.send_data(data)
             flight_status.new_telemetry(data)
-            led_controller.update_lights()
+
+            if led_controller is not None:
+                led_controller.update_lights()
 
         buzzer.update()
+        buzzer.add_status_beeps(flight_status.current_stage() != Stage.UNARMED)
 
         if flight_status.current_stage() == Stage.PRE_FLIGHT:
             if not camera.recording:
