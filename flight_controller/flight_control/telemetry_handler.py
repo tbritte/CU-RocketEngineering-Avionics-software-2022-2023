@@ -2,7 +2,7 @@ import time
 import numpy as np
 
 from sense_hat import SenseHat
-from ublox_gps import UbloxGps
+# from ublox_gps import UbloxGps
 import serial
 
 
@@ -28,7 +28,7 @@ class TelemetryHandler():
         self.base_pressure = np.mean(base_pressure_arr)
         self.base_altitude = self.calculate_altitude(base_pressure_arr)
         port = serial.Serial('/dev/serial0', baudrate=38400, timeout=1)
-        self.gps = UbloxGps(port)
+        # self.gps = UbloxGps(port)
 
 
     def get_data(self) -> dict:
