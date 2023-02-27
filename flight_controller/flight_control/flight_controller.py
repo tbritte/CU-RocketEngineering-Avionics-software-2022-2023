@@ -76,7 +76,8 @@ def main():
         if time.time() - last_data_pull > 0.125:  # Changed to 8hz because get_data can't run at 16hz
             last_data_pull = time.time()
             data_pulls += 1
-            print(flight_status.stage.name)
+            if cycle % 25 == 0:
+                print(flight_status.stage.name)
             data = telemetry_handler.get_data()
             data['state'] = flight_status.current_stage_name()
             data['data_pulls'] = data_pulls

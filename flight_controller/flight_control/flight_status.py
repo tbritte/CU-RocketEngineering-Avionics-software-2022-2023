@@ -11,10 +11,10 @@ class Stage(Enum):
 
 
 class FlightStatus:
-    # REMOVE THIS LATER PLEASE DONT FORGET TO REMOVE SENSE
     def __init__(self, buzzer):
         self.stage = Stage.UNARMED
         self.altitude_list = []
+        self.vertical_acceleration_list = []
 
         self.buzzer = buzzer
 
@@ -46,6 +46,18 @@ class FlightStatus:
         elif len(self.altitude_list) > 65:
             print('CRITICAL ERROR: Too many altitude variables stored')
 
+    def add_vertical_acceleration(self, vertical_acceleration: float) -> None:
+        """Adds a vertical acceleration to the vertical acceleration list.
+
+        Args:
+            vertical_acceleration (float): The vertical acceleration to add to the list.
+        """
+        self.vertical_acceleration_list.append(vertical_acceleration)
+        if len(self.vertical_acceleration_list) == 65:
+            self.vertical_acceleration_list.pop(0)
+        elif len(self.vertical_acceleration_list) > 65:
+            print('CRITICAL ERROR: Too many vertical acceleration variables stored')
+
     # def check_armed(self) -> bool:
     #     """Determines if the rocket is armed.
     #     """
@@ -56,16 +68,18 @@ class FlightStatus:
     #     return False
 
     def check_liftoff(self) -> bool:
-        """Determines if the rocket has liftoff.
-        Checks if the rocket has gained more than 1 meter of altitude in the last second OR
-        The rocket has gained a total of 10 meters since the starting altitude
-
-        Returns:
-            bool: True if the rocket has liftoff, False otherwise.
         """
-        lm = median(self.altitude_list[64 - 8:])  # Newest 8 samples (1 seconds)
-        fm = median(self.altitude_list[:64 - 8])  # Oldest 56 samples (7 seconds)
-        return lm > fm + 1 or lm > 10
+        Determines if the rocket has liftoff. Using accleration data
+        :return: bool: True if the rocket has liftoff, False otherwise.
+        """
+        # Newest 8 samples (1 seconds)
+        median_vertical_accleration_one_second = median(self.vertical_acceleration_list[64 - 8:])
+
+        if median_vertical_accleration_one_second > (9.8 * 3):  # 3g
+            return True
+        else:
+            return False
+
 
     # IMPORTANT: SHOULD WE USE LESS OLDER SAMPLES TO DETECT APOGEE SOONER???
     def check_apogee(self) -> bool:  # Checks if the rocket is past the apogee
@@ -97,6 +111,7 @@ class FlightStatus:
             telemetry (dict): Current telemetry from the Sense Hat.
         """
         self.add_altitude(telemetry['altitude'])
+        self.add_vertical_acceleration(telemetry['acl_z'])
 
         if len(self.altitude_list) >= 64:
             if self.stage.value == Stage.UNARMED.value:  # and self.check_armed():
