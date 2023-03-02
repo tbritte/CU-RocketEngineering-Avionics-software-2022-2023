@@ -79,7 +79,7 @@ class TelemetryDownlink():
         data_arr.extend(bytearray(struct.pack("f", data['latitude'])))
         data_arr.extend(bytearray(struct.pack("f", data['longitude'])))
         data_arr.extend(bytearray(struct.pack("f", data['gps_altitude'])))
-        data_arr.extend(bytearray(struct.pack("d", data['gps_time'])))
+        data_arr.extend(bytearray(struct.pack("d", 120000)))
         data_arr.extend(bytearray(struct.pack("H", data['heading'])))
         data_arr.extend(bytearray(struct.pack("H", data['status'])))
         
