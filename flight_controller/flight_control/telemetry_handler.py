@@ -41,9 +41,16 @@ class TelemetryHandler():
         pressure_temp: float - Temperature in Celsius as determined by the pressure levels.
         temp: float - Average temperature in Celsius taken from the pressure and humidity temp values.
         north: float - Magnetic north in degrees.
-        orientation: dict - Orientation of the Sense Hat in degrees. (keys: pitch, roll, yaw)
-        raw_magnetometer: dict - Raw magnetometer data.
-        raw_accelerometer: dict - Raw accelerometer data, is the acceleration intensity of the axis in Gs. (keys: x, y, z)
+        mag_x: float - Magnetic field strength in the x direction (in Mt).
+        mag_y: float - Magnetic field strength in the y direction (in Mt).
+        mag_z: float - Magnetic field strength in the z direction (in Mt).
+        acl_x: float - Acceleration in the x direction (in m/s).
+        acl_y: float - Acceleration in the y direction (in m/s).
+        acl_z: float - Acceleration in the z direction (in m/s).
+        roll: float - Roll in degrees.
+        pitch: float - Pitch in degrees.
+        yaw: float - Yaw in degrees.
+        altitude: float - Altitude in meters.
 
         Returns:
             dict: A dictionary containing all data from the Sense Hat.
@@ -66,15 +73,19 @@ class TelemetryHandler():
         north = self.sense.get_compass()
         raw_magnetometer = self.sense.get_compass_raw()
 
-        data = {'humidity': humidity, 'pressure': pressure, 'altitude': altitude, 'humidity_temp': humidity_temp,
-                'pressure_temp': pressure_temp, 'temp': temp,
+        data = {'humidity': humidity,
+                'pressure': pressure,
+                'altitude': altitude,
+                'humidity_temp': humidity_temp,
+                'pressure_temp': pressure_temp,
+                'temp': temp,
                 'north': north,
-                'magx': raw_magnetometer['x'],
-                'magy': raw_magnetometer['y'],
-                'magz': raw_magnetometer['z'],
-                'aclx': raw_accelerometer['x'],
-                'acly': raw_accelerometer['y'],
-                'aclz': raw_accelerometer['z'],
+                'mag_x': raw_magnetometer['x'],
+                'mag_y': raw_magnetometer['y'],
+                'mag_z': raw_magnetometer['z'],
+                'acl_x': raw_accelerometer['x'],
+                'acl_y': raw_accelerometer['y'],
+                'acl_z': raw_accelerometer['z'],
                 'roll': orientation['roll'],
                 'pitch': orientation['pitch'],
                 'yaw': orientation['yaw']}

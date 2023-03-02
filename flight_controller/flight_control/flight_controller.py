@@ -28,9 +28,9 @@ MAIN_CHUTE_DEPLOY_ALT = 1500
 USING_SENSE_HAT = False
 
 
-def startup(telemetryHandler: TelemetryHandler, telemetryDownlink: TelemetryDownlink):
-    telemetryHandler.setup()
-    telemetryDownlink.run()
+def startup(telemetry_handler: TelemetryHandler, telemetry_downlink: TelemetryDownlink):
+    telemetry_handler.setup()
+    telemetry_downlink.run()
 
 
 def main():
@@ -82,9 +82,10 @@ def main():
             data['state'] = flight_status.current_stage_name()
             data['data_pulls'] = data_pulls
             data['cputemp'] = cpu.temperature
+            data['predicted_apogee'] = 0
 
             telemetry_logger.log_data(data)
-            # telemetryDownlink.send_data(data)
+            telemetry_downlink.send_data(data)
             flight_status.new_telemetry(data)
 
             if led_controller is not None:
