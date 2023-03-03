@@ -21,7 +21,7 @@ class ExtTelemetryHandler:
         self.BMP180 = BMP085.BMP085(busnum=1)
         print("Calibrating a base_altitude...")
         self.base_altitude = sum([self.get_BMP_data()[0] for _ in range(64)]) / 64
-        print("Base altitude is: " + str(self.base_altitude))
+        print("Base altitude is: " + str(self.base_altitude) + " meters")
         self.old_bmp_data = None
 
         self.i2c = board.I2C()
@@ -73,9 +73,9 @@ class ExtTelemetryHandler:
                     sat_num = parts[7]
                     utc_time = parts[1]  # hhmmss.sss format (UTC)
 
-                    print("lat = " + str(latitude) + ", lon = " + str(longitude),
-                          "alt = " + str(alt) + " meters",
-                          "quality = " + GPS_QUALITY[int(quality)] + ", satellites = " + str(sat_num))
+                    # print("lat = " + str(latitude) + ", lon = " + str(longitude),
+                    #       "alt = " + str(alt) + " meters",
+                    #       "quality = " + GPS_QUALITY[int(quality)] + ", satellites = " + str(sat_num))
 
                     # GPS altitude is true altitude (above sea level)
 
@@ -84,9 +84,11 @@ class ExtTelemetryHandler:
                     return real_data
                 except IndexError:
                     # print("    Index Error, parts were: " + str(parts), "\n    Data was: " + str(data))
+                    # print("Next line would be: " + self.gps.readline().decode("utf-8"))
                     pass
                 except ValueError:
                     # print("    Value Error, parts were: " + str(parts), "\n    Data was: " + str(data))
+                    # print("Next line would be: " + self.gps.readline().decode("utf-8"))
                     pass
 
         else:
@@ -104,11 +106,24 @@ class ExtTelemetryHandler:
         return altitude, pressure, temperature
 
     def get_gyro_data(self):
-        gyro_x, gyro_y, gyro_z = self.lsm6dsox.gyro
-        # print("Gyro: X: %0.2f, Y: %0.2f, Z: %0.2f degrees/s" % (gyro_x, gyro_y, gyro_z))
-        acl_x, acl_y, acl_z = self.lsm6dsox.acceleration
-        # print("About to grab mag data")
-        mag_x, mag_y, mag_z = 0, 0, 0  # self.lis3mdl.magnetic
+        try:
+            gyro_x, gyro_y, gyro_z = self.lsm6dsox.gyro
+        except:
+            print("Error getting gyro data")
+            gyro_x, gyro_y, gyro_z = 0, 0, 0
+
+        try:
+            acl_x, acl_y, acl_z = self.lsm6dsox.acceleration
+        except:
+            print("Error getting acceleration data")
+            acl_x, acl_y, acl_z = 0, 0, 0
+        
+        try:
+            mag_x, mag_y, mag_z = self.lis3mdl.magnetic
+        except:
+            print("Error getting magnetometer data")
+            mag_x, mag_y, mag_z = 0, 0, 0
+
         return gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z
 
     def get_data(self):
