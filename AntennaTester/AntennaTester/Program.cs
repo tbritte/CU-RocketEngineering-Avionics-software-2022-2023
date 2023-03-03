@@ -61,9 +61,10 @@ void port_OnRecivedDataBinary(object sender, SerialDataReceivedEventArgs e)
     byte[] buffer = new byte[bytesToRead];
     serialPort.Read(buffer, 0, bytesToRead);
 
+    Console.WriteLine("GOT DATA");
     foreach (byte b in buffer)
     {
-        Console.WriteLine((char)b);
+        Console.WriteLine(b);
         //StringBuilder hex = new StringBuilder();
         //hex.AppendFormat("{0:x2}", b);
         //Console.WriteLine(hex.ToString());

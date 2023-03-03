@@ -1,7 +1,8 @@
 ﻿<Properties StartupConfiguration="{859F1CB3-698A-4C6A-8742-4935965DB324}|Default">
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.Workbench ActiveDocument="AntennaTester/Program.cs">
     <Files>
-      <File FileName="AntennaTester/Program.cs" Line="65" Column="6" />
+      <File FileName="AntennaTester/Program.cs" Line="67" Column="27" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -13,11 +14,10 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.ItemProperties.AntennaTester PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>
