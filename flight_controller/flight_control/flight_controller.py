@@ -45,6 +45,8 @@ def main():
 
     telemetry_handler.setup()
 
+    telemetry_downlink = TelemetryDownlink()
+
     buzzer = Buzzer()
 
     flight_status = FlightStatus(buzzer)
@@ -76,13 +78,15 @@ def main():
         if time.time() - last_data_pull > 0.125:  # Changed to 8hz because get_data can't run at 16hz
             last_data_pull = time.time()
             data_pulls += 1
-            if cycle % 25 == 0:
-                print(flight_status.stage.name)
+
             data = telemetry_handler.get_data()
             data['state'] = flight_status.current_stage_name()
             data['data_pulls'] = data_pulls
             data['cputemp'] = cpu.temperature
             data['predicted_apogee'] = 0
+
+            # if data_pulls % 8 == 0:
+            #     print("\n", flight_status.stage.name, data)
 
             telemetry_logger.log_data(data)
             telemetry_downlink.send_data(data)

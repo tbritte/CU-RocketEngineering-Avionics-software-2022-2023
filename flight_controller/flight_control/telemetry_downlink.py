@@ -5,19 +5,19 @@ import struct
 
 
 class TelemetryDownlink():
-    def __init__(self, thread_name, thread_ID) -> None:
-        self.ser = serial.Serial("/dev/ttyUSB1", baudrate=57600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=0)
-        
+    def __init__(self) -> None:
+        self.ser = serial.Serial("/dev/ttyUSB0", baudrate=57600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=0)
+
+
         self.frame_count_1 = 0
         self.frame_count_2 = 0
-    
-    def run(self):
-        print(str(self.thread_name) +" "+ str(self.thread_ID))
-        try:
-            self.ser.open()
-        except serial.SerialException as e:
-            sys.stderr.write('Could not open serial port {}: {}\n'.format(self.ser.name, e))
-            exit()
+        self.time_temp = 120000000
+
+        # try:
+        #     self.ser.open()
+        # except serial.SerialException as e:
+        #     sys.stderr.write('Could not open serial port {}: {}\n'.format(self.ser.name, e))
+
     
     # def encode_int(self, arr, num, n_bytes):
     #     arr.extend(num.to_bytes(n_bytes, byteorder='big'))
@@ -53,16 +53,13 @@ class TelemetryDownlink():
         2 - Status
         1 - Checksum
         """
-        print(data)
-        
-        data = '01101001'
         
         data_arr = bytearray()
         
         # Append sync bytes to data arr
         data_arr.extend(bytes('CRE', 'ascii'))
-        data_arr.extend(bytearray(struct.pack("H", frame_count_1)))
-        data_arr.extend(bytearray(struct.pack("H", frame_count_2)))
+        data_arr.extend(bytearray(struct.pack("H", self.frame_count_1)))
+        data_arr.extend(bytearray(struct.pack("H", self.frame_count_2)))
         data_arr.extend(bytearray(struct.pack("f", data['altitude'])))
         data_arr.extend(bytearray(struct.pack("f", data['acl_x'])))
         data_arr.extend(bytearray(struct.pack("f", data['acl_y'])))
@@ -73,27 +70,41 @@ class TelemetryDownlink():
         data_arr.extend(bytearray(struct.pack("f", data['mag_x'])))
         data_arr.extend(bytearray(struct.pack("f", data['mag_y'])))
         data_arr.extend(bytearray(struct.pack("f", data['mag_z'])))
-        data_arr.extend(bytearray(struct.pack("f", data['temp'])))
+        data_arr.extend(bytearray(struct.pack("f", data['bar_temp'])))
         data_arr.extend(bytearray(struct.pack("f", data['predicted_apogee'])))
-        data_arr.extend(bytearray(struct.pack("f", data['humidity'])))
+        data_arr.extend(bytearray(struct.pack("f", 0)))
         data_arr.extend(bytearray(struct.pack("f", data['latitude'])))
         data_arr.extend(bytearray(struct.pack("f", data['longitude'])))
         data_arr.extend(bytearray(struct.pack("f", data['gps_altitude'])))
-        data_arr.extend(bytearray(struct.pack("d", 120000)))
-        data_arr.extend(bytearray(struct.pack("H", data['heading'])))
-        data_arr.extend(bytearray(struct.pack("H", data['status'])))
+        data_arr.extend(bytearray(struct.pack("L", self.time_temp)))
+        data_arr.extend(bytearray(struct.pack("H", 0)))
+        data_arr.extend(bytearray(struct.pack("H", 0)))
+
+        self.time_temp += 125
+
+        for i, d in enumerate(data_arr):
+            print("index:", i, d)
         
         # Calculate checksum
+        checksum = 0
         for byte in data_arr:
             checksum ^= byte
+        print("checksum: " + str(checksum))
         data_arr.extend(bytearray(struct.pack("B", checksum)))
+        print("checksumbutearray: ", bytearray(struct.pack("B", checksum)))
         
-        frame_count_1 += 1
-        if frame_count_1 >= 1023:
+        self.frame_count_1 += 1
+        if self.frame_count_1 >= 1023:
             frame_count_1 = 0
-            frame_count_2 += 1
-        
+            self.frame_count_2 += 1
+
+        print(data_arr)
         self.ser.write(data_arr)
+        # self.ser.write(bytes('CRE', 'ascii'))
+        print ("Sent data")
+        # Sending the written data
+        # self.ser.flush()
+        # ser.flush is used to clear the buffer and send the data immediately without waiting for the buffer to fill up
     
     def close(self):
         self.ser.close()
