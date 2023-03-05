@@ -6,18 +6,16 @@ import struct
 
 class TelemetryDownlink():
     def __init__(self) -> None:
-        self.ser = serial.Serial("/dev/ttyUSB0", baudrate=57600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=0)
+        try:
+            self.ser = serial.Serial("/dev/ttyUSB0", baudrate=57600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=0)
 
 
-        self.frame_count_1 = 0
-        self.frame_count_2 = 0
-        self.time_temp = 120000000
-
-        # try:
-        #     self.ser.open()
-        # except serial.SerialException as e:
-        #     sys.stderr.write('Could not open serial port {}: {}\n'.format(self.ser.name, e))
-
+            self.frame_count_1 = 0
+            self.frame_count_2 = 0
+            self.time_temp = 120000000
+        except serial.serialutil.SerialException:
+            print("No USB plugged in, telemetry downlink disabled")
+            self.ser = None
     
     # def encode_int(self, arr, num, n_bytes):
     #     arr.extend(num.to_bytes(n_bytes, byteorder='big'))
@@ -82,26 +80,26 @@ class TelemetryDownlink():
 
         self.time_temp += 125
 
-        for i, d in enumerate(data_arr):
-            print("index:", i, d)
+        # for i, d in enumerate(data_arr):
+        #     print("index:", i, d)
         
         # Calculate checksum
         checksum = 0
         for byte in data_arr:
             checksum ^= byte
-        print("checksum: " + str(checksum))
+        # print("checksum: " + str(checksum))
         data_arr.extend(bytearray(struct.pack("B", checksum)))
-        print("checksumbutearray: ", bytearray(struct.pack("B", checksum)))
+        # print("checksumbutearray: ", bytearray(struct.pack("B", checksum)))
         
         self.frame_count_1 += 1
         if self.frame_count_1 >= 1023:
             frame_count_1 = 0
             self.frame_count_2 += 1
 
-        print(data_arr)
+        # print(data_arr)
         self.ser.write(data_arr)
         # self.ser.write(bytes('CRE', 'ascii'))
-        print ("Sent data")
+        # print ("Sent data")
         # Sending the written data
         # self.ser.flush()
         # ser.flush is used to clear the buffer and send the data immediately without waiting for the buffer to fill up

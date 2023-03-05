@@ -89,7 +89,8 @@ def main():
             #     print("\n", flight_status.stage.name, data)
 
             telemetry_logger.log_data(data)
-            telemetry_downlink.send_data(data)
+            if telemetry_downlink.ser is not None:
+                telemetry_downlink.send_data(data)
             flight_status.new_telemetry(data)
 
             if led_controller is not None:

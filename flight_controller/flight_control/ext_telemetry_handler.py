@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import math
 import serial
 import Adafruit_BMP.BMP085 as BMP085  # Pressure sensor
 import board
@@ -17,6 +18,8 @@ class ExtTelemetryHandler:
     def __init__(self):
         self.gps = serial.Serial("/dev/ttyS0", baudrate=9600, timeout=0)
         self.old_gps_data = [0, 0, 0, 0, 0, 0]
+
+        self.gps_buffer = ""
 
         self.BMP180 = BMP085.BMP085(busnum=1)
         print("Calibrating a base_altitude...")
@@ -46,54 +49,78 @@ class ExtTelemetryHandler:
                 print("\n\nMagnetometer not found, please check wiring!\n\n")
                 self.lis3mdl = None
 
-        self.old_gyro_data = None
-
     def setup(self):
         pass
 
+    def find_gpgga_in_buffer(self):
+        for i in range(len(self.gps_buffer)):
+            spot = len(self.gps_buffer) - i - 6
+            # looking for the start of the GPGGA message
+            if self.gps_buffer[spot:spot+6] == "$GPGGA":
+                print("Found GPGGA message:", spot)
+                # Checking if there is a newline after the message
+                for j in range(spot, len(self.gps_buffer)):
+                    if self.gps_buffer[j] == "\n":
+                        print("Found newline after GPGGA message:", j)
+                        return spot
+        return None
+
     def get_gps_data(self):
         # print("Getting GPS data...")
-        tries = 0
-        while tries < MAX_GPS_READ_LINES:  # GPGGA is the message type for GPS data (Global Positioning System)
-            tries += 1
-            data = self.gps.readline().decode("utf-8")
-            message = data[0:6]
 
-            if message == "$GPGGA":  # Actually found the data
-                parts = data.split(",")
-                try:
-                    utc_time = parts[1]  # hhmmss.sss format (UTC)
-                    if len(utc_time) > 2:
-                        self.old_gps_data[5] = utc_time
+        self.gps_buffer += self.gps.readline().decode("utf-8")
+        if len(self.gps_buffer) > 10000:  # 10000 character limit on buffer, it's arbitrary
+            self.gps_buffer = self.gps_buffer[-10000:]
 
-                    longitude = float(parts[4])
-                    latitude = float(parts[2])
-                    alt = parts[9]
-                    quality = parts[6]
-                    sat_num = parts[7]
-                    utc_time = parts[1]  # hhmmss.sss format (UTC)
+        print("\nbuffer: ", self.gps_buffer, "\n")
 
-                    # print("lat = " + str(latitude) + ", lon = " + str(longitude),
-                    #       "alt = " + str(alt) + " meters",
-                    #       "quality = " + GPS_QUALITY[int(quality)] + ", satellites = " + str(sat_num))
+        #  Looking through the newest date in the buffer for the GPGGA message
+        #  This is the message that contains the GPS data
 
-                    # GPS altitude is true altitude (above sea level)
+        spot = self.find_gpgga_in_buffer()
 
-                    real_data = [longitude, latitude, alt, quality, sat_num, utc_time]
-                    self.old_gps_data = real_data  # Save the data to be used if no data comes in one time
-                    return real_data
-                except IndexError:
-                    # print("    Index Error, parts were: " + str(parts), "\n    Data was: " + str(data))
-                    # print("Next line would be: " + self.gps.readline().decode("utf-8"))
-                    pass
-                except ValueError:
-                    # print("    Value Error, parts were: " + str(parts), "\n    Data was: " + str(data))
-                    # print("Next line would be: " + self.gps.readline().decode("utf-8"))
-                    pass
+        if spot is not None:
+            message = ""
+            # Iterating from spot till newline and putting that in the message
+            for i in range(spot, len(self.gps_buffer)):
+                if self.gps_buffer[i] == "\n":
+                    break
+                message += self.gps_buffer[i]
 
-        else:
-            # print("    Ran out of tries, using old GPS data")
-            return self.old_gps_data
+            parts = message.split(",")
+            try:
+                utc_time = parts[1]  # hhmmss.sss format (UTC
+                if len(utc_time) > 2:
+                    self.old_gps_data[5] = utc_time
+
+                longitude = float(parts[4])
+                latitude = float(parts[2])
+                alt = parts[9]
+                quality = parts[6]
+                sat_num = parts[7]
+                utc_time = parts[1]  # hhmmss.sss format (UTC)
+
+                # print("lat = " + str(latitude) + ", lon = " + str(longitude),
+                #       "alt = " + str(alt) + " meters",
+                #       "quality = " + GPS_QUALITY[int(quality)] + ", satellites = " + str(sat_num))
+
+                # GPS altitude is true altitude (above sea level)
+
+                real_data = [longitude, latitude, alt, quality, sat_num, utc_time]
+                self.old_gps_data = real_data  # Save the data to be used if no data comes in one time
+                return real_data
+            except IndexError:
+                print("    Index Error, parts were: " + str(parts), "\n    Data was: " + str(data))
+                print("Next line would be: " + self.gps.readline().decode("utf-8"))
+                pass
+            except ValueError:
+                print("    Value Error, parts were: " + str(parts), "\n    Data was: " + str(data))
+                print("Next line would be: " + self.gps.readline().decode("utf-8"))
+                pass
+            except TypeError:
+                print("    Type Error, parts were: " + str(parts), "\n    Data was: " + str(data))
+                print("Next line would be: " + self.gps.readline().decode("utf-8"))
+                pass
 
     def get_BMP_data(self):
         # Get the altitude from the BMP180 sensor
@@ -140,18 +167,28 @@ class ExtTelemetryHandler:
             longitude, latitude, gps_alt, gps_quality, gps_sat_num, utc_time = gps_data
         else:
             # get_gps_data() handles the old gps data, so it is no updated or used here
-            print("    No GPS data returned should never happen")
+            print("    No GPS data returned. Could happen if the first GPS read fails and there is no old data")
             longitude, latitude, gps_alt, gps_quality, gps_sat_num, utc_time = 0, 0, 0, 0, 0, 0
 
-        # Convert the GPS data to a more readable format
-        if latitude != 0:
-            latitude = str(latitude[:2]) + " " + str(latitude[2:]) + " N"
-        if longitude != 0:
-            longitude = str(longitude[:2]) + " " + str(longitude[2:]) + " W"
+        try:
 
-        # Converting the GPS time to a more readable format
-        if utc_time != 0:
-            utc_time = str(utc_time[:2]) + ":" + str(utc_time[2:4]) + ":" + str(utc_time[4:])
+            # Converting the GPS time to a more readable format
+            if utc_time != 0:
+                utc_time = str(utc_time[:2]) + ":" + str(utc_time[2:4]) + ":" + str(utc_time[4:])
+
+            # Convert the GPS data to a more readable format
+            if latitude != 0:
+                latitude = str(latitude)
+                latitude = str(latitude[:2]) + " " + str(latitude[2:]) + " N"
+            if longitude != 0:
+                longitude = str(longitude)
+                longitude = str(longitude[:2]) + " " + str(longitude[2:]) + " W"
+
+        except TypeError:
+            print("    TypeError in GPS data readability conversion... Leaving data in ugly format for now")
+        except:
+            print("    Non TypeError in GPS data readability conversion... Leaving data in ugly format for now")
+
 
         # Get the altitude from the BMP180 sensor
         try:
@@ -168,6 +205,17 @@ class ExtTelemetryHandler:
             gyro_data = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
         gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z = gyro_data
+        # print("mags", mag_x, mag_y, mag_z)
+        heading = math.atan2(mag_y, mag_x) * 180 / math.pi
+
+
+        # Dealing with < 360 and > 360
+        if heading < 0:
+            heading += 360
+        if heading > 360:
+            heading -= 360
+
+        print("heading = ", heading)
 
         # The altitude is the difference between the current altitude and the base altitude
         altitude = altitude - self.base_altitude
