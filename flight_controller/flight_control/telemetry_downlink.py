@@ -70,7 +70,7 @@ class TelemetryDownlink():
         data_arr.extend(bytearray(struct.pack("f", data['mag_z'])))
         data_arr.extend(bytearray(struct.pack("f", data['bar_temp'])))
         data_arr.extend(bytearray(struct.pack("f", data['predicted_apogee'])))
-        data_arr.extend(bytearray(struct.pack("f", 0)))
+        data_arr.extend(bytearray(struct.pack("f", 0)))  # Humidity no sensor for it
         data_arr.extend(bytearray(struct.pack("f", data['latitude'])))
         data_arr.extend(bytearray(struct.pack("f", data['longitude'])))
         data_arr.extend(bytearray(struct.pack("f", data['gps_altitude'])))
@@ -99,7 +99,7 @@ class TelemetryDownlink():
         # print(data_arr)
         self.ser.write(data_arr)
         # self.ser.write(bytes('CRE', 'ascii'))
-        # print ("Sent data")
+        print("\n", checksum, "Sent data:", data)
         # Sending the written data
         # self.ser.flush()
         # ser.flush is used to clear the buffer and send the data immediately without waiting for the buffer to fill up

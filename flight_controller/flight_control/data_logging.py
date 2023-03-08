@@ -3,6 +3,16 @@ import time
 
 from ._typing import DFData
 
+
+def gps_formatting(data):
+    # Convert the GPS data to a more readable format
+    for l in ["latitude", "longitude"]:
+        if data[l] != 0:
+            data[l] = str(data[l])
+            data[l] = str(data[l][:2]) + " " + str(data[l][2:]) + " N"
+    return data
+
+
 class DataLogger():
     def __init__(self, file_name: str, columns:list, start_time:float = time.time()):
         self.file_name = file_name
@@ -10,7 +20,7 @@ class DataLogger():
         
         self.df = pd.DataFrame(columns=columns)
         self.df.to_csv(file_name, header=True)
-    
+
     def log_data(self, data: DFData) -> None:
         """Logs the data to a CSV File.
         
