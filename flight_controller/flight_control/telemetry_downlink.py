@@ -2,6 +2,7 @@ import sys
 import multiprocessing
 import serial
 import struct
+import time
 
 
 class TelemetryDownlink():
@@ -74,7 +75,7 @@ class TelemetryDownlink():
         data_arr.extend(bytearray(struct.pack("f", data['latitude'])))
         data_arr.extend(bytearray(struct.pack("f", data['longitude'])))
         data_arr.extend(bytearray(struct.pack("f", data['gps_altitude'])))
-        data_arr.extend(bytearray(struct.pack("L", self.time_temp)))
+        data_arr.extend(bytearray(struct.pack("L", int(time.time()))))
         data_arr.extend(bytearray(struct.pack("H", 0)))
         data_arr.extend(bytearray(struct.pack("H", 0)))
 

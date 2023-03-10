@@ -30,6 +30,7 @@ class DataLogger():
         Args:
             data (DFData): Takes in any datatype compatible with pandas DataFrame to be appended to the CSV file.
         """
+        # data = gps_formatting(data)
         df = pd.DataFrame(data, columns=self.df.columns, index=[time.time() - self.START_TIME])
         df.to_csv(self.file_name, mode='a', header=False)
     

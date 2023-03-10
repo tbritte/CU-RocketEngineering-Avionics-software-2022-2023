@@ -85,8 +85,7 @@ def main():
             data['cputemp'] = cpu.temperature
             data['predicted_apogee'] = 0
 
-            # if data_pulls % 8 == 0:
-            #     print("\n", flight_status.stage.name, data)
+            print("\n\n", data)
 
             telemetry_logger.log_data(data)
             if telemetry_downlink.ser is not None:
@@ -97,7 +96,6 @@ def main():
                 led_controller.update_lights()
 
         buzzer.update()
-        buzzer.add_status_beeps(flight_status.current_stage() != Stage.UNARMED)
 
         if flight_status.current_stage() == Stage.PRE_FLIGHT:
             if not camera.recording:

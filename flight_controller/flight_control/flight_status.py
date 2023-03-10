@@ -75,7 +75,7 @@ class FlightStatus:
         # Newest 8 samples (1 seconds)
         median_vertical_accleration_one_second = median(self.vertical_acceleration_list[64 - 8:])
 
-        if median_vertical_accleration_one_second > (9.8 * 3):  # 3g
+        if median_vertical_accleration_one_second > (9.8 * .5):  # 3g
             return True
         else:
             return False
