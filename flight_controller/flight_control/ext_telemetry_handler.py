@@ -35,22 +35,22 @@ class ExtTelemetryHandler:
         try:
             self.lsm6dsox = LSM6DSOX(self.i2c)
         except ValueError:
-            print("\n\nAccelerometer not found, please check wiring!\n\n")
+            print("    Accelerometer not found, please check wiring!")
             self.lsm6dsox = None
 
         # Try to find the magnetometer with address 0x1C first, if that fails, try 0x1E
         # This is because the magnetometer has two possible addresses and the default is 0x1C
         try:
-            print("Trying to find magnetometer with address 0x1C")
+            print("    Trying to find magnetometer with address 0x1C")
             self.lis3mdl = adafruit_lis3mdl.LIS3MDL(self.i2c)
-            print("Magnetometer found with address 0x1C")
+            print("    Magnetometer found with address 0x1C")
         except ValueError:
             try:
-                print("Magnetometer not found, trying again with address 0x1e")
+                print("    Magnetometer not found, trying again with address 0x1e")
                 self.lis3mdl = adafruit_lis3mdl.LIS3MDL(self.i2c, address=0x1e)
-                print("Magnetometer found with address 0x1E")
+                print("    Magnetometer found with address 0x1E")
             except ValueError:
-                print("\n\nMagnetometer not found, please check wiring!\n\n")
+                print("    Magnetometer not found, please check wiring!")
                 self.lis3mdl = None
 
     def setup(self):
