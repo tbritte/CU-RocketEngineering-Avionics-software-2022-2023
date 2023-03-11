@@ -28,6 +28,10 @@ class ExtTelemetryHandler:
         self.old_bmp_data = None
 
         self.i2c = board.I2C()
+
+        self.setup9DOF()
+
+    def setup9DOF(self):
         try:
             self.lsm6dsox = LSM6DSOX(self.i2c)
         except ValueError:
@@ -56,7 +60,7 @@ class ExtTelemetryHandler:
         for i in range(len(self.gps_buffer)):
             spot = len(self.gps_buffer) - i - 6
             # looking for the start of the GPGGA message
-            if self.gps_buffer[spot:spot+6] == "$GPGGA":
+            if self.gps_buffer[spot:spot + 6] == "$GPGGA":
                 # print("Found GPGGA message:", spot)
                 # Checking if there is a newline after the message
                 for j in range(spot, len(self.gps_buffer)):
@@ -147,12 +151,17 @@ class ExtTelemetryHandler:
         except:
             print("Error getting acceleration data")
             acl_x, acl_y, acl_z = 0, 0, 0
-        
+
         try:
             mag_x, mag_y, mag_z = self.lis3mdl.magnetic
         except:
             print("Error getting magnetometer data")
             mag_x, mag_y, mag_z = 0, 0, 0
+
+        # Adding all the data up to check if it's bad (Doesn't use absolute value, may be a problem)
+        if sum([gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z]) == 0:
+            print("All 9DOF data is 0, restarting it")
+            self.setup9DOF()
 
         return gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z
 
@@ -185,7 +194,6 @@ class ExtTelemetryHandler:
         except:
             print("    Non TypeError in GPS data readability conversion... Leaving data in ugly format for now")
 
-
         # Get the altitude from the BMP180 sensor
         try:
             BMP_data = self.get_BMP_data()
@@ -195,15 +203,17 @@ class ExtTelemetryHandler:
             BMP_data = self.old_bmp_data
 
         altitude, bar_pressure, bar_temp = BMP_data
-        if self.lsm6dsox is not None and self.lis3mdl is not None:
+
+        try:
             gyro_data = self.get_gyro_data()
-        else:
+        except:
+            print("    ERROR in get gyro")
             gyro_data = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
 
         gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z = gyro_data
         # print("mags", mag_x, mag_y, mag_z)
         heading = math.atan2(mag_y, mag_x) * 180 / math.pi
-
 
         # Dealing with < 360 and > 360
         if heading < 0:
