@@ -14,7 +14,7 @@ class FlightStatus:
     def __init__(self, buzzer):
         self.stage = Stage.UNARMED
         self.altitude_list = []
-        self.vertical_acceleration_list = []
+        self.vertical_acceleration_list = []  # 4 acceleration values are saved
 
         self.buzzer = buzzer
 
@@ -53,10 +53,13 @@ class FlightStatus:
             vertical_acceleration (float): The vertical acceleration to add to the list.
         """
         self.vertical_acceleration_list.append(vertical_acceleration)
-        if len(self.vertical_acceleration_list) == 65:
+        if len(self.vertical_acceleration_list) > 8:  # 8 samples (1 second of data)
             self.vertical_acceleration_list.pop(0)
-        elif len(self.vertical_acceleration_list) > 65:
+        elif len(self.vertical_acceleration_list) > 8:
             print('CRITICAL ERROR: Too many vertical acceleration variables stored')
+
+        if sum(self.vertical_acceleration_list) == 0:
+            print("Bad vertical acceleration dat")
 
     # def check_armed(self) -> bool:
     #     """Determines if the rocket is armed.
@@ -69,13 +72,13 @@ class FlightStatus:
 
     def check_liftoff(self) -> bool:
         """
-        Determines if the rocket has liftoff. Using accleration data
+        Determines if the rocket has liftoff. Using acceleration data
         :return: bool: True if the rocket has liftoff, False otherwise.
         """
         # Newest 8 samples (1 seconds)
-        median_vertical_accleration_one_second = median(self.vertical_acceleration_list[64 - 8:])
+        median_vertical_acceleration = median(self.vertical_acceleration_list)
 
-        if median_vertical_accleration_one_second > (9.8 * .5):  # 3g
+        if median_vertical_acceleration > (9.8 * 3):  # 3g as the median vertical acceleration from the last .5 seconds
             return True
         else:
             return False
@@ -93,6 +96,8 @@ class FlightStatus:
         """
         lm = median(self.altitude_list[64 - 8:])  # Newest 8 samples (1 seconds)
         fm = median(self.altitude_list[64 - 16:64 - 8])  # Second newest 8 samples 1 to 2 second ago)
+        # v_acl = median(self.vertical_acceleration_list)  # Last 4 samples (0.5 seconds)
+        # Vertical acceleration should be close to gravity (1g) because the engine should be off
         return lm < fm
 
     def check_landed(self) -> bool:
@@ -101,8 +106,11 @@ class FlightStatus:
         Returns:
             bool: True if the rocket has landed, False otherwise.
         """
-        lm = median(self.altitude_list[64 - 8:])  # Newest 8 samples (.5 seconds)
-        return lm < 10  # Altitude is already relative to base altitude. Checking if we are below 10 meters above base altitude
+        lm = median(self.altitude_list)  # Entire list, 8 seconds, there is no rush to detect landing
+        v_acl = median(self.vertical_acceleration_list)  # Last 4 samples (0.5 seconds)
+        # Altitude is already relative to base altitude. Checking if we are below 10 meters above base altitude
+        # and if the vertical acceleration is near gravity (1g)
+        return lm < 10 and abs(v_acl - 9.8) < .5
 
     def new_telemetry(self, telemetry: dict) -> None:
         """Updates the flight status based on the new telemetry.
@@ -124,4 +132,4 @@ class FlightStatus:
             elif self.stage.value == Stage.DESCENT.value and self.check_landed():
                 self.stage = Stage.ON_GROUND
         else:
-            print("Need more altitude, collecting...", len(self.altitude_list))
+            print("Flight Status doing its own altitude calibration, collecting...", len(self.altitude_list))

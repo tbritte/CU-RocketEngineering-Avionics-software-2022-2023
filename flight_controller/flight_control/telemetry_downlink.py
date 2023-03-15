@@ -52,7 +52,7 @@ class TelemetryDownlink():
         2 - Status
         1 - Checksum
         """
-        
+
         data_arr = bytearray()
         
         # Append sync bytes to data arr
@@ -76,8 +76,8 @@ class TelemetryDownlink():
         data_arr.extend(bytearray(struct.pack("f", data['longitude'])))
         data_arr.extend(bytearray(struct.pack("f", data['gps_altitude'])))
         data_arr.extend(bytearray(struct.pack("L", int(time.time()))))
-        data_arr.extend(bytearray(struct.pack("H", 0)))
-        data_arr.extend(bytearray(struct.pack("H", 0)))
+        data_arr.extend(bytearray(struct.pack("H", 0)))  # Heading
+        data_arr.extend(bytearray(struct.pack("H", 0)))  # Status
 
         self.time_temp += 125
 
@@ -93,8 +93,8 @@ class TelemetryDownlink():
         # print("checksumbutearray: ", bytearray(struct.pack("B", checksum)))
         
         self.frame_count_1 += 1
-        if self.frame_count_1 >= 1023:
-            frame_count_1 = 0
+        if self.frame_count_1 >= 2**15 - 1:
+            self.frame_count_1 = 0
             self.frame_count_2 += 1
 
         # print(data_arr)

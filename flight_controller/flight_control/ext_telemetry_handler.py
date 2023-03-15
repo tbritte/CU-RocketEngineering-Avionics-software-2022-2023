@@ -23,7 +23,13 @@ class ExtTelemetryHandler:
 
         self.BMP180 = BMP085.BMP085(busnum=1)
         print("Calibrating a base_altitude...")
-        self.base_altitude = sum([self.get_BMP_data()[0] for _ in range(64)]) / 64
+        self.calibrate_initial_altitude()
+        if self.base_altitude == 0:
+            print("Bad BMP, trying once again...")
+            self.BMP180 = BMP085.BMP085(busnum=1)
+            self.calibrate_initial_altitude()
+            if self.base_altitude == 0:
+                print("Still bad... using 0 as base_altitude anyways, sry")
         print("Base altitude is: " + str(self.base_altitude) + " meters")
         self.old_bmp_data = None
 
@@ -31,7 +37,26 @@ class ExtTelemetryHandler:
 
         self.setup9DOF()
 
+    def calibrate_initial_altitude(self):
+        """
+        Calibrates the initial altitude of the rocket by taking the median of 64 altitude readings
+        Sets self.base_altitude to the median altitude
+        """
+        alts = []
+        for _ in range(64):
+            alts.append(self.get_BMP_data()[0])
+            time.sleep(0.01)
+
+        # Getting the median altitude to deal with outliers
+        print("alts: ", alts)
+        self.base_altitude = np.median(alts)
+
     def setup9DOF(self):
+        """
+        Tries to find the accelerometer and magnetometer on the I2C bus
+        If it fails, it will print an error message and set the variable to None
+        Called when the class is initialized or when there is bad data
+        """
         try:
             self.lsm6dsox = LSM6DSOX(self.i2c)
         except ValueError:
@@ -57,6 +82,11 @@ class ExtTelemetryHandler:
         pass
 
     def find_gpgga_in_buffer(self):
+        """
+        Finds the GPGGA message in the buffer and returns the index of the start of the message
+        If it can't find the message, it returns None
+        :return: Index of the start of the GPGGA message or None
+        """
         for i in range(len(self.gps_buffer)):
             spot = len(self.gps_buffer) - i - 6
             # looking for the start of the GPGGA message
@@ -70,6 +100,10 @@ class ExtTelemetryHandler:
         return None
 
     def get_gps_data(self):
+        """
+        Gets the GPS data from the GPS module
+        :return:  [longitude, latitude, altitude, quality, sat_num, utc_time]
+        """
         # print("Getting GPS data...")
         try:
             self.gps_buffer += self.gps.readline().decode("utf-8")
@@ -130,12 +164,20 @@ class ExtTelemetryHandler:
         return self.old_gps_data  # May have an updated UTC time value
 
     def get_BMP_data(self):
-        # Get the altitude from the BMP180 sensor
-        altitude = self.BMP180.read_altitude()
-        # Get the pressure from the BMP180 sensor
-        pressure = self.BMP180.read_pressure()
-        # Get the temperature from the BMP180 sensor
-        temperature = self.BMP180.read_temperature()
+        """
+        Gets the data from the BMP180 sensor
+        :return:  [altitude, pressure, temperature]
+        """
+        try:
+            # Get the altitude from the BMP180 sensor
+            altitude = self.BMP180.read_altitude()
+            # Get the pressure from the BMP180 sensor
+            pressure = self.BMP180.read_pressure()
+            # Get the temperature from the BMP180 sensor
+            temperature = self.BMP180.read_temperature()
+        except OSError:
+            print("Error getting BMP data")
+            altitude, pressure, temperature = 0, 0, 0
 
         return altitude, pressure, temperature
 
