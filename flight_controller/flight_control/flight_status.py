@@ -12,11 +12,32 @@ class Stage(Enum):
 
 class FlightStatus:
     def __init__(self, buzzer):
-        self.stage = Stage.UNARMED
+        self.stage = Stage.PRE_FLIGHT  # Starting stage is pre-flight
         self.altitude_list = []
-        self.vertical_acceleration_list = []  # 4 acceleration values are saved
+        self.vertical_acceleration_list = []  # 8 acceleration values are saved (1 second of data)
 
         self.buzzer = buzzer
+
+    def collect_status_bits(self, data, drouge_deployed, main_deployed, camera_recording):
+        status_bits = {"active aero": False,
+                       "excessive spin": sum(abs(data["gyro_x"]) + abs(data["gyro_y"]) + abs(data["gyro_z"])) > 720,
+                       "excessive vibration": data["acl_x"] > 100 or data["acl_y"] > 100 or data["acl_z"] > 100,
+                       "on": True,
+                       "Nominal": True,
+                       "launch detected": self.stage.value > Stage.PRE_FLIGHT.value,
+                       "apogee detected": self.stage.value > Stage.IN_FLIGHT.value,
+                       "drogue deployed": drouge_deployed,
+                       "main deployed": main_deployed,
+                       "touchdown": self.stage.value > Stage.DESCENT.value,
+                       "payload deployed": False,
+                       "Pi Cam 1 On": camera_recording,
+                        "Pi Cam 2 On": False,
+                        "Go Pro 1 On": False,
+                        "Go Pro 2 On": False,
+                        "Go Pro 3 On": False,
+                       }
+        return status_bits
+
 
     def current_stage(self) -> Stage:
         """Returns the current stage of the rocket.
@@ -122,10 +143,10 @@ class FlightStatus:
         self.add_vertical_acceleration(telemetry['acl_z'])
 
         if len(self.altitude_list) >= 64:
-            if self.stage.value == Stage.UNARMED.value:  # and self.check_armed():
-                self.stage = Stage.PRE_FLIGHT
-                self.buzzer.armed_beeps()  # Plays 20 quick beeps
-            elif self.stage.value == Stage.PRE_FLIGHT.value and self.check_liftoff():
+            # if self.stage.value == Stage.UNARMED.value:  # and self.check_armed():
+            #     self.stage = Stage.PRE_FLIGHT
+            #     self.buzzer.armed_beeps()  # Plays 20 quick beeps
+            if self.stage.value == Stage.PRE_FLIGHT.value and self.check_liftoff():
                 self.stage = Stage.IN_FLIGHT
             elif self.stage.value == Stage.IN_FLIGHT.value and self.check_apogee():
                 self.stage = Stage.DESCENT

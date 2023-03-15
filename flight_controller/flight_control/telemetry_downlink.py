@@ -8,8 +8,8 @@ import time
 class TelemetryDownlink():
     def __init__(self) -> None:
         try:
-            self.ser = serial.Serial("/dev/ttyUSB0", baudrate=57600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=0)
-
+            self.ser = serial.Serial("/dev/ttyUSB0", baudrate=57600, parity=serial.PARITY_NONE,
+                                     stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=0)
 
             self.frame_count_1 = 0
             self.frame_count_2 = 0
@@ -17,14 +17,14 @@ class TelemetryDownlink():
         except serial.serialutil.SerialException:
             print("No USB plugged in, telemetry downlink disabled")
             self.ser = None
-    
+
     # def encode_int(self, arr, num, n_bytes):
     #     arr.extend(num.to_bytes(n_bytes, byteorder='big'))
-    
+
     # def encode_float(self, arr, f):
     #     arr.extend(bytearray(struct.pack("f", f)))
-    
-    def send_data(self, data):
+
+    def send_data(self, data, status_bits):
         """
         1 - sync 0
         1 - sync 1
@@ -53,8 +53,19 @@ class TelemetryDownlink():
         1 - Checksum
         """
 
+        # Calculating the status number from the status bits
+        stat_num = 0
+        stats = ["active aero", "excessive spin", "excessive vibration", "on", "Nominal", "launch detected",
+                 "apogee detected", "drogue deployed", "main deployed", "touchdown", "payload deployed", "Pi Cam 1 On",
+                 "Pi Cam 2 On", "Go Pro 1 On", "Go Pro 2 On", "Go Pro 3 On"]
+
+        for i in range(16):
+            stat_num ^= status_bits[stats[i]] * 2 ** i
+
+        print(stat_num, bin(stat_num))
+
         data_arr = bytearray()
-        
+
         # Append sync bytes to data arr
         data_arr.extend(bytes('CRE', 'ascii'))
         data_arr.extend(bytearray(struct.pack("H", self.frame_count_1)))
@@ -83,7 +94,7 @@ class TelemetryDownlink():
 
         # for i, d in enumerate(data_arr):
         #     print("index:", i, d)
-        
+
         # Calculate checksum
         checksum = 0
         for byte in data_arr:
@@ -91,9 +102,9 @@ class TelemetryDownlink():
         # print("checksum: " + str(checksum))
         data_arr.extend(bytearray(struct.pack("B", checksum)))
         # print("checksumbutearray: ", bytearray(struct.pack("B", checksum)))
-        
+
         self.frame_count_1 += 1
-        if self.frame_count_1 >= 2**15 - 1:
+        if self.frame_count_1 >= 2 ** 15 - 1:
             self.frame_count_1 = 0
             self.frame_count_2 += 1
 
@@ -104,7 +115,7 @@ class TelemetryDownlink():
         # Sending the written data
         # self.ser.flush()
         # ser.flush is used to clear the buffer and send the data immediately without waiting for the buffer to fill up
-    
+
     def close(self):
         self.ser.close()
         pass

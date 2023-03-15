@@ -34,6 +34,10 @@ def startup(telemetry_handler: TelemetryHandler, telemetry_downlink: TelemetryDo
 
 
 def main():
+
+    drouge_deployed = False
+    main_deployed = False
+
     if USING_SENSE_HAT:
         telemetry_handler = TelemetryHandler()  # Collects data from the sense hat
     else:
@@ -87,10 +91,23 @@ def main():
 
             print("\n\n", data)
 
-            telemetry_logger.log_data(data)
-            if telemetry_downlink.ser is not None:
-                telemetry_downlink.send_data(data)
-            flight_status.new_telemetry(data)
+            status_bits = flight_status.collect_status_bits(data, drouge_deployed, main_deployed, camera.recording)
+
+            try:
+                if telemetry_downlink.ser is not None:
+                    telemetry_downlink.send_data(data)
+            except:
+                print("Error sending data to ground station")
+
+            try:
+                telemetry_logger.log_data(data)
+            except:
+                print("Error logging data")
+
+            try:
+                flight_status.new_telemetry(data)
+            except:
+                print("Error updating flight status")
 
             if led_controller is not None:
                 led_controller.update_lights()
@@ -102,6 +119,7 @@ def main():
                 camera.start_recording()
         if flight_status.current_stage() == Stage.DESCENT and not parachute.deployed:
             parachute.deploy()
+            drouge_deployed = True
         elif flight_status.current_stage() == Stage.DESCENT and parachute.deployed:
             parachute.kill_signal()
         # elif flight_status.current_stage() == Stage.ON_GROUND:
