@@ -19,8 +19,13 @@ class FlightStatus:
         self.buzzer = buzzer
 
     def collect_status_bits(self, data, drouge_deployed, main_deployed, camera_recording):
+        try:
+            e_spin = sum(abs(data["gyro_x"]) + abs(data["gyro_y"]) + abs(data["gyro_z"])) > 720
+        except TypeError:
+            e_spin = False
+
         status_bits = {"active aero": False,
-                       "excessive spin": sum(abs(data["gyro_x"]) + abs(data["gyro_y"]) + abs(data["gyro_z"])) > 720,
+                       "excessive spin": e_spin,
                        "excessive vibration": data["acl_x"] > 100 or data["acl_y"] > 100 or data["acl_z"] > 100,
                        "on": True,
                        "Nominal": True,
@@ -36,6 +41,7 @@ class FlightStatus:
                         "Go Pro 2 On": False,
                         "Go Pro 3 On": False,
                        }
+        print(status_bits)
         return status_bits
 
 

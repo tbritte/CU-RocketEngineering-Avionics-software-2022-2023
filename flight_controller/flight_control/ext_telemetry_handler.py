@@ -20,13 +20,19 @@ class ExtTelemetryHandler:
         self.old_gps_data = [0, 0, 0, 0, 0, 0]
 
         self.gps_buffer = ""
-
-        self.BMP180 = BMP085.BMP085(busnum=1)
+        try:
+            self.BMP180 = BMP085.BMP085(busnum=1)
+        except OSError:
+            print("    BMP180 not found, please check wiring!")
+            self.BMP180 = None
         print("Calibrating a base_altitude...")
         self.calibrate_initial_altitude()
         if self.base_altitude == 0:
             print("Bad BMP, trying once again...")
-            self.BMP180 = BMP085.BMP085(busnum=1)
+            try:
+                self.BMP180 = BMP085.BMP085(busnum=1)
+            except OSError:
+                print("    BMP180 not found again, please check wiring!")
             self.calibrate_initial_altitude()
             if self.base_altitude == 0:
                 print("Still bad... using 0 as base_altitude anyways, sry")
@@ -168,15 +174,18 @@ class ExtTelemetryHandler:
         Gets the data from the BMP180 sensor
         :return:  [altitude, pressure, temperature]
         """
-        try:
-            # Get the altitude from the BMP180 sensor
-            altitude = self.BMP180.read_altitude()
-            # Get the pressure from the BMP180 sensor
-            pressure = self.BMP180.read_pressure()
-            # Get the temperature from the BMP180 sensor
-            temperature = self.BMP180.read_temperature()
-        except OSError:
-            print("Error getting BMP data")
+        if self.BMP180 is not None:
+            try:
+                # Get the altitude from the BMP180 sensor
+                altitude = self.BMP180.read_altitude()
+                # Get the pressure from the BMP180 sensor
+                pressure = self.BMP180.read_pressure()
+                # Get the temperature from the BMP180 sensor
+                temperature = self.BMP180.read_temperature()
+            except OSError:
+                print("OSError getting BMP data")
+                altitude, pressure, temperature = 0, 0, 0
+        else:
             altitude, pressure, temperature = 0, 0, 0
 
         return altitude, pressure, temperature
