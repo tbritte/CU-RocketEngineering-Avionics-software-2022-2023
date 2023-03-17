@@ -35,7 +35,7 @@ def startup(telemetry_handler: TelemetryHandler, telemetry_downlink: TelemetryDo
 
 def main():
 
-    drouge_deployed = False
+    drogue_deployed = False
     main_deployed = False
 
     if USING_SENSE_HAT:
@@ -73,14 +73,18 @@ def main():
     terminate = False
 
     last_data_pull = time.time()
+    last_downlink_send = time.time()
+    last_flight_status_update = time.time()
 
     cycle = 0
     data_pulls = 0
 
     while not terminate:
         cycle += 1
-        if time.time() - last_data_pull > 0.125:  # Changed to 8hz because get_data can't run at 16hz
-            last_data_pull = time.time()
+        if True:  # run as fast as possible
+            # print(time.time() - last_data_pull)  # To see how fast the loop is running
+            last_data_pull = time.time()  # Allways pulling data
+
             data_pulls += 1
 
             data = telemetry_handler.get_data()
@@ -90,22 +94,27 @@ def main():
             data['predicted_apogee'] = 0
 
             print("\n\n", data)
-
-            status_bits = flight_status.collect_status_bits(data, drouge_deployed, main_deployed, camera.recording)
+            
+            status_bits = flight_status.collect_status_bits(data, drogue_deployed, main_deployed, camera.recording)
 
             try:
                 if telemetry_downlink.ser is not None:
-                    telemetry_downlink.send_data(data)
+                    if (time.time() - last_downlink_send) > 0.125:  # Downlink should only be sent at 8hz 
+                        telemetry_downlink.send_data(data, status_bits)
+                        last_downlink_send = time.time()
             except:
                 print("Error sending data to ground station")
 
             try:
+                # Log the data to a csv file happens at 16hz
                 telemetry_logger.log_data(data)
             except:
                 print("Error logging data")
 
             try:
-                flight_status.new_telemetry(data)
+                if (time.time() - last_flight_status_update) > 0.125:  # Flight_status should only be updated at 8hz
+                    flight_status.new_telemetry(data)
+                    last_flight_status_update = time.time()
             except:
                 print("Error updating flight status")
 
@@ -119,7 +128,7 @@ def main():
                 camera.start_recording()
         if flight_status.current_stage() == Stage.DESCENT and not parachute.deployed:
             parachute.deploy()
-            drouge_deployed = True
+            drogue_deployed = True
         elif flight_status.current_stage() == Stage.DESCENT and parachute.deployed:
             parachute.kill_signal()
         # elif flight_status.current_stage() == Stage.ON_GROUND:
