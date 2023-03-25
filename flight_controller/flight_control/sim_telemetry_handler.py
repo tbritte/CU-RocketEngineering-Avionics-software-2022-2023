@@ -37,7 +37,7 @@ class SimTelemetryHandler:
                 "gyro_x": 0, "gyro_y": 0, "gyro_z": 0,
                 "acl_x": 0, "acl_y": 0, "acl_z": acl_avg, "mag_x": 0, "mag_y": 0, "mag_z": 0}
         return data
-    
+
     @staticmethod
     def get_data_header_list():
         columns = ['time', 'gps_time', 'state', 'altitude', 'gps_altitude', 'data_pulls', 'bar_pressure',

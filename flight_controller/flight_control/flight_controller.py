@@ -12,6 +12,7 @@ from .telemetry_downlink import TelemetryDownlink
 
 from .telemetry_handler import TelemetryHandler
 from .ext_telemetry_handler import ExtTelemetryHandler
+from .sim_telemetry_handler import SimTelemetryHandler
 
 from .data_logging import DataLogger
 
@@ -26,6 +27,7 @@ date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
 
 MAIN_CHUTE_DEPLOY_ALT = 1500
 USING_SENSE_HAT = False
+USING_SIM_DATA = False
 
 
 def startup(telemetry_handler: TelemetryHandler, telemetry_downlink: TelemetryDownlink):
@@ -38,10 +40,13 @@ def main():
     drogue_deployed = False
     main_deployed = False
 
-    if USING_SENSE_HAT:
-        telemetry_handler = TelemetryHandler()  # Collects data from the sense hat
+    if USING_SIM_DATA:
+        telemetry_handler = SimTelemetryHandler() # Uses previously collected data in a csv file
     else:
-        telemetry_handler = ExtTelemetryHandler()  # Collects data from the external sensors
+        if USING_SENSE_HAT:
+            telemetry_handler = TelemetryHandler()  # Collects data from the sense hat
+        else:
+            telemetry_handler = ExtTelemetryHandler()  # Collects data from the external sensors
 
     # Creates a new data logger for the telemetry data depending on what sensors are being used
     telemetry_logger = DataLogger(date + '-telemetry_log' + "-r" + str(random.randint(1000, 9999)) + '.csv',
