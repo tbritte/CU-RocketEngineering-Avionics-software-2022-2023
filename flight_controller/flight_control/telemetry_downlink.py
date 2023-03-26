@@ -24,6 +24,57 @@ class TelemetryDownlink():
     # def encode_float(self, arr, f):
     #     arr.extend(bytearray(struct.pack("f", f)))
 
+    def read_data(self):
+        # Reading in 11 bytes
+        """
+        1 - sync 0 ('C')
+        1 - sync 1 ('R')
+        1 - sync 2 ('E')
+        1 - message char 1
+        1 - message char 2
+        1 - message char 3
+        1 - message char 4
+        4 - Checksum (xor of all other bytes)
+
+        Returns: The message as string
+        """
+        print("\nReading data...")
+        # Read in 11 bytes
+        try:
+            data = self.ser.read(11)
+        except:
+            print("Error reading 11 bytes")
+            return
+
+        message = ""
+        if len(data) == 11:
+            # Converting all the bytes except for the last one to a string of characters
+            for i in range(10):
+                message += data[i].decode('ascii')
+
+            # Check if the first three characters are 'CRE'
+            if message[0:3] == "CRE":  # message[0:3] is the first three characters
+                # Check if the checksum is correct
+                checksum = 0
+                # Using all bytes except the last one
+                for i in range(10):
+                    checksum ^= data[i]
+            else:
+                print("Does not have correct sync bytes... "
+                      "has " + message[0:3] + " instead")
+        else:
+            print("Does not have 11 bytes has " + str(len(data)) + " bytes instead")
+
+        print("Raw decoded message: " + message)
+
+        # Decoding the message to see which camera to turn on
+        if message[3:6] == 'CAM':  # We are turning on a camera
+            return int(message[6])  # returning the camera number
+        elif message[3:6] == 'RDY':
+            print("----Received ready message----")
+        else:
+            print("Unknown message, I don't know what to do with it...")
+
     def send_data(self, data, status_bits):
         """
         1 - sync 0
