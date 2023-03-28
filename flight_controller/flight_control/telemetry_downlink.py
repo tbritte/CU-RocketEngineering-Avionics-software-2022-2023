@@ -5,6 +5,25 @@ import struct
 import time
 
 
+def find_sync_bytes(buffer):
+    """
+
+    :param buffer: List of bytes from the serial port read buffer
+    :return: The index of the second to last 'CRE' in the buffer or -1 if no 'CRE' was found
+    """
+
+    found_newest_cre = False
+    for j in range(len(buffer)):
+        i = len(buffer) - j - 1  # Going backwards through the buffer
+        if i < len(buffer) - 3:
+            if buffer[i] == 67 and buffer[i + 1] == 82 and buffer[i + 2] == 69:  # 'C', 'R', 'E'
+                if found_newest_cre:  # If we have already found the newest 'CRE'
+                    return i  # Return the index of the second to last 'CRE'
+                else:  # This is the newest 'CRE'
+                    found_newest_cre = True
+    return -1  # If we didn't find any 'CRE's
+
+
 class TelemetryDownlink():
     def __init__(self) -> None:
         try:
@@ -18,6 +37,8 @@ class TelemetryDownlink():
             print("No USB plugged in, telemetry downlink disabled")
             self.ser = None
 
+        self.read_buffer = []
+
     # def encode_int(self, arr, num, n_bytes):
     #     arr.extend(num.to_bytes(n_bytes, byteorder='big'))
 
@@ -25,7 +46,7 @@ class TelemetryDownlink():
     #     arr.extend(bytearray(struct.pack("f", f)))
 
     def read_data(self):
-        # Reading in 11 bytes
+        # Moving data into the buffer
         """
         1 - sync 0 ('C')
         1 - sync 1 ('R')
@@ -38,32 +59,32 @@ class TelemetryDownlink():
 
         Returns: The message as string
         """
-        print("\nReading data...")
-        # Read in 11 bytes
-        try:
-            data = self.ser.read(11)
-        except:
-            print("Error reading 11 bytes")
-            return
+        if self.ser is None:
+            return None
 
+        # Reading all the data on this serial port and adding it to the buffer
+        self.read_buffer.append(self.ser.read(self.ser.in_waiting))
+
+        # Trimming the beginning of the buffer to remove any old data
+        if len(self.read_buffer) > 100:
+            self.read_buffer = self.read_buffer[-100:]
+        print(self.read_buffer)
+        # Searching for the most recent complete message by finding the second to last 'CRE'
+        index_second_to_last_cre = find_sync_bytes(self.read_buffer)
+        if index_second_to_last_cre == -1:
+            print("No complete message found")
+            return None
+
+        # Getting the data from the second to last 'CRE' to the last 'CRE'
+        byte_message = self.read_buffer[index_second_to_last_cre:index_second_to_last_cre + 11]
+
+        # Converting the first 7 bytes to a string and calculating the checksum
         message = ""
-        if len(data) == 11:
-            # Converting all the bytes except for the last one to a string of characters
-            for i in range(10):
-                message += data[i].decode('ascii')
+        checksum = 0
+        for i in range(7):
+            message += byte_message[i].decode('ascii')
+            checksum ^= byte_message[i]
 
-            # Check if the first three characters are 'CRE'
-            if message[0:3] == "CRE":  # message[0:3] is the first three characters
-                # Check if the checksum is correct
-                checksum = 0
-                # Using all bytes except the last one
-                for i in range(10):
-                    checksum ^= data[i]
-            else:
-                print("Does not have correct sync bytes... "
-                      "has " + message[0:3] + " instead")
-        else:
-            print("Does not have 11 bytes has " + str(len(data)) + " bytes instead")
 
         print("Raw decoded message: " + message)
 
