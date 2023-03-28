@@ -75,7 +75,7 @@ class TelemetryDownlink():
             print("No complete message found")
             return None
 
-        # Getting the data from the second to last 'CRE' to the last 'CRE'
+        # Getting the data from the second to last 'CRE'
         byte_message = self.read_buffer[index_second_to_last_cre:index_second_to_last_cre + 11]
 
         # Converting the first 7 bytes to a string and calculating the checksum
@@ -85,8 +85,7 @@ class TelemetryDownlink():
             message += byte_message[i].decode('ascii')
             checksum ^= byte_message[i]
 
-
-        print("Raw decoded message: " + message)
+        print("Checksum= " + str(checksum) + "Final decoded message: " + message)
 
         # Decoding the message to see which camera to turn on
         if message[3:6] == 'CAM':  # We are turning on a camera
