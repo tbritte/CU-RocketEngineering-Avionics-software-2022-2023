@@ -27,7 +27,7 @@ date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
 
 MAIN_CHUTE_DEPLOY_ALT = 1500
 USING_SENSE_HAT = False
-USING_SIM_DATA = False
+USING_SIM_DATA = True
 
 
 def startup(telemetry_handler: TelemetryHandler, telemetry_downlink: TelemetryDownlink):
@@ -98,17 +98,25 @@ def main():
             data['cputemp'] = cpu.temperature
             data['predicted_apogee'] = 0
 
-            print("\n\n", data)
+            print("\n\n STATUS: ", flight_status.current_stage_name())
+            # print("\n\n", data)
             
             status_bits = flight_status.collect_status_bits(data, drogue_deployed, main_deployed, camera.recording)
 
             try:
                 if telemetry_downlink.ser is not None:
+                    # DON'T CHANGE DOWNLINK SPEED UNLESS YOU CHANGE GPS SAME TIME INCREMENT AMOUNT FROM .125
                     if (time.time() - last_downlink_send) > 0.125:  # Downlink should only be sent at 8hz 
                         telemetry_downlink.send_data(data, status_bits)
                         last_downlink_send = time.time()
-            except:
-                print("Error sending data to ground station")
+            except Exception as e:
+                print("Error sending data to ground station " + str(e))
+
+            try:
+                if telemetry_downlink.ser is not None:
+                    telemetry_downlink.read_data()
+            except Exception as e:
+                print("Error reading data from ground station " + str(e))
 
             try:
                 # Log the data to a csv file happens at 16hz

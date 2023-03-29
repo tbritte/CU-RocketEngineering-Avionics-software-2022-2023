@@ -7,7 +7,7 @@ import time
 
 def find_sync_bytes(buffer):
     """
-
+    Find the second to last 'CRE' in the buffer. Does not use the newest 'CRE' because it may be incomplete
     :param buffer: List of bytes from the serial port read buffer
     :return: The index of the second to last 'CRE' in the buffer or -1 if no 'CRE' was found
     """
@@ -33,6 +33,8 @@ class TelemetryDownlink():
             self.frame_count_1 = 0
             self.frame_count_2 = 0
             self.time_temp = 120000000
+            self.last_gps_time_sent = 0
+            self.gps_time_count_in_second = 0  # The number of GPS times sent in the last second so far
         except serial.serialutil.SerialException:
             print("No USB plugged in, telemetry downlink disabled")
             self.ser = None
@@ -68,7 +70,7 @@ class TelemetryDownlink():
         # Trimming the beginning of the buffer to remove any old data
         if len(self.read_buffer) > 100:
             self.read_buffer = self.read_buffer[-100:]
-        print(self.read_buffer)
+        # print(self.read_buffer)
         # Searching for the most recent complete message by finding the second to last 'CRE'
         index_second_to_last_cre = find_sync_bytes(self.read_buffer)
         if index_second_to_last_cre == -1:
@@ -94,6 +96,8 @@ class TelemetryDownlink():
             print("----Received ready message----")
         else:
             print("Unknown message, I don't know what to do with it...")
+
+        # QZMP for DSRM
 
     def send_data(self, data, status_bits):
         """
@@ -129,11 +133,19 @@ class TelemetryDownlink():
         stats = ["active aero", "excessive spin", "excessive vibration", "on", "Nominal", "launch detected",
                  "apogee detected", "drogue deployed", "main deployed", "touchdown", "payload deployed", "Pi Cam 1 On",
                  "Pi Cam 2 On", "Go Pro 1 On", "Go Pro 2 On", "Go Pro 3 On"]
-
+        # print("Status bits: ", status_bits)
         for i in range(16):
-            stat_num ^= status_bits[stats[i]] * 2 ** i
+            stat_num ^= status_bits[stats[i]] * (2 ** (15 - i))
 
-        print(stat_num, bin(stat_num))
+        # print(stat_num, bin(stat_num))
+
+        # Adding 1/8s to the GPS time if it is the same as the last GPS time sent until a new second is reached
+        current_gps_time = float(data['gps_time'])
+        if current_gps_time == self.last_gps_time_sent:
+            self.gps_time_count_in_second += 1
+            current_gps_time += self.gps_time_count_in_second * .125
+        else:
+            self.gps_time_count_in_second = 0
 
         data_arr = bytearray()
 
@@ -157,9 +169,9 @@ class TelemetryDownlink():
         data_arr.extend(bytearray(struct.pack("f", data['latitude'])))
         data_arr.extend(bytearray(struct.pack("f", data['longitude'])))
         data_arr.extend(bytearray(struct.pack("f", data['gps_altitude'])))
-        data_arr.extend(bytearray(struct.pack("L", int(time.time()))))
+        data_arr.extend(bytearray(struct.pack("L", int(current_gps_time * 1000))))
         data_arr.extend(bytearray(struct.pack("H", 0)))  # Heading
-        data_arr.extend(bytearray(struct.pack("H", 0)))  # Status
+        data_arr.extend(bytearray(struct.pack("H", stat_num)))  # Status
 
         self.time_temp += 125
 
@@ -182,7 +194,7 @@ class TelemetryDownlink():
         # print(data_arr)
         self.ser.write(data_arr)
         # self.ser.write(bytes('CRE', 'ascii'))
-        print("\n", checksum, "Sent data:", data)
+        # print("\n", checksum, "Sent data:", data)
         # Sending the written data
         # self.ser.flush()
         # ser.flush is used to clear the buffer and send the data immediately without waiting for the buffer to fill up

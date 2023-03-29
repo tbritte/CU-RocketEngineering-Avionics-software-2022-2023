@@ -41,7 +41,7 @@ class FlightStatus:
                         "Go Pro 2 On": False,
                         "Go Pro 3 On": False,
                        }
-        print(status_bits)
+        # print(status_bits)
         return status_bits
 
 
@@ -146,7 +146,7 @@ class FlightStatus:
             telemetry (dict): Current telemetry from the Sense Hat.
         """
         self.add_altitude(telemetry['altitude'])
-        self.add_vertical_acceleration(telemetry['acl_z'])
+        self.add_vertical_acceleration(abs(telemetry['acl_x']))
 
         if len(self.altitude_list) >= 64:
             # if self.stage.value == Stage.UNARMED.value:  # and self.check_armed():

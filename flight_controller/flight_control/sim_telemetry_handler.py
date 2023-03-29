@@ -6,20 +6,24 @@ sys.path.append("simulation") # Putting the simulation folder in the path
 
 
 # Should be in the simulation folder
-DATA_NAME = "testdata.csv"
+DATA_NAME = "simulation/testdata.csv"
 
 class SimTelemetryHandler:
     def __init__(self):
         self.start_time = time.time()
 
-        # Loading in testdata using panadas and then storing it as a numpy array
-        self.data = pd.read_csv("DATA_NAME")
+        # Loading in testdata using pandas and then storing it as a numpy array
+        self.data = pd.read_csv(DATA_NAME)
+        print("ALL DATA IS HERE:", self.data)
         self.data = self.data.to_numpy()
+
+    def setup(self):
+        pass
 
     def get_data(self):
 
-        # Getting elaspsed time to query the csv data with
-        elapsed_time = time.time() - self.start_time
+        # Getting elapsed time to query the csv data with
+        elapsed_time = time.time() - self.start_time + 340  # To get to the exciting part of the flight
 
         # Using the time column to find the closest time to the elapsed time and then using that index to get the data
         index = np.abs(self.data[:,0] - elapsed_time).argmin()
@@ -30,12 +34,14 @@ class SimTelemetryHandler:
         # Average of the three axis, only one axis is significant, so the avg doesn't have a difference from vertical
         acl_avg = self.data[index, 2]
 
+        print("USEFUL DATA FROM SIMULATION: ", elapsed_time, altitude, acl_avg)
+
         # Most value are zero
         data = {"latitude": 0, "longitude": 0,
                 "gps_altitude": 0, "gps_time": 0, "gps_quality": 0, "gps_sat_num": 0,
                 "altitude": altitude, "bar_pressure": 0, "bar_temp": 0,
                 "gyro_x": 0, "gyro_y": 0, "gyro_z": 0,
-                "acl_x": 0, "acl_y": 0, "acl_z": acl_avg, "mag_x": 0, "mag_y": 0, "mag_z": 0}
+                "acl_x": acl_avg, "acl_y": 0, "acl_z": 0, "mag_x": 0, "mag_y": 0, "mag_z": 0}
         return data
 
     @staticmethod
