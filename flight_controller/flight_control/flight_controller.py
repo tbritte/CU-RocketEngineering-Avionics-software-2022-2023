@@ -19,6 +19,8 @@ from .buddy_comm import BuddyComm
 from .data_logging import DataLogger
 
 from .camera import Camera
+from .cam_servo import CamServoController
+
 from .LED_controller import LEDController
 from .buzzer import Buzzer
 
@@ -27,7 +29,8 @@ from gpiozero import CPUTemperature
 start_time = time.time()
 date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
 
-MAIN_CHUTE_DEPLOY_ALT = 1500
+# Main chute deploy altitude in meters
+MAIN_CHUTE_DEPLOY_ALT = 304.8
 USING_SENSE_HAT = False
 USING_SIM_DATA = True
 
@@ -62,11 +65,14 @@ def main():
     buzzer = Buzzer()
 
     flight_status = FlightStatus(buzzer)
-    parachute = Parachute()
+    drogue_chute = Parachute(18)
+    main_chute = Parachute(16)
 
     cpu = CPUTemperature()  # For getting the CPU temperature
 
     camera = Camera()
+    go_pro_1_cam_servo = CamServoController()
+
 
     # Only set up the LED controller if the sense hat is being used
     if USING_SENSE_HAT:
@@ -105,7 +111,7 @@ def main():
             # print("\n\n", data)
             
             status_bits = flight_status.collect_status_bits(data, drogue_deployed, main_deployed, camera.recording)
-
+            print(status_bits)
             try:
                 if telemetry_downlink.ser is not None:
                     # DON'T CHANGE DOWNLINK SPEED UNLESS YOU CHANGE GPS SAME TIME INCREMENT AMOUNT FROM .125
@@ -117,7 +123,22 @@ def main():
 
             try:
                 if telemetry_downlink.ser is not None:
-                    telemetry_downlink.read_data()
+                    read_num = telemetry_downlink.read_data()
+                    if read_num == 1:
+                        # Start go pro 1
+                        print("Trying to start GoPro 1")
+                        go_pro_1_cam_servo.activate_camera()
+                        if flight_status.go_pro_1_on:
+                            flight_status.go_pro_1_on = False
+                        else:
+                            flight_status.go_pro_1_on = True
+
+                    elif read_num == 2:
+                        # TELL SRAD2 TO TURN GOPRO2 ON
+                        pass
+                    elif read_num == 3:
+                        # TELL SRAD2 TO TURN GOPRO3 ON
+                        pass
             except Exception as e:
                 print("Error reading data from ground station " + str(e))
 
@@ -154,15 +175,20 @@ def main():
                 led_controller.update_lights()
 
         buzzer.update()
+        go_pro_1_cam_servo.check_let_go_of_button()
 
         if flight_status.current_stage() == Stage.PRE_FLIGHT:
             if not camera.recording:
                 camera.start_recording()
-        if flight_status.current_stage() == Stage.DESCENT and not parachute.deployed:
-            parachute.deploy()
+        if flight_status.current_stage() == Stage.DESCENT and not drogue_chute.deployed:
+            drogue_chute.deploy()
             drogue_deployed = True
-        elif flight_status.current_stage() == Stage.DESCENT and parachute.deployed:
-            parachute.kill_signal()
+        elif flight_status.current_stage() == Stage.DESCENT and drogue_chute.deployed:
+            drogue_chute.kill_signal()
+        if flight_status.current_stage() == Stage.DESCENT and flight_status.get_median_altitude_from_last_second() < MAIN_CHUTE_DEPLOY_ALT and not main_chute.deployed:
+            print("MAIN DEPLOY")
+            main_chute.deploy()
+            main_deployed = True
         # elif flight_status.current_stage() == Stage.ON_GROUND:
     #         if camera.recording:
     #             camera.stop_recording()

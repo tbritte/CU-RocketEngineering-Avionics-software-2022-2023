@@ -64,30 +64,35 @@ class TelemetryDownlink():
         if self.ser is None:
             return None
 
-        # Reading all the data on this serial port and adding it to the buffer
-        self.read_buffer.append(self.ser.read(self.ser.in_waiting))
-
-        # Trimming the beginning of the buffer to remove any old data
-        if len(self.read_buffer) > 100:
-            self.read_buffer = self.read_buffer[-100:]
-        # print(self.read_buffer)
-        # Searching for the most recent complete message by finding the second to last 'CRE'
-        index_second_to_last_cre = find_sync_bytes(self.read_buffer)
-        if index_second_to_last_cre == -1:
-            print("No complete message found")
+        # Reading all the data on this serial port and adding it to the buffer one character at a time
+        if self.ser.in_waiting > 0:
+            message = str(self.ser.read(self.ser.in_waiting).decode("ascii"))
+            print("\n\n\nMessage:\n\n\n ", message)
+        else:
             return None
+        # self.read_buffer.append(self.ser.read(self.ser.in_waiting))
 
-        # Getting the data from the second to last 'CRE'
-        byte_message = self.read_buffer[index_second_to_last_cre:index_second_to_last_cre + 11]
-
-        # Converting the first 7 bytes to a string and calculating the checksum
-        message = ""
-        checksum = 0
-        for i in range(7):
-            message += byte_message[i].decode('ascii')
-            checksum ^= byte_message[i]
-
-        print("Checksum= " + str(checksum) + "Final decoded message: " + message)
+        # # Trimming the beginning of the buffer to remove any old data
+        # if len(self.read_buffer) > 100:
+        #     self.read_buffer = self.read_buffer[-100:]
+        # print(self.read_buffer)
+        # # Searching for the most recent complete message by finding the second to last 'CRE'
+        # index_second_to_last_cre = find_sync_bytes(self.read_buffer)
+        # if index_second_to_last_cre == -1:
+        #     print("No complete message found")
+        #     return None
+        #
+        # # Getting the data from the second to last 'CRE'
+        # byte_message = self.read_buffer[index_second_to_last_cre:index_second_to_last_cre + 11]
+        #
+        # # Converting the first 7 bytes to a string and calculating the checksum
+        # message = ""
+        # checksum = 0
+        # for i in range(7):
+        #     message += byte_message[i].decode('ascii')
+        #     checksum ^= byte_message[i]
+        #
+        # print("Checksum= " + str(checksum) + "Final decoded message: " + message)
 
         # Decoding the message to see which camera to turn on
         if message[3:6] == 'CAM':  # We are turning on a camera
@@ -135,7 +140,7 @@ class TelemetryDownlink():
                  "Pi Cam 2 On", "Go Pro 1 On", "Go Pro 2 On", "Go Pro 3 On"]
         # print("Status bits: ", status_bits)
         for i in range(16):
-            stat_num ^= status_bits[stats[i]] * (2 ** (15 - i))
+            stat_num ^= status_bits[stats[i]] * (2 ** i)
 
         # print(stat_num, bin(stat_num))
 

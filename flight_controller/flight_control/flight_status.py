@@ -1,3 +1,4 @@
+import statistics
 from enum import Enum
 from statistics import median
 
@@ -79,6 +80,17 @@ class FlightStatus:
             self.altitude_list.pop(0)
         elif len(self.altitude_list) > 65:
             print('CRITICAL ERROR: Too many altitude variables stored')
+
+    def get_median_altitude_from_last_second(self):
+        """
+        Returns the median of the last second of altitude values
+        :return:  median of the last second of altitude values
+        """
+        try:
+            return median(self.altitude_list[-8:])
+        except statistics.StatisticsError:
+            print("No altitude data")
+            return 0
 
     def add_vertical_acceleration(self, vertical_acceleration: float) -> None:
         """Adds a vertical acceleration to the vertical acceleration list.
