@@ -18,6 +18,13 @@ class FlightStatus:
 
         self.buzzer = buzzer
 
+        self.payload_deployed = False
+        self.go_pro_1_on = False
+        self.go_pro_2_on = False
+        self.go_pro_3_on = False
+        self.pi_cam2_on = False
+
+
     def collect_status_bits(self, data, drouge_deployed, main_deployed, camera_recording):
         try:
             e_spin = sum(abs(data["gyro_x"]) + abs(data["gyro_y"]) + abs(data["gyro_z"])) > 720
@@ -34,12 +41,12 @@ class FlightStatus:
                        "drogue deployed": drouge_deployed,
                        "main deployed": main_deployed,
                        "touchdown": self.stage.value > Stage.DESCENT.value,
-                       "payload deployed": False,
+                       "payload deployed": self.payload_deployed,
                        "Pi Cam 1 On": camera_recording,
-                        "Pi Cam 2 On": False,
-                        "Go Pro 1 On": False,
-                        "Go Pro 2 On": False,
-                        "Go Pro 3 On": False,
+                        "Pi Cam 2 On": self.pi_cam2_on,
+                        "Go Pro 1 On": self.go_pro_1_on,
+                        "Go Pro 2 On": self.go_pro_2_on,
+                        "Go Pro 3 On": self.go_pro_3_on,
                        }
         # print(status_bits)
         return status_bits

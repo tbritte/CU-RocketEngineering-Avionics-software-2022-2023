@@ -14,6 +14,8 @@ from .telemetry_handler import TelemetryHandler
 from .ext_telemetry_handler import ExtTelemetryHandler
 from .sim_telemetry_handler import SimTelemetryHandler
 
+from .buddy_comm import BuddyComm
+
 from .data_logging import DataLogger
 
 from .camera import Camera
@@ -55,6 +57,7 @@ def main():
     telemetry_handler.setup()
 
     telemetry_downlink = TelemetryDownlink()
+    buddy_comm = BuddyComm()
 
     buzzer = Buzzer()
 
@@ -130,6 +133,22 @@ def main():
                     last_flight_status_update = time.time()
             except:
                 print("Error updating flight status")
+
+            # Handling what the SRAD2 tells us
+            num_from_srad2 = buddy_comm.receive()
+            if num_from_srad2 != -1:
+                if num_from_srad2 == 0:
+                    flight_status.payload_deployed = True
+                    print("(buddy) Payload deployed")
+                elif num_from_srad2 == 1:
+                    flight_status.go_pro_2_on = True
+                    print("(buddy) GoPro 2 on")
+                elif num_from_srad2 == 2:
+                    pass
+                    print("(buddy) SRAD2 is armed and flight ready")
+                elif num_from_srad2 == 3:
+                    flight_status.go_pro_3_on = True
+                    print("(buddy) GoPro 3 on")
 
             if led_controller is not None:
                 led_controller.update_lights()
