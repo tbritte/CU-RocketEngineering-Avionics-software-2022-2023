@@ -135,7 +135,7 @@ class TelemetryDownlink():
 
         # Calculating the status number from the status bits
         stat_num = 0
-        stats = ["active aero", "excessive spin", "excessive vibration", "on", "Nominal", "launch detected",
+        stats = ["active aero", "excessive spin", "excessive vibration", "on", "disarmed", "launch detected",
                  "apogee detected", "drogue deployed", "main deployed", "touchdown", "payload deployed", "Pi Cam 1 On",
                  "Pi Cam 2 On", "Go Pro 1 On", "Go Pro 2 On", "Go Pro 3 On"]
         # print("Status bits: ", status_bits)

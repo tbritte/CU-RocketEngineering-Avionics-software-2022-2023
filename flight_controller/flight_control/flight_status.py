@@ -26,7 +26,7 @@ class FlightStatus:
         self.pi_cam2_on = False
 
 
-    def collect_status_bits(self, data, drouge_deployed, main_deployed, camera_recording):
+    def collect_status_bits(self, data, drouge_deployed, main_deployed, camera_recording, disarmed):
         try:
             e_spin = sum(abs(data["gyro_x"]) + abs(data["gyro_y"]) + abs(data["gyro_z"])) > 720
         except TypeError:
@@ -36,7 +36,7 @@ class FlightStatus:
                        "excessive spin": e_spin,
                        "excessive vibration": data["acl_x"] > 100 or data["acl_y"] > 100 or data["acl_z"] > 100,
                        "on": True,
-                       "Nominal": True,
+                       "disarmed": disarmed,
                        "launch detected": self.stage.value > Stage.PRE_FLIGHT.value,
                        "apogee detected": self.stage.value > Stage.IN_FLIGHT.value,
                        "drogue deployed": drouge_deployed,

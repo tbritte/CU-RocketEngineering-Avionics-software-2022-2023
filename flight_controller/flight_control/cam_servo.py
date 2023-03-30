@@ -10,18 +10,26 @@ class CamServoController:
         GPIO.setup(CAM_SERVO_PIN, GPIO.OUT)
         self.pwm = GPIO.PWM(CAM_SERVO_PIN, 50)
         self.pwm.start(2.5)
-        self.active = False
+        self.button_depressed = False
         self.activated_time = 0
+        self.deactivated_time = 0
 
     def activate_camera(self):
+        self.pwm.start(13)
         self.pwm.ChangeDutyCycle(13)
-        self.active = True
+        self.button_depressed = True
         self.activated_time = time.time()
 
+    def update(self):
+        self.check_let_go_of_button()
+        if not self.button_depressed and time.time() - self.deactivated_time > 1:
+            self.pwm.ChangeDutyCycle(0)
+
     def check_let_go_of_button(self):
-        if self.active and time.time() - self.activated_time > 0.5:
+        if self.button_depressed and time.time() - self.activated_time > 1:
             self.pwm.ChangeDutyCycle(2.5)
-            self.active = False
+            self.deactivated_time = time.time()
+            self.button_depressed = False
 
     def terminate(self):
         self.pwm.stop()

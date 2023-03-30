@@ -68,6 +68,8 @@ def main():
     drogue_chute = Parachute(18)
     main_chute = Parachute(16)
 
+    disarmed = False
+
     cpu = CPUTemperature()  # For getting the CPU temperature
 
     camera = Camera()
@@ -93,7 +95,11 @@ def main():
     cycle = 0
     data_pulls = 0
 
+    SERVO_TEST_TIME = 0
     while not terminate:
+        if time.time() - SERVO_TEST_TIME > 10:
+            SERVO_TEST_TIME = time.time()
+            go_pro_1_cam_servo.activate_camera()
         cycle += 1
         if True:  # run as fast as possible
             # print(time.time() - last_data_pull)  # To see how fast the loop is running
@@ -110,7 +116,7 @@ def main():
             print("\n\n STATUS: ", flight_status.current_stage_name())
             # print("\n\n", data)
             
-            status_bits = flight_status.collect_status_bits(data, drogue_deployed, main_deployed, camera.recording)
+            status_bits = flight_status.collect_status_bits(data, drogue_deployed, main_deployed, camera.recording, disarmed)
             print(status_bits)
             try:
                 if telemetry_downlink.ser is not None:
@@ -170,12 +176,14 @@ def main():
                 elif num_from_srad2 == 3:
                     flight_status.go_pro_3_on = True
                     print("(buddy) GoPro 3 on")
+            else:
+                print("No data from SRAD2")
 
             if led_controller is not None:
                 led_controller.update_lights()
 
         buzzer.update()
-        go_pro_1_cam_servo.check_let_go_of_button()
+        go_pro_1_cam_servo.update()  # For temporal handling without using time.sleep()
 
         if flight_status.current_stage() == Stage.PRE_FLIGHT:
             if not camera.recording:
