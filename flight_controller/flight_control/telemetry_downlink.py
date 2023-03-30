@@ -99,6 +99,10 @@ class TelemetryDownlink():
             return int(message[6])  # returning the camera number
         elif message[3:6] == 'RDY':
             print("----Received ready message----")
+            return "RDY"
+        elif message[3:7] == 'QZMP':
+            print("----Received DSRM message----")
+            return "DSRM"
         else:
             print("Unknown message, I don't know what to do with it...")
 

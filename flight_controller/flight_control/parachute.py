@@ -1,4 +1,6 @@
 import RPi.GPIO as GPIO
+import time
+
 
 class Parachute:
     def __init__(self, pin) -> None:
@@ -7,14 +9,23 @@ class Parachute:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.OUT)
         self.deployed = False
-    
+        self.deploy_time = 0
+
     def deploy(self):
         """Deploys the parachute.
         """
         GPIO.output(self.pin, GPIO.HIGH)
         self.deployed = True
-        
-    def kill_signal(self):
+        self.deploy_time = time.time()
+
+    def update(self):
+        """
+        Kills the parachute signal after .5 seconds of being set to high
+        """
+        if self.deployed and time.time() - self.deploy_time > .5:
+            self._kill_signal()
+
+    def _kill_signal(self):
         """Kills the parachute signal to save electricity and prevent anything weird from happening.
         """
         GPIO.output(self.pin, GPIO.LOW)

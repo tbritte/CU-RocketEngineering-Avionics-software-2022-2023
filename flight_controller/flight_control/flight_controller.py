@@ -97,9 +97,6 @@ def main():
 
     SERVO_TEST_TIME = 0
     while not terminate:
-        if time.time() - SERVO_TEST_TIME > 10:
-            SERVO_TEST_TIME = time.time()
-            go_pro_1_cam_servo.activate_camera()
         cycle += 1
         if True:  # run as fast as possible
             # print(time.time() - last_data_pull)  # To see how fast the loop is running
@@ -129,8 +126,8 @@ def main():
 
             try:
                 if telemetry_downlink.ser is not None:
-                    read_num = telemetry_downlink.read_data()
-                    if read_num == 1:
+                    read_val = telemetry_downlink.read_data()
+                    if read_val == 1:
                         # Start go pro 1
                         print("Trying to start GoPro 1")
                         go_pro_1_cam_servo.activate_camera()
@@ -139,12 +136,24 @@ def main():
                         else:
                             flight_status.go_pro_1_on = True
 
-                    elif read_num == 2:
+                    elif read_val == 2:
                         # TELL SRAD2 TO TURN GOPRO2 ON
                         pass
-                    elif read_num == 3:
+                    elif read_val == 3:
                         # TELL SRAD2 TO TURN GOPRO3 ON
                         pass
+                    elif read_val == "RDY":
+                        pass
+                        # TELL SRAD2 TO BE READY
+                    elif read_val == "DSRM":
+                        # Doing disarm procedure
+                        print("Disarming")
+
+                        # TELL SRAD2 TO DISARM
+                        buddy_comm.send(1)
+
+                        # Disable parachute deployment systems
+                        disarmed = True
             except Exception as e:
                 print("Error reading data from ground station " + str(e))
 
@@ -183,17 +192,17 @@ def main():
                 led_controller.update_lights()
 
         buzzer.update()
+        drogue_chute.update()
+        main_chute.update()
         go_pro_1_cam_servo.update()  # For temporal handling without using time.sleep()
 
         if flight_status.current_stage() == Stage.PRE_FLIGHT:
             if not camera.recording:
                 camera.start_recording()
-        if flight_status.current_stage() == Stage.DESCENT and not drogue_chute.deployed:
+        if flight_status.current_stage() == Stage.DESCENT and not drogue_chute.deployed and not disarmed:
             drogue_chute.deploy()
             drogue_deployed = True
-        elif flight_status.current_stage() == Stage.DESCENT and drogue_chute.deployed:
-            drogue_chute.kill_signal()
-        if flight_status.current_stage() == Stage.DESCENT and flight_status.get_median_altitude_from_last_second() < MAIN_CHUTE_DEPLOY_ALT and not main_chute.deployed:
+        if flight_status.current_stage() == Stage.DESCENT and flight_status.get_median_altitude_from_last_second() < MAIN_CHUTE_DEPLOY_ALT and not main_chute.deployed and not disarmed:
             print("MAIN DEPLOY")
             main_chute.deploy()
             main_deployed = True
