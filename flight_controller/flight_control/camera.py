@@ -46,7 +46,7 @@ class Camera():
             self.camera.stop_recording()
             self.recording = False
         else:
-            print("Camera is not recording")
+            print("Camera is has stopped recording")
     
     def start_preview(self):
         """Previews the camera feed in a window

@@ -2,6 +2,7 @@ from subprocess import call
 import time
 import datetime
 import random
+import threading
 
 from .parachute import Parachute
 
@@ -14,7 +15,7 @@ from .telemetry_handler import TelemetryHandler
 from .ext_telemetry_handler import ExtTelemetryHandler
 from .sim_telemetry_handler import SimTelemetryHandler
 
-from .buddy_comm import BuddyComm
+from .buddy_comm import BuddyCommThread, BuddyComm
 
 from .data_logging import DataLogger
 
@@ -60,7 +61,10 @@ def main():
     telemetry_handler.setup()
 
     telemetry_downlink = TelemetryDownlink()
-    buddy_comm = BuddyComm()
+    buddy_comm = BuddyCommThread()  # Used for receiving data operates in a separate thread
+    buddy_comm.start()
+
+    buddy_sender = BuddyComm()  # Used for sending data operates in the main thread
 
     buzzer = Buzzer()
 
@@ -110,11 +114,20 @@ def main():
             data['cputemp'] = cpu.temperature
             data['predicted_apogee'] = 0
 
-            print("\n\n STATUS: ", flight_status.current_stage_name())
+            # print("\n\n STATUS: ", flight_status.current_stage_name())
+            print("Buddy Comm messages: ", buddy_comm.messages)
+
+            if data_pulls == 20:
+                buddy_sender.send(1)
+                print("\n\nSent 1 to buddy\n\n")
+            if data_pulls == 40:
+                buddy_sender.send(2)
+                print("\n\nSent 2 to buddy\n\n")
+
             # print("\n\n", data)
             
             status_bits = flight_status.collect_status_bits(data, drogue_deployed, main_deployed, camera.recording, disarmed)
-            print(status_bits)
+            # print(status_bits)
             try:
                 if telemetry_downlink.ser is not None:
                     # DON'T CHANGE DOWNLINK SPEED UNLESS YOU CHANGE GPS SAME TIME INCREMENT AMOUNT FROM .125
@@ -154,6 +167,12 @@ def main():
 
                         # Disable parachute deployment systems
                         disarmed = True
+
+                        # Turn off all cameras
+                        go_pro_1_cam_servo.activate_camera()  # Turns off the camera
+                        flight_status.go_pro_1_on = False
+                        camera.stop_recording()
+
             except Exception as e:
                 print("Error reading data from ground station " + str(e))
 
@@ -170,23 +189,22 @@ def main():
             except:
                 print("Error updating flight status")
 
-            # Handling what the SRAD2 tells us
-            num_from_srad2 = buddy_comm.receive()
+            num_from_srad2 = 0 #buddy_comm.get_oldest_message()
             if num_from_srad2 != -1:
                 if num_from_srad2 == 0:
                     flight_status.payload_deployed = True
                     print("(buddy) Payload deployed")
                 elif num_from_srad2 == 1:
-                    flight_status.go_pro_2_on = True
-                    print("(buddy) GoPro 2 on")
-                elif num_from_srad2 == 2:
                     pass
                     print("(buddy) SRAD2 is armed and flight ready")
+
+                elif num_from_srad2 == 2:
+                    flight_status.go_pro_2_on = True
+                    print("(buddy) GoPro 2 on")
+
                 elif num_from_srad2 == 3:
                     flight_status.go_pro_3_on = True
                     print("(buddy) GoPro 3 on")
-            else:
-                print("No data from SRAD2")
 
             if led_controller is not None:
                 led_controller.update_lights()
@@ -196,7 +214,7 @@ def main():
         main_chute.update()
         go_pro_1_cam_servo.update()  # For temporal handling without using time.sleep()
 
-        if flight_status.current_stage() == Stage.PRE_FLIGHT:
+        if flight_status.current_stage().value >= Stage.IN_FLIGHT.value:  # If we have taken off, then start recording
             if not camera.recording:
                 camera.start_recording()
         if flight_status.current_stage() == Stage.DESCENT and not drogue_chute.deployed and not disarmed:

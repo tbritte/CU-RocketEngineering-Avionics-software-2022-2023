@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+from threading import Thread
 
 DATA_PIN_TO_SRAD2 = 23
 CLOCK_PIN_TO_SRAD2 = 24
@@ -56,25 +57,55 @@ class BuddyComm:
         Returns the number received
         """
         try:
-            start_time = time.time()
             # Receiving the number
             # If the clock pin is high, then the data pin will be the number received
             # Looking for two bits of data
+            time_of_getting_first_bit = 0
             num = 0
             for i in range(2):
                 while GPIO.input(CLOCK_PIN_FROM_SRAD2) == GPIO.LOW:  # Waiting for the clock pin to go high
-                    if time.time() - start_time > 0.1:
-                        return -1  # If it takes too long, then return -1
+                    pass
                 if GPIO.input(DATA_PIN_FROM_SRAD2) == GPIO.HIGH:  # Checking if the data pin is high
                     num = num | 0b1  # Setting the last bit to 1
+                if i == 0:
+                    time_of_getting_first_bit = time.time()
+                if i == 1:
+                    if time.time() - time_of_getting_first_bit > 1:
+                        print("Too much time between bits")
+                        time.sleep(.5)
+                        return -1
                 num = num << 1  # Shifting the number to the left by 1 bit
                 while GPIO.input(CLOCK_PIN_FROM_SRAD2) == GPIO.HIGH:  # Waiting for the clock pin to go low
-                    if time.time() - start_time > 0.1:
-                        return -1
                     pass
+                print("got a bit: ", num)
             return num >> 1  # Shifting the number to the right by 1 bit to get rid of the extra bit
         except Exception as e:
             print("Buddy Read Error: " + str(e))
             return -1
 
 
+# custom thread
+class BuddyCommThread(Thread):
+    # constructor
+    def __init__(self):
+        # execute the base constructor
+        Thread.__init__(self)
+        self.messages = []
+
+    def get_oldest_message(self):
+        """
+        Gets the oldest message in the queue
+        Removes it from the queue
+        """
+        if len(self.messages) > 0:
+            return self.messages.pop(0)
+        else:
+            return -1
+
+    # function executed in a new thread
+    def run(self):
+        my_buddy_comm = BuddyComm()
+        while True:
+            val = my_buddy_comm.receive()
+            if val != -1:
+                self.messages.append(val)
