@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BA08FEE5-1395-4380-88F8-A5957CEE17FF}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>ModernUIDesign</RootNamespace>
+    <AssemblyName>ModernUIDesign</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>TMSoftwareIcon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Core\ObservableObject.cs" />
+    <Compile Include="Core\RelayCommand.cs" />
+    <Compile Include="Core\ViewCommand.cs" />
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MVVM\Model\DataPoint.cs" />
+    <Compile Include="MVVM\Model\TelemetryModel.cs" />
+    <Compile Include="MVVM\Model\UpdateQuickViewEventArgs.cs" />
+    <Compile Include="MVVM\Model\UpdateTelemetryViewEventArgs.cs" />
+    <Compile Include="MVVM\ViewModel\TelemetryViewModel.cs" />
+    <Compile Include="MVVM\ViewModel\HomeViewModel.cs" />
+    <Compile Include="MVVM\ViewModel\MainViewModel.cs" />
+    <Compile Include="MVVM\View\HomeView.xaml.cs">
+      <DependentUpon>HomeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\TelemetryView.xaml.cs">
+      <DependentUpon>TelemetryView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Charts.22.1.5\lib\net452\DevExpress.Charts.Designer.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Charts.Core.22.1.5\lib\net452\DevExpress.Charts.v22.1.Core.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.CodeParser.22.1.5\lib\net452\DevExpress.CodeParser.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Data.Desktop.22.1.5\lib\net452\DevExpress.Data.Desktop.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Data.22.1.5\lib\net452\DevExpress.Data.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.DataAccess.22.1.5\lib\net452\DevExpress.DataAccess.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.DataVisualization.Core.22.1.5\lib\net452\DevExpress.DataVisualization.v22.1.Core.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Drawing.22.1.5\lib\net452\DevExpress.Drawing.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Images.22.1.5\lib\net452\DevExpress.Images.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Mvvm.22.1.5\lib\net452\DevExpress.Mvvm.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Office.Core.22.1.5\lib\net452\DevExpress.Office.v22.1.Core.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Pdf.Core.22.1.5\lib\net452\DevExpress.Pdf.v22.1.Core.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Pdf.Drawing.22.1.5\lib\net452\DevExpress.Pdf.v22.1.Drawing.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Printing.Core.22.1.5\lib\net452\DevExpress.Printing.v22.1.Core.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.RichEdit.Core.22.1.5\lib\net452\DevExpress.RichEdit.v22.1.Core.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Sparkline.Core.22.1.5\lib\net452\DevExpress.Sparkline.v22.1.Core.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Spreadsheet.Core.22.1.5\lib\net452\DevExpress.Spreadsheet.v22.1.Core.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.TreeMap.Core.22.1.5\lib\net452\DevExpress.TreeMap.v22.1.Core.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Charts.22.1.5\lib\net452\DevExpress.Xpf.Charts.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Controls.22.1.5\lib\net452\DevExpress.Xpf.Controls.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Core.22.1.5\lib\net452\DevExpress.Xpf.Core.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Docking.22.1.5\lib\net452\DevExpress.Xpf.Docking.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.DocumentViewer.Core.22.1.5\lib\net452\DevExpress.Xpf.DocumentViewer.v22.1.Core.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Grid.Core.22.1.5\lib\net452\DevExpress.Xpf.Grid.v22.1.Core.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Grid.Core.22.1.5\lib\net452\DevExpress.Xpf.Grid.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Grid.Core.22.1.5\lib\net452\DevExpress.Xpf.Grid.v22.1.Extensions.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Docking.22.1.5\lib\net452\DevExpress.Xpf.Layout.v22.1.Core.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.LayoutControl.22.1.5\lib\net452\DevExpress.Xpf.LayoutControl.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.NavBar.22.1.5\lib\net452\DevExpress.Xpf.NavBar.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Office.22.1.5\lib\net452\DevExpress.Xpf.Office.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Printing.22.1.5\lib\net452\DevExpress.Xpf.Printing.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.PropertyGrid.22.1.5\lib\net452\DevExpress.Xpf.PropertyGrid.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Ribbon.22.1.5\lib\net452\DevExpress.Xpf.Ribbon.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Spreadsheet.22.1.5\lib\net452\DevExpress.Xpf.Spreadsheet.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.Themes.Office2019Colorful.22.1.5\lib\net452\DevExpress.Xpf.Themes.Office2019Colorful.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Wpf.TreeMap.22.1.5\lib\net452\DevExpress.Xpf.TreeMap.v22.1.dll" />
+    <ReferencePath Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\packages\DevExpress.Xpo.22.1.5\lib\net452\DevExpress.Xpo.v22.1.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\Microsoft.CSharp.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\mscorlib.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\PresentationCore.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\PresentationFramework.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Core.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Data.DataSetExtensions.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Data.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Net.Http.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Xaml.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Xml.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Xml.Linq.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\WindowsBase.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\obj\Debug\MainWindow.g.cs" />
+    <Compile Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\obj\Debug\MVVM\View\HomeView.g.cs" />
+    <Compile Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\obj\Debug\MVVM\View\TelemetryView.g.cs" />
+    <Compile Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\obj\Debug\App.g.cs" />
+    <Compile Include="C:\Users\kyle3\Dropbox\C#\ModernUIDesign\obj\Debug\GeneratedInternalTypeHelper.g.cs" />
+  </ItemGroup>
+</Project>
