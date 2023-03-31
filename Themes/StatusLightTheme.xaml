@@ -1,0 +1,241 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+
+
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="BaseLightTheme">
+        <Style.Setters>
+
+            <Setter Property="Height" Value="55"/>
+            <Setter Property="Width" Value="55"/>
+            <Setter Property="Margin" Value="15,10"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Stroke" Value="Black"/>
+            <Setter Property="StrokeThickness" Value="2"/>
+
+        </Style.Setters>
+
+    </Style>
+
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme0"
+           BasedOn="{StaticResource BaseLightTheme}">
+        
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[0]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[0]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme1"
+           BasedOn="{StaticResource BaseLightTheme}">
+        
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[1]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[1]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme2"
+           BasedOn="{StaticResource BaseLightTheme}">
+        
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[2]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[2]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme3"
+           BasedOn="{StaticResource BaseLightTheme}">
+        
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[3]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[3]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme4"
+           BasedOn="{StaticResource BaseLightTheme}">
+        
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[4]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[4]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme5"
+           BasedOn="{StaticResource BaseLightTheme}">
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[5]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[5]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme6"
+           BasedOn="{StaticResource BaseLightTheme}">
+        
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[6]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[6]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme7"
+           BasedOn="{StaticResource BaseLightTheme}">
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[7]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[7]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme8"
+           BasedOn="{StaticResource BaseLightTheme}">
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[8]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[8]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme9"
+           BasedOn="{StaticResource BaseLightTheme}">
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[9]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[9]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme10"
+           BasedOn="{StaticResource BaseLightTheme}">
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[10]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[10]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme11"
+           BasedOn="{StaticResource BaseLightTheme}">
+        
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[11]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[11]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme12"
+           BasedOn="{StaticResource BaseLightTheme}">
+        
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[12]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[12]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme13"
+           BasedOn="{StaticResource BaseLightTheme}">
+        
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[13]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[13]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme14"
+           BasedOn="{StaticResource BaseLightTheme}">
+        
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[14]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[14]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="{x:Type Ellipse}"
+           x:Key="StatusLightTheme15"
+           BasedOn="{StaticResource BaseLightTheme}">
+        
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[15]}" Value="True">
+                <Setter Property="Fill" Value="#08FF08"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IndicatorLights[15]}" Value="False">
+                <Setter Property="Fill" Value="#FF0000"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    
+
+</ResourceDictionary>

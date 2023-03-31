@@ -1,0 +1,558 @@
+﻿<UserControl x:Class="ModernUIDesign.MVVM.View.TelemetryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts"
+             xmlns:local="clr-namespace:ModernUIDesign.MVVM.View"
+             xmlns:viewmodel="clr-namespace:ModernUIDesign.MVVM.ViewModel"
+             d:DataContext="{d:DesignInstance Type=viewmodel:TelemetryViewModel}"
+             mc:Ignorable="d" 
+             d:DesignHeight="820" d:DesignWidth="1380">
+    
+    <StackPanel>
+
+        <!--TM Command Buttons-->
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Telemetry Data View"
+                   Foreground="White"
+                   FontSize="32"
+                   FontFamily="/Fonts/#Poppins"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Bottom"
+                   Margin="0,0,0,10"/>
+
+            
+            <Button Style="{StaticResource TelemetryDataButton}" Content="Start Downlink" 
+                    Margin="225,10,0,10" Command="{Binding Path=StartDownlinkCommand}"/>
+            
+            <Button Style="{StaticResource TelemetryDataButton}" Content="Stop Downlink"
+                    Margin="10,10,0,10" Command="{Binding Path=StopDownlinkCommand}"/>
+            
+            <Button Style="{StaticResource TelemetryDataButton}" Content="Reset Downlink"
+                    Margin="10,10,0,10" Command="{Binding Path=ResetDownlinkCommand}"/>
+            
+            <Button Style="{StaticResource TelemetryDataButton}" Content="Refresh" 
+                    MinWidth="115" Margin="10,10,0,10" Command="{Binding Path=RefreshCOMPortsCommand}"/>
+
+            <ComboBox Margin="10,10,0,10" MinWidth="160" Text="{Binding Path = ComboBoxDefaultMessage}"
+                      ScrollViewer.CanContentScroll="True" IsEditable="True"
+                      IsReadOnly="True" HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch" SelectedItem="{Binding Path=SelectedCOMPort}"
+                      FontSize="18" ItemsSource="{Binding Path=COMPorts}"
+                      VerticalContentAlignment="Stretch"/>
+
+        </StackPanel>
+        
+        <!--TM 1-->
+        <Border Width="1375"
+                Height="765"
+                Margin="0"
+                CornerRadius="4"
+                HorizontalAlignment="Left">
+
+            <Border.Background>
+                <SolidColorBrush Color="{Binding Path=DataValidPanelColor}"/>
+            </Border.Background>
+
+            <Grid>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.625*"/>
+                    <ColumnDefinition Width="0.375*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0.43*"/>
+                    <RowDefinition Height="0.57*"/>
+                </Grid.RowDefinitions>
+                
+                
+                <StackPanel Margin="2.5" Orientation="Horizontal" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+
+                    <!--MSG Keys & Acceleration-->
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <!--Altitude-->
+                            <TextBlock Text="Altitude:"
+                                    Style="{StaticResource DataIdentifierTheme}"
+                                    />
+
+                            <TextBlock Text="{Binding Altitude}"
+                                    Style="{StaticResource DataValueTheme}"
+                                    MinWidth="120"
+                                    TextAlignment="Left"
+                                    HorizontalAlignment="Left"
+                                    />
+                        </StackPanel>
+
+                        <!--MFC 1-->
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="MFC 1:"
+                                    Style="{StaticResource DataIdentifierTheme}"
+                                    />
+
+                            <TextBlock Text="{Binding MFC1}"
+                                    Style="{StaticResource DataValueTheme}"
+                                    />
+                        </StackPanel>
+                        
+
+                        <!--MFC 2-->
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="MFC 2:"
+                                    Style="{StaticResource DataIdentifierTheme}"
+                                    />
+
+                            <TextBlock Text="{Binding MFC2}"
+                                    Style="{StaticResource DataValueTheme}"
+                                    />
+                        </StackPanel>
+                        
+
+                        <!--TM 1 Valid Msg %-->
+                        <StackPanel Orientation="Horizontal">
+                            
+                            <TextBlock Text="Valid Messages %:"
+                                    Margin="5,0,0,0"
+                                    Style="{StaticResource DataIdentifierTheme}"
+                                    />
+
+                            <TextBlock Text="{Binding ValidmsgPercentage}"
+                                    Style="{StaticResource DataValueTheme}"
+                                    MinWidth="160"/>
+                        </StackPanel>
+
+                        <!--Acceleration X-->
+                        <StackPanel Orientation="Horizontal">
+                            
+                            <TextBlock Text="Acceleration X:"
+                                       Style="{StaticResource DataIdentifierTheme}"
+                                        />
+
+                            <TextBlock Text="{Binding XAcceleration}"
+                                       Style="{StaticResource DataValueTheme}"
+                                       />
+                        </StackPanel>
+
+                        <!--Acceleration Y-->
+                        <StackPanel Orientation="Horizontal">
+                            
+                            <TextBlock Text="Acceleration Y:"
+                                       Style="{StaticResource DataIdentifierTheme}"
+                                       />
+
+                            <TextBlock Text="{Binding YAcceleration}"
+                                       Style="{StaticResource DataValueTheme}"
+                                       />
+                        </StackPanel>
+
+                        <!--Acceleration Z-->
+                        <StackPanel Orientation="Horizontal">
+                            
+                            <TextBlock Text="Acceleration Z:"
+                                       Style="{StaticResource DataIdentifierTheme}"
+                                       />
+
+                            <TextBlock Text="{Binding ZAcceleration}"
+                                       Style="{StaticResource DataValueTheme}"
+                                       />
+                        </StackPanel>
+
+
+                    </StackPanel>
+
+                    <!--9 DoF-->
+                    <StackPanel Orientation="Vertical">
+
+                            <!--Gyro X-->
+                        <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Gyro X:"
+                                            Style="{StaticResource DataIdentifierTheme}"
+                                           MinWidth="120"/>
+
+                                <TextBlock Text="{Binding XGyroscope}"
+                                           Style="{StaticResource DataValueTheme}"
+                                           MinWidth="240"/>
+                            </StackPanel>
+
+                            <!--Gyro Y-->
+                        <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Gyro Y:"
+                                            Style="{StaticResource DataIdentifierTheme}"
+                                           MinWidth="120"/>
+
+                                <TextBlock Text="{Binding YGyroscope}"
+                                           Style="{StaticResource DataValueTheme}"
+                                           MinWidth="240"/>
+                            </StackPanel>
+
+                            <!--Gyro Z-->
+                        <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Gyro Z:"
+                                    Style="{StaticResource DataIdentifierTheme}"
+                                           MinWidth="120"/>
+
+                                <TextBlock Text="{Binding ZGyroscope}"
+                                        Style="{StaticResource DataValueTheme}"
+                                           MinWidth="240"/>
+                            </StackPanel>
+
+                            <!--Magnetomter X-->
+                        <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Mag X:"
+                                           Style="{StaticResource DataIdentifierTheme}"
+                                           MinWidth="120"/>
+                                <TextBlock Text="{Binding XMagnetometer}"
+                                           Style="{StaticResource DataValueTheme}"
+                                           MinWidth="240"/>
+                            </StackPanel>
+
+                            <!--Magnetomter Y-->
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Mag Y:"
+                                            Style="{StaticResource DataIdentifierTheme}"
+                                       MinWidth="120"/>
+                                <TextBlock Text="{Binding YMagnetometer}"
+                                           Style="{StaticResource DataValueTheme}"
+                                           MinWidth="240"/>
+                            </StackPanel>
+
+                            <!--Magnetomter Z-->
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Mag Z:"
+                                       Style="{StaticResource DataIdentifierTheme}"
+                                       MinWidth="120"/>
+                            <TextBlock Text="{Binding ZMagnetometer}"
+                                Style="{StaticResource DataValueTheme}"
+                                        MinWidth="240"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,-8,0,0">
+                            <TextBlock Text="Apogee:"
+                                       Style="{StaticResource DataIdentifierTheme}"
+                                       MinWidth="120"/>
+                            <TextBlock Text="{Binding ZMagnetometer}"
+                                Style="{StaticResource DataValueTheme}"
+                                        MinWidth="240"/>
+                        </StackPanel>
+                        
+                    </StackPanel>
+
+                    <!--GPS Data + Temp + Humidity + -->
+                    <StackPanel Orientation="Vertical">
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Latitude:"
+                                    Style="{StaticResource DataIdentifierTheme}"/>
+                            <TextBlock Text="{Binding Latitude}"
+                                    Style="{StaticResource DataValueTheme}"
+                                    />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Longitude:"
+                                    Style="{StaticResource DataIdentifierTheme}"/>
+                            <TextBlock Text="{Binding Longitude}"
+                                    Style="{StaticResource DataValueTheme}"
+                                    />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Altitude:"
+                                    Style="{StaticResource DataIdentifierTheme}"/>
+                            <TextBlock Text="{Binding GPSAltitude}"
+                                    Style="{StaticResource DataValueTheme}"
+                                    />
+                        </StackPanel>
+
+                        <!--Temperature-->
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Temperature:"
+                                            Style="{StaticResource DataIdentifierTheme}"/>
+                            <TextBlock Text="{Binding Temperature}"
+                                            Style="{StaticResource DataValueTheme}"/>
+                        </StackPanel>
+                        <!--Humidity-->
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Humidity:"
+                                        Style="{StaticResource DataIdentifierTheme}"/>
+                            <TextBlock Text="{Binding Humidity}"
+                                        Style="{StaticResource DataValueTheme}"/>
+                        </StackPanel>
+                        <!--Apogee Prediction-->
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Predicted apogee:"
+                                        Style="{StaticResource DataIdentifierTheme}"/>
+                            <TextBlock Text="{Binding PredictedApogee}"
+                                        Style="{StaticResource DataValueTheme}"
+                                        />
+
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Mission Time:"
+                                        Style="{StaticResource DataIdentifierTheme}"/>
+                            <TextBlock Text="{Binding MissionTime}"
+                                        Style="{StaticResource DataValueTheme}"
+                                        />
+
+                        </StackPanel>
+                        
+                    </StackPanel>
+                </StackPanel>
+
+                <!--Data Graphs-->
+                <StackPanel Grid.Row="1" Grid.Column="0">
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+
+                        <!--Altitude chart-->
+                        <dxc:ChartControl x:Name="AltitudeChart"
+                                    BoundDataChanged="AltitudeChart_BoundDataChanged"
+                                    dx:ThemeManager.ThemeName="Win10Light"
+                                    MaxHeight="210" MinWidth="425">
+
+                            <dxc:ChartControl.Titles>
+                                <dxc:Title Content="Altitude [m]:"
+                                    FontFamily="/Fonts/#Poppins" FontSize="12"
+                                    Margin="-5,-10,0,0"/>
+                            </dxc:ChartControl.Titles>
+                            <dxc:XYDiagram2D x:Name="AltitudeDiagram"
+                                        DependentAxesYRange="True">
+                                <dxc:LineSeries2D DisplayName="Altitude"
+                                            DataSource="{Binding AltitudeData}"
+                                            ArgumentDataMember="Time"
+                                            ValueDataMember="Value"
+                                            Brush="#000000"
+                                            CrosshairEnabled="False">
+
+                                </dxc:LineSeries2D>
+
+                                <dxc:XYDiagram2D.AxisX>
+                                    <dxc:AxisX2D>
+                                        <dxc:AxisX2D.DateTimeScaleOptions>
+                                            <dxc:ContinuousDateTimeScaleOptions/>
+                                        </dxc:AxisX2D.DateTimeScaleOptions>
+                                    </dxc:AxisX2D>
+                                </dxc:XYDiagram2D.AxisX>
+                                <dxc:XYDiagram2D.AxisY>
+                                    <dxc:AxisY2D>
+                                        <dxc:AxisY2D.WholeRange>
+                                            <dxc:Range dxc:AxisY2D.AlwaysShowZeroLevel="True"/>
+                                        </dxc:AxisY2D.WholeRange>
+                                    </dxc:AxisY2D>
+                                </dxc:XYDiagram2D.AxisY>
+
+                            </dxc:XYDiagram2D>
+
+                            <dxc:ChartControl.CrosshairOptions>
+                                <dxc:CrosshairOptions ShowCrosshairLabels="True" ShowArgumentLabels="False" ShowValueLine="False" ShowArgumentLine="True" ShowValueLabels="False"/>
+                            </dxc:ChartControl.CrosshairOptions>
+
+                        </dxc:ChartControl>
+
+                        <!--Gyroscope chart-->
+                        <dxc:ChartControl x:Name="GyroscopeChart"
+                                    BoundDataChanged="GyroscopeChart_BoundDataChanged"   
+                                    dx:ThemeManager.ThemeName="Win10Light"
+                                    MaxHeight="210" Margin="5,0,0,0" MinWidth="425">
+
+                            <dxc:ChartControl.Titles>
+                                <dxc:Title Content="Gyroscope Data [&#186;/s&#x00B2;]:"
+                                    FontFamily="/Fonts/#Poppins" FontSize="12"
+                                    Margin="-5,-10,0,0"/>
+                            </dxc:ChartControl.Titles>
+
+                            <dxc:XYDiagram2D x:Name="GyroscopeDiagram"
+                                        DependentAxesYRange="True">
+
+                                <dxc:LineSeries2D DisplayName="Z Axis"
+                                            DataSource="{Binding ZGyroscopeData}"
+                                            ArgumentDataMember="Time"
+                                            ValueDataMember="Value"
+                                            Brush="#A30023"
+                                                    CrosshairEnabled="False">
+                                </dxc:LineSeries2D>
+
+                                <dxc:LineSeries2D DisplayName="Y Axis"
+                                            DataSource="{Binding YGyroscopeData}"
+                                            ArgumentDataMember="Time"
+                                            ValueDataMember="Value"
+                                            Brush="#E7A200"
+                                                    CrosshairEnabled="False">
+                                </dxc:LineSeries2D>
+
+                                <dxc:LineSeries2D DisplayName="X Axis"
+                                            DataSource="{Binding XGyroscopeData}"
+                                            ArgumentDataMember="Time"
+                                            ValueDataMember="Value"
+                                            Brush="#001D9D"
+                                                    CrosshairEnabled="False">
+                                </dxc:LineSeries2D>
+
+                                <dxc:XYDiagram2D.AxisX>
+                                    <dxc:AxisX2D>
+                                        <dxc:AxisX2D.DateTimeScaleOptions>
+                                            <dxc:ContinuousDateTimeScaleOptions/>
+                                        </dxc:AxisX2D.DateTimeScaleOptions>
+                                    </dxc:AxisX2D>
+                                </dxc:XYDiagram2D.AxisX>
+                                <dxc:XYDiagram2D.AxisY>
+                                    <dxc:AxisY2D>
+                                        <dxc:AxisY2D.WholeRange>
+                                            <dxc:Range dxc:AxisY2D.AlwaysShowZeroLevel="False"/>
+                                        </dxc:AxisY2D.WholeRange>
+                                    </dxc:AxisY2D>
+                                </dxc:XYDiagram2D.AxisY>
+
+                            </dxc:XYDiagram2D>
+
+                            <dxc:ChartControl.CrosshairOptions>
+                                <dxc:CrosshairOptions ShowCrosshairLabels="True" ShowArgumentLabels="False" ShowValueLine="False" ShowArgumentLine="True" ShowValueLabels="False"/>
+                            </dxc:ChartControl.CrosshairOptions>
+
+                        </dxc:ChartControl>
+
+                    </StackPanel>
+                    <!--Data Graphs 2-->
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+
+                        <!--Acceleration Chart-->
+                        <dxc:ChartControl x:Name="AccelerationChart"
+                                    BoundDataChanged="AccelerationChart_BoundDataChanged"
+                                    dx:ThemeManager.ThemeName="Win10Light"
+                                    MaxHeight="210" MinWidth="425">
+
+                            <dxc:ChartControl.Titles>
+                                <dxc:Title Content="Acceleration Data [m/s&#x00B2;]:"
+                                    FontFamily="/Fonts/#Poppins" FontSize="12"
+                                    Margin="-5,-10,0,0"/>
+                            </dxc:ChartControl.Titles>
+                            <dxc:XYDiagram2D x:Name="AccelerationDiagram"
+                                        DependentAxesYRange="True">
+
+                                <dxc:LineSeries2D DisplayName="Z Axis"
+                                            DataSource="{Binding ZAccelerationData}"
+                                            ArgumentDataMember="Time"
+                                            ValueDataMember="Value"
+                                            Brush="#A30023"
+                                                    CrosshairEnabled="False">
+                                </dxc:LineSeries2D>
+
+                                <dxc:LineSeries2D DisplayName="Y Axis"
+                                            DataSource="{Binding YAccelerationData}"
+                                            ArgumentDataMember="Time"
+                                            ValueDataMember="Value"
+                                            Brush="#E7A200"
+                                                    CrosshairEnabled="False">
+                                </dxc:LineSeries2D>
+
+                                <dxc:LineSeries2D DisplayName="X Axis"
+                                            DataSource="{Binding XAccelerationData}"
+                                            ArgumentDataMember="Time"
+                                            ValueDataMember="Value"
+                                            Brush="#001D9D"
+                                                    CrosshairEnabled="False">
+                                </dxc:LineSeries2D>
+
+                                <dxc:XYDiagram2D.AxisX>
+                                    <dxc:AxisX2D>
+                                        <dxc:AxisX2D.DateTimeScaleOptions>
+                                            <dxc:ContinuousDateTimeScaleOptions/>
+                                        </dxc:AxisX2D.DateTimeScaleOptions>
+                                    </dxc:AxisX2D>
+                                </dxc:XYDiagram2D.AxisX>
+                                <dxc:XYDiagram2D.AxisY>
+                                    <dxc:AxisY2D>
+                                        <dxc:AxisY2D.WholeRange>
+                                            <dxc:Range dxc:AxisY2D.AlwaysShowZeroLevel="False"/>
+                                        </dxc:AxisY2D.WholeRange>
+                                    </dxc:AxisY2D>
+                                </dxc:XYDiagram2D.AxisY>
+
+                            </dxc:XYDiagram2D>
+
+                            <dxc:ChartControl.CrosshairOptions>
+                                <dxc:CrosshairOptions ShowCrosshairLabels="True" ShowArgumentLabels="False" ShowValueLine="False" ShowArgumentLine="True" ShowValueLabels="False"/>
+                            </dxc:ChartControl.CrosshairOptions>
+
+                        </dxc:ChartControl>
+
+                        <!--Magnetometer chart-->
+                        <dxc:ChartControl x:Name="MagnetometerChart"
+                                    BoundDataChanged="MagnetometerChart_BoundDataChanged"    
+                                    dx:ThemeManager.ThemeName="Win10Light"
+                                    MaxHeight="210" Margin="5,0,0,0" MinWidth="425">
+
+                            <dxc:ChartControl.Titles>
+                                <dxc:Title Content="Magnetometer Data &#x03BC;T:"
+                                    FontFamily="/Fonts/#Poppins" FontSize="12"
+                                    Margin="-5,-10,0,0"/>
+                            </dxc:ChartControl.Titles>
+
+                            <dxc:XYDiagram2D x:Name="MagnetometerDiagram"
+                                        DependentAxesYRange="True">
+
+                                <dxc:LineSeries2D DisplayName="Z Axis"
+                                            DataSource="{Binding ZMagnetometerData}"
+                                            ArgumentDataMember="Time"
+                                            ValueDataMember="Value"
+                                            Brush="#A30023"
+                                                    CrosshairEnabled="False">
+
+                                </dxc:LineSeries2D>
+
+                                <dxc:LineSeries2D DisplayName="Y Axis"
+                                            DataSource="{Binding YMagnetometerData}"
+                                            ArgumentDataMember="Time"
+                                            ValueDataMember="Value"
+                                            Brush="#E7A200"
+                                                    CrosshairEnabled="False">
+
+                                </dxc:LineSeries2D>
+
+                                <dxc:LineSeries2D DisplayName="X Axis"
+                                            DataSource="{Binding XMagnetometerData}"
+                                            ArgumentDataMember="Time"
+                                            ValueDataMember="Value"
+                                            Brush="#001D9D"
+                                                    CrosshairEnabled="False">
+
+                                </dxc:LineSeries2D>
+
+                                <dxc:XYDiagram2D.AxisX>
+                                    <dxc:AxisX2D>
+                                        <dxc:AxisX2D.DateTimeScaleOptions>
+                                            <dxc:ContinuousDateTimeScaleOptions/>
+                                        </dxc:AxisX2D.DateTimeScaleOptions>
+                                    </dxc:AxisX2D>
+                                </dxc:XYDiagram2D.AxisX>
+                                <dxc:XYDiagram2D.AxisY>
+                                    <dxc:AxisY2D>
+                                        <dxc:AxisY2D.WholeRange>
+                                            <dxc:Range dxc:AxisY2D.AlwaysShowZeroLevel="False"/>
+                                        </dxc:AxisY2D.WholeRange>
+                                    </dxc:AxisY2D>
+                                </dxc:XYDiagram2D.AxisY>
+
+                            </dxc:XYDiagram2D>
+
+                            <dxc:ChartControl.CrosshairOptions>
+                                <dxc:CrosshairOptions ShowCrosshairLabels="True" ShowArgumentLabels="False" ShowValueLine="False" ShowArgumentLine="True" ShowValueLabels="False"/>
+                            </dxc:ChartControl.CrosshairOptions>
+
+                        </dxc:ChartControl>
+
+                    </StackPanel>
+                </StackPanel>
+                
+
+
+
+
+            </Grid>
+        </Border>
+
+    </StackPanel>
+
+        
+</UserControl>
