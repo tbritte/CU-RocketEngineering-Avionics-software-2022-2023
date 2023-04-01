@@ -24,6 +24,7 @@ class FlightStatus:
         self.go_pro_2_on = False
         self.go_pro_3_on = False
         self.pi_cam2_on = False
+        self.srad2_ready = False
 
 
     def collect_status_bits(self, data, drouge_deployed, main_deployed, camera_recording, disarmed):
@@ -35,7 +36,7 @@ class FlightStatus:
         status_bits = {"active aero": False,
                        "excessive spin": e_spin,
                        "excessive vibration": data["acl_x"] > 100 or data["acl_y"] > 100 or data["acl_z"] > 100,
-                       "on": True,
+                       "srad2 ready": self.srad2_ready,
                        "disarmed": disarmed,
                        "launch detected": self.stage.value > Stage.PRE_FLIGHT.value,
                        "apogee detected": self.stage.value > Stage.IN_FLIGHT.value,

@@ -103,10 +103,11 @@ class TelemetryDownlink():
         elif message[3:7] == 'QZMP':
             print("----Received DSRM message----")
             return "DSRM"
+        elif message[3:7] == 'WXNO':
+            print("----Received OVRD message----")
+            return "OVRD"
         else:
             print("Unknown message, I don't know what to do with it...")
-
-        # QZMP for DSRM
 
     def send_data(self, data, status_bits):
         """
@@ -139,7 +140,7 @@ class TelemetryDownlink():
 
         # Calculating the status number from the status bits
         stat_num = 0
-        stats = ["active aero", "excessive spin", "excessive vibration", "on", "disarmed", "launch detected",
+        stats = ["active aero", "excessive spin", "excessive vibration", "srad2 ready", "disarmed", "launch detected",
                  "apogee detected", "drogue deployed", "main deployed", "touchdown", "payload deployed", "Pi Cam 1 On",
                  "Pi Cam 2 On", "Go Pro 1 On", "Go Pro 2 On", "Go Pro 3 On"]
         # print("Status bits: ", status_bits)
@@ -196,7 +197,7 @@ class TelemetryDownlink():
         # print("checksumbutearray: ", bytearray(struct.pack("B", checksum)))
 
         self.frame_count_1 += 1
-        if self.frame_count_1 >= 2 ** 15 - 1:
+        if self.frame_count_1 >= 2 ** 12 - 1:
             self.frame_count_1 = 0
             self.frame_count_2 += 1
 

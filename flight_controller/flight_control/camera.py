@@ -32,8 +32,6 @@ class Camera():
         if self.recording:
             print("Camera is already recording")
         else:
-            if self.camera is None:
-                self.setup_camera()
             if self.camera is not None:  # If the camera is still None, then it failed to initialize
                 date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 self.camera.start_recording(os.path.join(self.save_dir, date + "recording.h264"))
@@ -46,13 +44,11 @@ class Camera():
             self.camera.stop_recording()
             self.recording = False
         else:
-            print("Camera is has stopped recording")
+            print("Camera has stopped recording")
     
     def start_preview(self):
         """Previews the camera feed in a window
         """
-        if self.camera is None:
-            self.setup_camera()
         if self.camera is not None:  # If the camera is still None, then it failed to initialize
             self.camera.start_preview()
 

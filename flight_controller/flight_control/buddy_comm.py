@@ -25,8 +25,12 @@ class BuddyComm:
         GPIO.setup(DATA_PIN_FROM_SRAD2, GPIO.IN)
         GPIO.setup(CLOCK_PIN_FROM_SRAD2, GPIO.IN)
 
-    @staticmethod
-    def send(num):
+        self.sents = []
+
+    def get_has_sent(self, val):
+        return val in self.sents
+
+    def send(self, num):
         """
         nums:
         00 - apogee
@@ -34,6 +38,9 @@ class BuddyComm:
         10 - turn on gopro 2
         11 - turn on gopro 3
         """
+        print("Sending " + str(num) + " to SRAD2")
+        if num not in self.sents:
+            self.sents.append(num)  # Keeping track of which nums have been sent at least once
 
         # Sending the number
         for i in range(2):

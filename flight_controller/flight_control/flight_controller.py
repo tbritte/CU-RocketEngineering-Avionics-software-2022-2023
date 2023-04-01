@@ -72,7 +72,9 @@ def main():
     drogue_chute = Parachute(18)
     main_chute = Parachute(16)
 
+    override_mode = False
     disarmed = False
+    disarmed_time = time.time()
 
     cpu = CPUTemperature()  # For getting the CPU temperature
 
@@ -102,8 +104,8 @@ def main():
     SERVO_TEST_TIME = 0
     while not terminate:
         cycle += 1
-        if True:  # run as fast as possible
-            # print(time.time() - last_data_pull)  # To see how fast the loop is running
+        try:
+            print("Time sense last data pull:", time.time() - last_data_pull)  # To see how fast the loop is running
             last_data_pull = time.time()  # Allways pulling data
 
             data_pulls += 1
@@ -114,7 +116,7 @@ def main():
             data['cputemp'] = cpu.temperature
             data['predicted_apogee'] = 0
 
-            # print("\n\n STATUS: ", flight_status.current_stage_name())
+            print("STATUS: ", flight_status.current_stage_name())
             print("Buddy Comm messages: ", buddy_comm.messages)
 
             if data_pulls == 20:
@@ -131,7 +133,8 @@ def main():
             try:
                 if telemetry_downlink.ser is not None:
                     # DON'T CHANGE DOWNLINK SPEED UNLESS YOU CHANGE GPS SAME TIME INCREMENT AMOUNT FROM .125
-                    if (time.time() - last_downlink_send) > 0.125:  # Downlink should only be sent at 8hz 
+                    if (time.time() - last_downlink_send) > 0:  # Downlink should only be sent at 8hz
+                        print("Time since last send: ", time.time() - last_downlink_send)
                         telemetry_downlink.send_data(data, status_bits)
                         last_downlink_send = time.time()
             except Exception as e:
@@ -140,6 +143,7 @@ def main():
             try:
                 if telemetry_downlink.ser is not None:
                     read_val = telemetry_downlink.read_data()
+
                     if read_val == 1:
                         # Start go pro 1
                         print("Trying to start GoPro 1")
@@ -151,30 +155,34 @@ def main():
 
                     elif read_val == 2:
                         # TELL SRAD2 TO TURN GOPRO2 ON
-                        pass
+                        buddy_sender.send(2)
                     elif read_val == 3:
                         # TELL SRAD2 TO TURN GOPRO3 ON
-                        pass
+                        buddy_sender.send(3)
                     elif read_val == "RDY":
                         pass
                         # TELL SRAD2 TO BE READY
-                    elif read_val == "DSRM":
+                    elif read_val == "OVRD":
+                        override_mode = True
+
+                    elif read_val == "DSRM" and (flight_status.current_stage() == Stage.PRE_FLIGHT or override_mode):
                         # Doing disarm procedure
-                        print("Disarming")
+                        print("Disarming: ", read_val, "is override mode: ", override_mode, "stage: ", flight_status.current_stage_name())
 
                         # TELL SRAD2 TO DISARM
-                        buddy_comm.send(1)
+                        buddy_sender.send(1)
 
                         # Disable parachute deployment systems
-                        disarmed = True
+                        disarmed = True  # Also affect status bits
+                        disarmed_time = time.time()  # To wait a bit before shutting down
 
                         # Turn off all cameras
                         go_pro_1_cam_servo.activate_camera()  # Turns off the camera
                         flight_status.go_pro_1_on = False
-                        camera.stop_recording()
+                        camera.stop_recording()  # Stops the pi camera
 
             except Exception as e:
-                print("Error reading data from ground station " + str(e))
+                print("Error reading/using data from ground station " + str(e))
 
             try:
                 # Log the data to a csv file happens at 16hz
@@ -189,47 +197,62 @@ def main():
             except:
                 print("Error updating flight status")
 
-            num_from_srad2 = 0 #buddy_comm.get_oldest_message()
-            if num_from_srad2 != -1:
-                if num_from_srad2 == 0:
-                    flight_status.payload_deployed = True
-                    print("(buddy) Payload deployed")
-                elif num_from_srad2 == 1:
-                    pass
-                    print("(buddy) SRAD2 is armed and flight ready")
-
-                elif num_from_srad2 == 2:
-                    flight_status.go_pro_2_on = True
-                    print("(buddy) GoPro 2 on")
-
-                elif num_from_srad2 == 3:
-                    flight_status.go_pro_3_on = True
-                    print("(buddy) GoPro 3 on")
+            """
+            Doing stuff based on messages received from SRAD2
+            """
+            if 0 in buddy_comm.messages:
+                flight_status.payload_deployed = True
+                if buddy_comm.messages.count(0) > 1:
+                    print("Payload arm retracted")
+                print("(buddy) Payload deployed")
+            if 1 in buddy_comm.messages:
+                print("(buddy) SRAD2 is armed and flight ready")
+                flight_status.srad2_ready = True
+            if 2 in buddy_comm.messages:
+                flight_status.go_pro_2_on = True
+                print("(buddy) GoPro 2 on")
+            if 3 in buddy_comm.messages:
+                flight_status.go_pro_3_on = True
+                print("(buddy) GoPro 3 on")
 
             if led_controller is not None:
                 led_controller.update_lights()
 
-        buzzer.update()
-        drogue_chute.update()
-        main_chute.update()
-        go_pro_1_cam_servo.update()  # For temporal handling without using time.sleep()
+            """
+            For single threaded temporal handling without using time.sleep() or another thread
+            """
+            buzzer.update()
+            drogue_chute.update()
+            main_chute.update()
+            go_pro_1_cam_servo.update()
 
-        if flight_status.current_stage().value >= Stage.IN_FLIGHT.value:  # If we have taken off, then start recording
-            if not camera.recording:
-                camera.start_recording()
-        if flight_status.current_stage() == Stage.DESCENT and not drogue_chute.deployed and not disarmed:
-            drogue_chute.deploy()
-            drogue_deployed = True
-        if flight_status.current_stage() == Stage.DESCENT and flight_status.get_median_altitude_from_last_second() < MAIN_CHUTE_DEPLOY_ALT and not main_chute.deployed and not disarmed:
-            print("MAIN DEPLOY")
-            main_chute.deploy()
-            main_deployed = True
-        # elif flight_status.current_stage() == Stage.ON_GROUND:
-    #         if camera.recording:
-    #             camera.stop_recording()
-    #         terminate = True
-    #
-    # call(['shutdown', '-h', 'now'], shell=False)
+            """
+            Stage change handling
+            """
+
+            if flight_status.current_stage().value >= Stage.IN_FLIGHT.value:  # If we have taken off, then start recording
+                if not camera.recording:
+                    camera.start_recording()
+            if flight_status.current_stage() == Stage.DESCENT and not buddy_sender.get_has_sent(0):
+                buddy_sender.send(0)  # Tell SRAD2 that we have reached apogee
+            if flight_status.current_stage() == Stage.DESCENT and not drogue_chute.deployed and not disarmed:
+                drogue_chute.deploy()
+                drogue_deployed = True
+            if flight_status.current_stage() == Stage.DESCENT and flight_status.get_median_altitude_from_last_second() < MAIN_CHUTE_DEPLOY_ALT and not main_chute.deployed and not disarmed:
+                print("MAIN DEPLOY")
+                main_chute.deploy()
+                main_deployed = True
+
+
+            """
+            Shutting down the pi (5 seconds after receiving disarm command)
+            """
+            if disarmed and (time.time() - disarmed_time) > 5:
+                print("Final disarming stuff happening")
+                call(['shutdown', '-h', 'now'], shell=False)
+
+        except Exception as e:
+            print("\n\n     %%%%%MAIN ERROR -- No error should be caught by this, errors should be handled closer to the exception: " + str(e) + "%%%%%%%\n\n")
 
 
 if __name__ == '__main__':
