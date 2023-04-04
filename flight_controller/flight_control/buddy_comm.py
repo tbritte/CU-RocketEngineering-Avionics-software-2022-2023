@@ -49,10 +49,11 @@ class BuddyComm:
             else:
                 GPIO.output(DATA_PIN_TO_SRAD2, GPIO.LOW)
             num = num << 1  # Shifting the number to the left by 1 bit
+            time.sleep(.01)
             GPIO.output(CLOCK_PIN_TO_SRAD2, GPIO.HIGH)
-            time.sleep(0.0001)
+            time.sleep(0.1)
             GPIO.output(CLOCK_PIN_TO_SRAD2, GPIO.LOW)
-            time.sleep(0.0001)
+            time.sleep(0.1)
 
         # End signal
         GPIO.output(DATA_PIN_TO_SRAD2, GPIO.LOW)
@@ -61,7 +62,7 @@ class BuddyComm:
     @staticmethod
     def receive():
         """
-        Returns the number received
+        Returns the number received, should be ran in a seperate thread
         """
         try:
             # Receiving the number
@@ -72,19 +73,26 @@ class BuddyComm:
             for i in range(2):
                 while GPIO.input(CLOCK_PIN_FROM_SRAD2) == GPIO.LOW:  # Waiting for the clock pin to go high
                     pass
+                print("clock is high")
                 if GPIO.input(DATA_PIN_FROM_SRAD2) == GPIO.HIGH:  # Checking if the data pin is high
                     num = num | 0b1  # Setting the last bit to 1
                 if i == 0:
                     time_of_getting_first_bit = time.time()
                 if i == 1:
-                    if time.time() - time_of_getting_first_bit > 1:
-                        print("Too much time between bits")
-                        time.sleep(.5)
-                        return -1
+                    # if time.time() - time_of_getting_first_bit > 1:
+                    #     print("Too much time between bits")
+                    #     time.sleep(.5)
+                    #     return -1
+                    # elif time.time() - time_of_getting_first_bit < .01:
+                    #     print("TIME BETWEEN BITS: ", time.time() - time_of_getting_first_bit)
+                    #     print("Too little time between bits")
+                    #     time.sleep(.5)
+                    #     return -1
+                    pass
                 num = num << 1  # Shifting the number to the left by 1 bit
                 while GPIO.input(CLOCK_PIN_FROM_SRAD2) == GPIO.HIGH:  # Waiting for the clock pin to go low
                     pass
-                print("got a bit: ", num)
+                print("clock is low")
             return num >> 1  # Shifting the number to the right by 1 bit to get rid of the extra bit
         except Exception as e:
             print("Buddy Read Error: " + str(e))

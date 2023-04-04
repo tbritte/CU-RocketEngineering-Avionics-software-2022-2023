@@ -102,6 +102,9 @@ def main():
     data_pulls = 0
 
     SERVO_TEST_TIME = 0
+    buddy_sends = 0
+    sent_the_two = False
+    sent_the_three = False
     while not terminate:
         cycle += 1
         try:
@@ -109,6 +112,21 @@ def main():
             last_data_pull = time.time()  # Allways pulling data
 
             data_pulls += 1
+
+            if data_pulls % 40 == 0:
+                buddy_sends += 1
+                v = buddy_sends % 4
+                buddy_sender.send(v)
+                print("\n\nSent a ", v, " to SRAD2\n\n")
+
+            # if time.time() - start_time > 20 and not sent_the_two:
+            #     print("\n\n\nSRAD 2 SENDING a [2]\n\n\n")
+            #     buddy_sender.send(2)
+            #     sent_the_two = True
+            # if time.time() - start_time > 30 and not sent_the_three:
+            #     print("\n\n\nSRAD 2 SENDING a [3]\n\n\n")
+            #     buddy_sender.send(3)
+            #     sent_the_three = True
 
             data = telemetry_handler.get_data()
             data['state'] = flight_status.current_stage_name()
@@ -118,13 +136,6 @@ def main():
 
             print("STATUS: ", flight_status.current_stage_name())
             print("Buddy Comm messages: ", buddy_comm.messages)
-
-            if data_pulls == 20:
-                buddy_sender.send(1)
-                print("\n\nSent 1 to buddy\n\n")
-            if data_pulls == 40:
-                buddy_sender.send(2)
-                print("\n\nSent 2 to buddy\n\n")
 
             # print("\n\n", data)
             
@@ -250,6 +261,7 @@ def main():
             if disarmed and (time.time() - disarmed_time) > 5:
                 print("Final disarming stuff happening")
                 call(['shutdown', '-h', 'now'], shell=False)
+                exit(1)
 
         except Exception as e:
             print("\n\n     %%%%%MAIN ERROR -- No error should be caught by this, errors should be handled closer to the exception: " + str(e) + "%%%%%%%\n\n")
