@@ -69,9 +69,9 @@ class BuddyComm:
             num = num << 1  # Shifting the number to the left by 1 bit
             time.sleep(.01)
             GPIO.output(CLOCK_PIN_TO_SRAD2, GPIO.HIGH)
-            time.sleep(0.1)
+            time.sleep(0.25)
             GPIO.output(CLOCK_PIN_TO_SRAD2, GPIO.LOW)
-            time.sleep(0.1)
+            time.sleep(0.25)
 
         # End signal
         GPIO.output(DATA_PIN_TO_SRAD2, GPIO.LOW)
@@ -91,21 +91,25 @@ class BuddyComm:
             for i in range(2):
                 while GPIO.input(CLOCK_PIN_FROM_SRAD2) == GPIO.LOW:  # Waiting for the clock pin to go high
                     pass
-                print("clock is high")
+                # print("(Buddy Comm) clock is high waiting .1 seconds to see if it stays high")
+                time.sleep(.1)
+                if GPIO.input(CLOCK_PIN_FROM_SRAD2) == GPIO.LOW:
+                    # print("\n(Buddy Comm) clock went low too quickly\n")
+                    return -1
                 if GPIO.input(DATA_PIN_FROM_SRAD2) == GPIO.HIGH:  # Checking if the data pin is high
                     num = num | 0b1  # Setting the last bit to 1
                 if i == 0:
                     time_of_getting_first_bit = time.time()
                 if i == 1:
-                    # if time.time() - time_of_getting_first_bit > 1:
-                    #     print("Too much time between bits")
-                    #     time.sleep(.5)
-                    #     return -1
-                    # elif time.time() - time_of_getting_first_bit < .01:
-                    #     print("TIME BETWEEN BITS: ", time.time() - time_of_getting_first_bit)
-                    #     print("Too little time between bits")
-                    #     time.sleep(.5)
-                    #     return -1
+                    if time.time() - time_of_getting_first_bit > 1:
+                        print("Too much time between bits")
+                        time.sleep(.5)
+                        return -1
+                    if time.time() - time_of_getting_first_bit < .2:
+                        # print("(Buddy Comm) TIME BETWEEN BITS: ", time.time() - time_of_getting_first_bit)
+                        # print("(Buddy Comm) Too little time between bits")
+                        time.sleep(.5)
+                        return -1
                     pass
                 num = num << 1  # Shifting the number to the left by 1 bit
                 while GPIO.input(CLOCK_PIN_FROM_SRAD2) == GPIO.HIGH:  # Waiting for the clock pin to go low

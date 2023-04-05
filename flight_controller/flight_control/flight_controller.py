@@ -33,7 +33,7 @@ date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
 # Main chute deploy altitude in meters
 MAIN_CHUTE_DEPLOY_ALT = 304.8
 USING_SENSE_HAT = False
-USING_SIM_DATA = True
+USING_SIM_DATA = False
 
 
 def startup(telemetry_handler: TelemetryHandler, telemetry_downlink: TelemetryDownlink):
