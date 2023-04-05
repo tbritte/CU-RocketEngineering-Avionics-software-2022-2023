@@ -8,6 +8,24 @@ CLOCK_PIN_TO_SRAD2 = 24
 DATA_PIN_FROM_SRAD2 = 5
 CLOCK_PIN_FROM_SRAD2 = 6
 
+class BuddyCommSystem:
+    def __init__(self):
+        self.writer = BuddyCommWriterThread()
+        self.reader = BuddyCommReaderThread()
+
+        self.writer.start()
+        self.reader.start()
+
+    def get_messages(self):
+        return self.reader.messages
+
+    def has_sent(self, num):
+        return self.writer.has_sent(num)
+
+    def send(self, num):
+        self.writer.send(num)
+
+
 
 class BuddyComm:
     """
@@ -100,7 +118,7 @@ class BuddyComm:
 
 
 # custom thread
-class BuddyCommThread(Thread):
+class BuddyCommReaderThread(Thread):
     # constructor
     def __init__(self):
         # execute the base constructor
@@ -124,3 +142,26 @@ class BuddyCommThread(Thread):
             val = my_buddy_comm.receive()
             if val != -1:
                 self.messages.append(val)
+
+
+# Thread for writing to SRAD2
+class BuddyCommWriterThread(Thread):
+    # constructor
+    def __init__(self):
+        # execute the base constructor
+        Thread.__init__(self)
+        self.my_buddy_comm = BuddyComm()
+        self.send_queue = []
+
+    def has_sent(self, num):
+        return self.my_buddy_comm.get_has_sent(num)
+
+    def send(self, val):
+        self.send_queue.append(val)
+
+    # function executed in a new thread
+    def run(self):
+        while True:
+            if len(self.send_queue) > 0:
+                self.my_buddy_comm.send(self.send_queue.pop(0))
+            time.sleep(.1)

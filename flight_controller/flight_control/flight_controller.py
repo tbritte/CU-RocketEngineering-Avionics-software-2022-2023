@@ -15,7 +15,7 @@ from .telemetry_handler import TelemetryHandler
 from .ext_telemetry_handler import ExtTelemetryHandler
 from .sim_telemetry_handler import SimTelemetryHandler
 
-from .buddy_comm import BuddyCommThread, BuddyComm
+from .buddy_comm import BuddyCommSystem
 
 from .data_logging import DataLogger
 
@@ -61,10 +61,7 @@ def main():
     telemetry_handler.setup()
 
     telemetry_downlink = TelemetryDownlink()
-    buddy_comm = BuddyCommThread()  # Used for receiving data operates in a separate thread
-    buddy_comm.start()
-
-    buddy_sender = BuddyComm()  # Used for sending data operates in the main thread
+    buddy_comm = BuddyCommSystem()  # Used for receiving data operates in a separate thread
 
     buzzer = Buzzer()
 
@@ -116,7 +113,7 @@ def main():
             if data_pulls % 40 == 0:
                 buddy_sends += 1
                 v = buddy_sends % 4
-                buddy_sender.send(v)
+                buddy_comm.send(v)
                 print("\n\nSent a ", v, " to SRAD2\n\n")
 
             # if time.time() - start_time > 20 and not sent_the_two:
@@ -135,7 +132,7 @@ def main():
             data['predicted_apogee'] = 0
 
             print("STATUS: ", flight_status.current_stage_name())
-            print("Buddy Comm messages: ", buddy_comm.messages)
+            print("Buddy Comm messages: ", buddy_comm.get_messages())
 
             # print("\n\n", data)
             
@@ -166,10 +163,10 @@ def main():
 
                     elif read_val == 2:
                         # TELL SRAD2 TO TURN GOPRO2 ON
-                        buddy_sender.send(2)
+                        buddy_comm.send(2)
                     elif read_val == 3:
                         # TELL SRAD2 TO TURN GOPRO3 ON
-                        buddy_sender.send(3)
+                        buddy_comm.send(3)
                     elif read_val == "RDY":
                         pass
                         # TELL SRAD2 TO BE READY
@@ -181,7 +178,7 @@ def main():
                         print("Disarming: ", read_val, "is override mode: ", override_mode, "stage: ", flight_status.current_stage_name())
 
                         # TELL SRAD2 TO DISARM
-                        buddy_sender.send(1)
+                        buddy_comm.send(1)
 
                         # Disable parachute deployment systems
                         disarmed = True  # Also affect status bits
@@ -211,18 +208,19 @@ def main():
             """
             Doing stuff based on messages received from SRAD2
             """
-            if 0 in buddy_comm.messages:
+            bc_messages = buddy_comm.get_messages()
+            if 0 in bc_messages:
                 flight_status.payload_deployed = True
-                if buddy_comm.messages.count(0) > 1:
+                if bc_messages.count(0) > 1:
                     print("Payload arm retracted")
                 print("(buddy) Payload deployed")
-            if 1 in buddy_comm.messages:
+            if 1 in bc_messages:
                 print("(buddy) SRAD2 is armed and flight ready")
                 flight_status.srad2_ready = True
-            if 2 in buddy_comm.messages:
+            if 2 in bc_messages:
                 flight_status.go_pro_2_on = True
                 print("(buddy) GoPro 2 on")
-            if 3 in buddy_comm.messages:
+            if 3 in bc_messages:
                 flight_status.go_pro_3_on = True
                 print("(buddy) GoPro 3 on")
 
@@ -244,8 +242,8 @@ def main():
             if flight_status.current_stage().value >= Stage.IN_FLIGHT.value:  # If we have taken off, then start recording
                 if not camera.recording:
                     camera.start_recording()
-            if flight_status.current_stage() == Stage.DESCENT and not buddy_sender.get_has_sent(0):
-                buddy_sender.send(0)  # Tell SRAD2 that we have reached apogee
+            if flight_status.current_stage() == Stage.DESCENT and not buddy_comm.has_sent(0):
+                buddy_comm.send(0)  # Tell SRAD2 that we have reached apogee
             if flight_status.current_stage() == Stage.DESCENT and not drogue_chute.deployed and not disarmed:
                 drogue_chute.deploy()
                 drogue_deployed = True
