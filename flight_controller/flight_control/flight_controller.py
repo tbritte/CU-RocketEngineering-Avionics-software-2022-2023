@@ -12,7 +12,7 @@ from .flight_status import Stage
 from .telemetry_downlink import TelemetryDownlink
 
 from .telemetry_handler import TelemetryHandler
-from .ext_telemetry_handler import ExtTelemetryHandler
+from .ext_telemetry_handler import extTelemThread
 from .sim_telemetry_handler import SimTelemetryHandler
 
 from .buddy_comm import BuddyCommSystem
@@ -52,13 +52,11 @@ def main():
         if USING_SENSE_HAT:
             telemetry_handler = TelemetryHandler()  # Collects data from the sense hat
         else:
-            telemetry_handler = ExtTelemetryHandler()  # Collects data from the external sensors
+            telemetry_handler = extTelemThread()  # Collects data from the external sensors
 
     # Creates a new data logger for the telemetry data depending on what sensors are being used
     telemetry_logger = DataLogger(date + '-telemetry_log' + "-r" + str(random.randint(1000, 9999)) + '.csv',
                                   telemetry_handler.get_data_header_list(), start_time)
-
-    telemetry_handler.setup()
 
     telemetry_downlink = TelemetryDownlink()
     buddy_comm = BuddyCommSystem()  # Used for receiving data operates in a separate thread
@@ -100,32 +98,30 @@ def main():
 
     SERVO_TEST_TIME = 0
     buddy_sends = 0
-    sent_the_two = False
-    sent_the_three = False
+    time_of_last_buddy_send = time.time() + 15
+
+    go_pro_1_cam_servo.activate_camera()
+
     while not terminate:
         cycle += 1
         try:
-            print("Time sense last data pull:", time.time() - last_data_pull)  # To see how fast the loop is running
+            print("(Timing) Time sense last data pull:", time.time() - last_data_pull)  # To see how fast the loop is running
             last_data_pull = time.time()  # Allways pulling data
 
             data_pulls += 1
 
-            if data_pulls % 40 == 0:
+            if time.time() - time_of_last_buddy_send > 5:
+                time_of_last_buddy_send = time.time()
                 buddy_sends += 1
                 v = buddy_sends % 4
                 buddy_comm.send(v)
                 print("\n\nSent a ", v, " to SRAD2\n\n")
 
-            # if time.time() - start_time > 20 and not sent_the_two:
-            #     print("\n\n\nSRAD 2 SENDING a [2]\n\n\n")
-            #     buddy_sender.send(2)
-            #     sent_the_two = True
-            # if time.time() - start_time > 30 and not sent_the_three:
-            #     print("\n\n\nSRAD 2 SENDING a [3]\n\n\n")
-            #     buddy_sender.send(3)
-            #     sent_the_three = True
 
+            # time_before_get_data = time.time()
             data = telemetry_handler.get_data()
+            # print("Time taken to do telemetry handler.get_data(): ", time.time() - time_before_get_data)
+
             data['state'] = flight_status.current_stage_name()
             data['data_pulls'] = data_pulls
             data['cputemp'] = cpu.temperature
@@ -133,6 +129,7 @@ def main():
 
             print("STATUS: ", flight_status.current_stage_name())
             print("Buddy Comm messages: ", buddy_comm.get_messages())
+            print("Data: ", data)
 
             # print("\n\n", data)
             

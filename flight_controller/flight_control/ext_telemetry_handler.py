@@ -6,6 +6,7 @@ import Adafruit_BMP.BMP085 as BMP085  # Pressure sensor
 import board
 from adafruit_lsm6ds.lsm6dsox import LSM6DSOX  # Accelerometer
 import adafruit_lis3mdl  # Magnetometer
+from threading import Thread
 
 MAX_GPS_READ_LINES = 100
 
@@ -83,9 +84,6 @@ class ExtTelemetryHandler:
             except ValueError:
                 print("    Magnetometer not found, please check wiring!")
                 self.lis3mdl = None
-
-    def setup(self):
-        pass
 
     def find_gpgga_in_buffer(self):
         """
@@ -221,8 +219,9 @@ class ExtTelemetryHandler:
         Gets all the data from the external sensors and returns it in a dictionary
         :return: Dictionary with all the data
         """
-
+        # time_before_gps = time.monotonic()
         gps_data = self.get_gps_data()
+        # print("    GPS get time: ", time.monotonic() - time_before_gps)
 
         # print("    ERROR in get GPS")
         # gps_data = None
@@ -246,20 +245,25 @@ class ExtTelemetryHandler:
             print("    Non TypeError in GPS data readability conversion... Leaving data in ugly format for now")
 
         # Get the altitude from the BMP180 sensor
+        # time_before_bmp = time.monotonic()
         try:
             BMP_data = self.get_BMP_data()
             self.old_bmp_data = BMP_data
         except:
             print("    ERROR in get BMP")
             BMP_data = self.old_bmp_data
+        # print("    BMP get time: ", time.monotonic() - time_before_bmp)
 
         altitude, bar_pressure, bar_temp = BMP_data
 
+        # time_before_gyro = time.monotonic()
         try:
             gyro_data = self.get_gyro_data()
         except:
             print("    ERROR in get gyro")
             gyro_data = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        # print("    Gyro get time: ", time.monotonic() - time_before_gyro)
 
 
         gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z = gyro_data
@@ -293,3 +297,22 @@ class ExtTelemetryHandler:
                    'latitude', 'longitude', 'gps_quality', 'gps_sat_num',
                    'cputemp']
         return columns
+
+
+class extTelemThread(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self.telem = ExtTelemetryHandler()
+        self.most_recent_data = self.telem.get_data()
+        self.start()
+
+    def get_data(self):
+        return self.most_recent_data
+
+    def get_data_header_list(self):
+        return self.telem.get_data_header_list()
+
+    def run(self) -> None:
+        while True:
+            time.sleep(0.1)
+            self.most_recent_data = self.telem.get_data()

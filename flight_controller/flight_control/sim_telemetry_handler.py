@@ -17,9 +17,6 @@ class SimTelemetryHandler:
         print("ALL DATA IS HERE:", self.data)
         self.data = self.data.to_numpy()
 
-    def setup(self):
-        pass
-
     def get_data(self):
 
         # Getting elapsed time to query the csv data with

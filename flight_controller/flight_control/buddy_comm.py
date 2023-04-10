@@ -146,6 +146,7 @@ class BuddyCommReaderThread(Thread):
             val = my_buddy_comm.receive()
             if val != -1:
                 self.messages.append(val)
+            time.sleep(.1)
 
 
 # Thread for writing to SRAD2

@@ -15,12 +15,14 @@ class CamServoController:
         self.deactivated_time = 0
 
     def activate_camera(self):
+        print("\n\nACTIVATING CAMERA\n\n")
         self.pwm.start(13)
         self.pwm.ChangeDutyCycle(13)
         self.button_depressed = True
         self.activated_time = time.time()
 
     def update(self):
+        print("(gopro) UPDATING CAMERA")
         self.check_let_go_of_button()
         if not self.button_depressed and time.time() - self.deactivated_time > 1:
             self.pwm.ChangeDutyCycle(0)
