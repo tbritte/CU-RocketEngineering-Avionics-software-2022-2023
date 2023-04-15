@@ -4,8 +4,18 @@ import math
 import serial
 import Adafruit_BMP.BMP085 as BMP085  # Pressure sensor
 import board
+import busio
 from adafruit_lsm6ds.lsm6dsox import LSM6DSOX  # Accelerometer
 import adafruit_lis3mdl  # Magnetometer
+from adafruit_bno08x import (
+    BNO_REPORT_ACCELEROMETER,
+    BNO_REPORT_GYROSCOPE,
+    BNO_REPORT_MAGNETOMETER,
+    BNO_REPORT_ROTATION_VECTOR,
+)
+from adafruit_bno08x.i2c import BNO08X_I2C
+
+
 from threading import Thread
 
 MAX_GPS_READ_LINES = 100
@@ -40,9 +50,11 @@ class ExtTelemetryHandler:
         print("Base altitude is: " + str(self.base_altitude) + " meters")
         self.old_bmp_data = None
 
-        self.i2c = board.I2C()
+        # self.i2c = board.I2C()
+        self.i2c = busio.I2C(board.SCL, board.SDA, frequency=400000)
 
-        self.setup9DOF()
+        # self.setup9DOF()
+        self.setupBNO()
 
     def calibrate_initial_altitude(self):
         """
@@ -57,6 +69,25 @@ class ExtTelemetryHandler:
         # Getting the median altitude to deal with outliers
         print("alts: ", alts)
         self.base_altitude = np.median(alts)
+
+
+    def setupBNO(self):
+        """
+        Tries to find the BNO on the I2C bus
+        If it fails, it will print an error message and set the variable to None
+        Called when the class is initialized or when there is bad data
+        """
+        try:
+            self.bno = BNO08X_I2C(self.i2c)
+            self.bno.initialize()
+            self.bno.enable_feature(BNO_REPORT_ACCELEROMETER)
+            # Enabling raw_accleration
+            # self.bno.enable_feature(BNO_REPORT_GYROSCOPE)
+            # self.bno.enable_feature(BNO_REPORT_MAGNETOMETER)
+            # self.bno.enable_feature(BNO_REPORT_ROTATION_VECTOR)
+        except ValueError:
+            print("    BNO not found, please check wiring!")
+            self.bno = None
 
     def setup9DOF(self):
         """
@@ -214,6 +245,38 @@ class ExtTelemetryHandler:
 
         return gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z
 
+
+    def get_BNO_data(self):
+        """
+        Gets the data from the BNO055 sensor
+        :return:  [gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z]
+        """
+        print("(BNO )GET BNO DATA CALLED")
+        if self.bno is not None:
+            try:
+                time_before_just_gyro = time.monotonic()
+                gyro_x, gyro_y, gyro_z = 0, 0, 0  #  TOO SLOW self.bno.gyro
+                # print("   Time to get just gyro data: ", time.monotonic() - time_before_just_gyro)
+                time_before_just_mag = time.monotonic()
+                mag_x, mag_y, mag_z = 0, 0, 0  #  TOO SLOW self.bno.magnetic
+                # print("   Time to get just mag data: ", time.monotonic() - time_before_just_mag)
+                time_before_just_acl = time.monotonic()
+                acl_x, acl_y, acl_z = self.bno.acceleration
+                # print("   Time to get just acl data: ", time.monotonic() - time_before_just_acl)
+
+            except Exception as e:
+                print("Error getting BNO055 data exception is: ", e)
+                gyro_x, gyro_y, gyro_z = 0, 0, 0
+                mag_x, mag_y, mag_z = 0, 0, 0
+                acl_x, acl_y, acl_z = 0, 0, 0
+        else:
+            print("BNO is None, setting everything to zero")
+            gyro_x, gyro_y, gyro_z = 0, 0, 0
+            mag_x, mag_y, mag_z = 0, 0, 0
+            acl_x, acl_y, acl_z = 0, 0, 0
+        print("(BNO) DATA RETURNED", gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z)
+        return gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z
+
     def get_data(self):
         """
         Gets all the data from the external sensors and returns it in a dictionary
@@ -256,14 +319,14 @@ class ExtTelemetryHandler:
 
         altitude, bar_pressure, bar_temp = BMP_data
 
-        # time_before_gyro = time.monotonic()
+        time_before_gyro = time.monotonic()
         try:
-            gyro_data = self.get_gyro_data()
-        except:
-            print("    ERROR in get gyro")
+            gyro_data = self.get_BNO_data()
+        except Exception as e:
+            print("    ERROR in get gyro: ", e)
             gyro_data = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-        # print("    Gyro get time: ", time.monotonic() - time_before_gyro)
+        print("    Accl get time: ", time.monotonic() - time_before_gyro)
 
 
         gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z = gyro_data
@@ -304,6 +367,7 @@ class extTelemThread(Thread):
         Thread.__init__(self)
         self.telem = ExtTelemetryHandler()
         self.most_recent_data = self.telem.get_data()
+        self.time_of_last_data = time.monotonic()
         self.start()
 
     def get_data(self):
@@ -316,3 +380,5 @@ class extTelemThread(Thread):
         while True:
             time.sleep(0.1)
             self.most_recent_data = self.telem.get_data()
+            print("(EXT TELEM Thread) Time since last fresh data: ", time.monotonic() - self.time_of_last_data)
+            self.time_of_last_data = time.monotonic()

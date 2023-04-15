@@ -108,16 +108,16 @@ def main():
         cycle += 1
         try:
             print("(Timing) Time sense last data pull:", time.time() - last_data_pull)  # To see how fast the loop is running
-            last_data_pull = time.time()  # Allways pulling data
+            last_data_pull = time.time()  # Always pulling data
 
             data_pulls += 1
 
-            if time.time() - time_of_last_buddy_send > 5:
-                time_of_last_buddy_send = time.time()
-                buddy_sends += 1
-                v = buddy_sends % 4
-                buddy_comm.send(v)
-                print("\n\nSent a ", v, " to SRAD2\n\n")
+            # if time.time() - time_of_last_buddy_send > 5:
+            #     time_of_last_buddy_send = time.time()
+            #     buddy_sends += 1
+            #     v = buddy_sends % 4
+            #     buddy_comm.send(v)
+            #     print("\n\nSent a ", v, " to SRAD2\n\n")
 
 
             # time_before_get_data = time.time()
@@ -130,8 +130,8 @@ def main():
             data['predicted_apogee'] = 0
 
             print("STATUS: ", flight_status.current_stage_name())
-            print("Buddy Comm messages: ", buddy_comm.get_messages())
-            print("Data: ", data)
+            # print("Buddy Comm messages: ", buddy_comm.get_messages())
+            # print("Data: ", data)
 
             # print("\n\n", data)
             
@@ -198,7 +198,7 @@ def main():
                 print("Error logging data")
 
             try:
-                if (time.time() - last_flight_status_update) > 0.125:  # Flight_status should only be updated at 8hz
+                if (time.time() - last_flight_status_update) > 0.1:  # Flight_status should only be updated at 8hz
                     print("Time since last flight status update should be .125...: ", time.time() - last_flight_status_update)
                     flight_status.new_telemetry(data)
                     last_flight_status_update = time.time()
