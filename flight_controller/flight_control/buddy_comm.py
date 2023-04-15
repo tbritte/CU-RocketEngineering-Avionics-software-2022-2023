@@ -26,7 +26,6 @@ class BuddyCommSystem:
         self.writer.send(num)
 
 
-
 class BuddyComm:
     """
     Handles communication with SRAD 2

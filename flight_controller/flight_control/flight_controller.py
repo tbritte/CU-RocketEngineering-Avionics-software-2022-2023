@@ -2,7 +2,6 @@ from subprocess import call
 import time
 import datetime
 import random
-import threading
 
 from .parachute import Parachute
 
@@ -32,6 +31,9 @@ date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
 
 # Main chute deploy altitude in meters
 MAIN_CHUTE_DEPLOY_ALT = 304.8
+DROGUE_CHUTE_PIN = 18
+MAIN_CHUTE_PIN = 16
+
 USING_SENSE_HAT = False
 USING_SIM_DATA = False
 
@@ -42,7 +44,7 @@ def startup(telemetry_handler: TelemetryHandler, telemetry_downlink: TelemetryDo
 
 
 def main():
-
+    hello = input("PRESS ENTER TO START")
     drogue_deployed = False
     main_deployed = False
 
@@ -64,8 +66,8 @@ def main():
     buzzer = Buzzer()
 
     flight_status = FlightStatus(buzzer)
-    drogue_chute = Parachute(18)
-    main_chute = Parachute(16)
+    drogue_chute = Parachute(DROGUE_CHUTE_PIN)
+    main_chute = Parachute(MAIN_CHUTE_PIN)
 
     override_mode = False
     disarmed = False
@@ -197,6 +199,7 @@ def main():
 
             try:
                 if (time.time() - last_flight_status_update) > 0.125:  # Flight_status should only be updated at 8hz
+                    print("Time since last flight status update should be .125...: ", time.time() - last_flight_status_update)
                     flight_status.new_telemetry(data)
                     last_flight_status_update = time.time()
             except:
@@ -246,6 +249,12 @@ def main():
                 drogue_deployed = True
             if flight_status.current_stage() == Stage.DESCENT and flight_status.get_median_altitude_from_last_second() < MAIN_CHUTE_DEPLOY_ALT and not main_chute.deployed and not disarmed:
                 print("MAIN DEPLOY")
+                main_chute.deploy()
+                main_deployed = True
+
+            # Emergency main chute deployment
+            if flight_status.drogue_failure and not main_chute.deployed and not disarmed and flight_status.current_stage() == Stage.DESCENT:
+                print("Emergency main deploy")
                 main_chute.deploy()
                 main_deployed = True
 

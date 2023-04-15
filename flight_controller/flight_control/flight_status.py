@@ -1,6 +1,7 @@
 import statistics
 from enum import Enum
 from statistics import median
+import time
 
 
 class Stage(Enum):
@@ -18,6 +19,10 @@ class FlightStatus:
         self.vertical_acceleration_list = []  # 8 acceleration values are saved (1 second of data)
 
         self.buzzer = buzzer
+
+        self.time_of_apogee = 0
+
+        self.drogue_failure = False
 
         self.payload_deployed = False
         self.go_pro_1_on = False
@@ -159,6 +164,37 @@ class FlightStatus:
         # and if the vertical acceleration is near gravity (1g)
         return lm < 10 and abs(v_acl - 9.8) < .5
 
+    def too_fast_descent(self) -> bool:
+        """
+        Determines if the rocket is descending too fast which implies that the drogue chute failed
+        This is to deploy the main chute to avoid waiting till we are too fast
+
+        The too fast speed is 50 m/s
+        """
+
+        # Checking that it has been at least 3 seconds since apogee to give the drogue chute time to deploy
+        if (time.time() - self.time_of_apogee) > 3:
+            # using the last 8 samples of altitude data (m)
+            current_altitude_m = self.altitude_list[-1]
+            altitude_one_second_ago_m = self.altitude_list[-8]
+            altitude_two_second_ago_m = self.altitude_list[-16]
+            altitude_three_second_ago_m = self.altitude_list[-24]
+
+            change_in_alt_from_one_second_ago = altitude_one_second_ago_m - current_altitude_m
+            change_in_alt_from_two_second_ago = altitude_two_second_ago_m - altitude_one_second_ago_m
+            change_in_alt_from_three_second_ago = altitude_three_second_ago_m - altitude_two_second_ago_m
+
+
+
+            if change_in_alt_from_one_second_ago > 50:  # 50 m/s
+                # We are going down too fast, but let's make sure the velocity is increasing from previous seconds
+                if change_in_alt_from_one_second_ago > change_in_alt_from_two_second_ago + 8:  # Gained 8 m/s in 1 second i.e. 8 m/s^2
+                    if change_in_alt_from_two_second_ago > change_in_alt_from_three_second_ago + 8:  # Gained 8 m/s in 1 second i.e. 8 m/s^2
+                        return True
+        return False
+
+
+
     def new_telemetry(self, telemetry: dict) -> None:
         """Updates the flight status based on the new telemetry.
 
@@ -175,8 +211,16 @@ class FlightStatus:
             if self.stage.value == Stage.PRE_FLIGHT.value and self.check_liftoff():
                 self.stage = Stage.IN_FLIGHT
             elif self.stage.value == Stage.IN_FLIGHT.value and self.check_apogee():
+                self.time_of_apogee = time.time()
                 self.stage = Stage.DESCENT
             elif self.stage.value == Stage.DESCENT.value and self.check_landed():
                 self.stage = Stage.ON_GROUND
+
+            # If we are moving too fast after apogee, we assume the drogue chute failed
+            if self.stage.value == Stage.DESCENT.value and self.too_fast_descent():
+                self.drogue_failure = True
+
+
+
         else:
             print("Flight Status doing its own altitude calibration, collecting...", len(self.altitude_list))
