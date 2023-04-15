@@ -2,7 +2,7 @@
 import RPi.GPIO as GPIO
 import time
 
-CAM_SERVO_PIN = 17
+CAM_SERVO_PIN = 22
 
 class CamServoController:
     def __init__(self):
@@ -24,7 +24,7 @@ class CamServoController:
     def update(self):
         # print("(gopro) UPDATING CAMERA")
         self.check_let_go_of_button()
-        if not self.button_depressed and time.time() - self.deactivated_time > 1:
+        if not self.button_depressed and time.time() - self.deactivated_time > 2:
             self.pwm.ChangeDutyCycle(0)
 
     def check_let_go_of_button(self):

@@ -8,12 +8,14 @@ class Parachute:
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.OUT)
+        GPIO.output(self.pin, GPIO.LOW)
         self.deployed = False
         self.deploy_time = 0
 
     def deploy(self):
         """Deploys the parachute.
         """
+        print("DEPLOY CALLED PIN IS", self.pin)
         GPIO.output(self.pin, GPIO.HIGH)
         self.deployed = True
         self.deploy_time = time.time()

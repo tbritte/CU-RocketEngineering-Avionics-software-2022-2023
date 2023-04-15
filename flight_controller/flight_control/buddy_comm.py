@@ -5,8 +5,8 @@ from threading import Thread
 DATA_PIN_TO_SRAD2 = 23
 CLOCK_PIN_TO_SRAD2 = 24
 
-DATA_PIN_FROM_SRAD2 = 5
-CLOCK_PIN_FROM_SRAD2 = 6
+DATA_PIN_FROM_SRAD2 = 8
+CLOCK_PIN_FROM_SRAD2 = 7
 
 class BuddyCommSystem:
     def __init__(self):

@@ -31,8 +31,8 @@ date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
 
 # Main chute deploy altitude in meters
 MAIN_CHUTE_DEPLOY_ALT = 304.8
-DROGUE_CHUTE_PIN = 18
-MAIN_CHUTE_PIN = 16
+DROGUE_CHUTE_PIN = 25
+MAIN_CHUTE_PIN = 17
 
 USING_SENSE_HAT = False
 USING_SIM_DATA = False
@@ -47,6 +47,30 @@ def main():
     hello = input("PRESS ENTER TO START")
     drogue_deployed = False
     main_deployed = False
+
+    # time.sleep(10)
+    # print("Initalizing drogue chute")
+    # drogue_chute = Parachute(DROGUE_CHUTE_PIN)
+    # time.sleep(2)
+    # print("initalizng main chute")
+    # main_chute = Parachute(MAIN_CHUTE_PIN)
+    # print("\n\nINITALIZED PARACHUTESn\n\n")
+    #
+    # time.sleep(20)
+    # print("Druge deployed")
+    # drogue_chute.deploy()
+    # time.sleep(5)
+    # print("main deployed")
+    # main_chute.deploy()
+    # time.sleep(10)
+    # print("Setting them both to low")
+    # main_chute._kill_signal()
+    # drogue_chute._kill_signal()
+    # time.sleep(5)
+    # print("entering main program")
+
+    drogue_chute = Parachute(DROGUE_CHUTE_PIN)
+    main_chute = Parachute(MAIN_CHUTE_PIN)
 
     if USING_SIM_DATA:
         telemetry_handler = SimTelemetryHandler() # Uses previously collected data in a csv file
@@ -66,8 +90,8 @@ def main():
     buzzer = Buzzer()
 
     flight_status = FlightStatus(buzzer)
-    drogue_chute = Parachute(DROGUE_CHUTE_PIN)
-    main_chute = Parachute(MAIN_CHUTE_PIN)
+
+
 
     override_mode = False
     disarmed = False
@@ -102,7 +126,8 @@ def main():
     buddy_sends = 0
     time_of_last_buddy_send = time.time() + 15
 
-    go_pro_1_cam_servo.activate_camera()
+    # For testing the cameras
+    # go_pro_1_cam_servo.activate_camera()
 
     while not terminate:
         cycle += 1
@@ -131,7 +156,7 @@ def main():
 
             print("STATUS: ", flight_status.current_stage_name())
             # print("Buddy Comm messages: ", buddy_comm.get_messages())
-            # print("Data: ", data)
+            print("Data: ", data)
 
             # print("\n\n", data)
             
@@ -245,6 +270,7 @@ def main():
             if flight_status.current_stage() == Stage.DESCENT and not buddy_comm.has_sent(0):
                 buddy_comm.send(0)  # Tell SRAD2 that we have reached apogee
             if flight_status.current_stage() == Stage.DESCENT and not drogue_chute.deployed and not disarmed:
+                print("DROGUE DEPLOYED")
                 drogue_chute.deploy()
                 drogue_deployed = True
             if flight_status.current_stage() == Stage.DESCENT and flight_status.get_median_altitude_from_last_second() < MAIN_CHUTE_DEPLOY_ALT and not main_chute.deployed and not disarmed:
