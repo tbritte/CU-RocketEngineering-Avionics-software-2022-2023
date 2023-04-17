@@ -38,9 +38,58 @@ USING_SENSE_HAT = False
 USING_SIM_DATA = False
 
 
-def startup(telemetry_handler: TelemetryHandler, telemetry_downlink: TelemetryDownlink):
-    telemetry_handler.setup()
-    telemetry_downlink.run()
+# def startup(telemetry_handler: TelemetryHandler, telemetry_downlink: TelemetryDownlink):
+#     telemetry_handler.setup()
+#     telemetry_downlink.run()
+
+
+def data_pprint(data: dict):
+    """
+    Prints out the data in the nicer format i.e. two columns
+    :param data: A dictionary of values
+    """
+
+    # Find the longest key
+    longest_key = 0
+    for key in data.keys():
+        if len(key) > longest_key:
+            longest_key = len(key)
+
+    # Print out the data
+    for key in data.keys():
+        print(key + " " * (longest_key - len(key)) + ":", data[key])
+
+
+def alt_bat_test():
+    """
+    Tests how long altitude came be collected before the battery drains. Also heat testing
+    """
+    input("PRESS ENTER TO START ALT_BAT_TEST")  # Wait for user to press enter to prevent auto start
+
+    telemetry_handler = extTelemThread()
+
+    header_list = ["time (s)", "altitude", "temp", "cputemp"]  # Not using the full header list from the telemetry handler
+
+    telemetry_logger = DataLogger(date + '-alt_bat_test_log' + "-r" + str(random.randint(1000, 9999)) + '.csv',
+                                  header_list, start_time)
+    cpu = CPUTemperature()  # For getting the CPU temperature
+
+    time_of_last_loop = time.monotonic()
+    while True:
+        if time.monotonic() - time_of_last_loop > 1:
+            print("Main loop time:", time.monotonic() - time_of_last_loop)
+            time_of_last_loop = time.monotonic()
+            all_data = telemetry_handler.get_data()  # Includes data from other sensors that we do not need
+
+            # Using just the altitude and temperature data that we need for the test
+            data = {"time (s)": time.time() - start_time,
+                    "altitude": all_data["altitude"],
+                    "temp": all_data["bar_temp"],
+                    "cputemp": cpu.temperature}
+
+            telemetry_logger.log_data(data)
+
+            data_pprint(data)
 
 
 def main():
@@ -48,32 +97,11 @@ def main():
     drogue_deployed = False
     main_deployed = False
 
-    # time.sleep(10)
-    # print("Initalizing drogue chute")
-    # drogue_chute = Parachute(DROGUE_CHUTE_PIN)
-    # time.sleep(2)
-    # print("initalizng main chute")
-    # main_chute = Parachute(MAIN_CHUTE_PIN)
-    # print("\n\nINITALIZED PARACHUTESn\n\n")
-    #
-    # time.sleep(20)
-    # print("Druge deployed")
-    # drogue_chute.deploy()
-    # time.sleep(5)
-    # print("main deployed")
-    # main_chute.deploy()
-    # time.sleep(10)
-    # print("Setting them both to low")
-    # main_chute._kill_signal()
-    # drogue_chute._kill_signal()
-    # time.sleep(5)
-    # print("entering main program")
-
     drogue_chute = Parachute(DROGUE_CHUTE_PIN)
     main_chute = Parachute(MAIN_CHUTE_PIN)
 
     if USING_SIM_DATA:
-        telemetry_handler = SimTelemetryHandler() # Uses previously collected data in a csv file
+        telemetry_handler = SimTelemetryHandler()  # Uses previously collected data in a csv file
     else:
         if USING_SENSE_HAT:
             telemetry_handler = TelemetryHandler()  # Collects data from the sense hat
@@ -91,8 +119,6 @@ def main():
 
     flight_status = FlightStatus(buzzer)
 
-
-
     override_mode = False
     disarmed = False
     disarmed_time = time.time()
@@ -101,7 +127,6 @@ def main():
 
     camera = Camera()
     go_pro_1_cam_servo = CamServoController()
-
 
     # Only set up the LED controller if the sense hat is being used
     if USING_SENSE_HAT:
@@ -132,7 +157,8 @@ def main():
     while not terminate:
         cycle += 1
         try:
-            print("(Timing) Time sense last data pull:", time.time() - last_data_pull)  # To see how fast the loop is running
+            print("(Timing) Time sense last data pull:",
+                  time.time() - last_data_pull)  # To see how fast the loop is running
             last_data_pull = time.time()  # Always pulling data
 
             data_pulls += 1
@@ -143,7 +169,6 @@ def main():
             #     v = buddy_sends % 4
             #     buddy_comm.send(v)
             #     print("\n\nSent a ", v, " to SRAD2\n\n")
-
 
             # time_before_get_data = time.time()
             data = telemetry_handler.get_data()
@@ -159,8 +184,9 @@ def main():
             print("Data: ", data)
 
             # print("\n\n", data)
-            
-            status_bits = flight_status.collect_status_bits(data, drogue_deployed, main_deployed, camera.recording, disarmed)
+
+            status_bits = flight_status.collect_status_bits(data, drogue_deployed, main_deployed, camera.recording,
+                                                            disarmed)
             # print(status_bits)
             try:
                 if telemetry_downlink.ser is not None:
@@ -199,7 +225,8 @@ def main():
 
                     elif read_val == "DSRM" and (flight_status.current_stage() == Stage.PRE_FLIGHT or override_mode):
                         # Doing disarm procedure
-                        print("Disarming: ", read_val, "is override mode: ", override_mode, "stage: ", flight_status.current_stage_name())
+                        print("Disarming: ", read_val, "is override mode: ", override_mode, "stage: ",
+                              flight_status.current_stage_name())
 
                         # TELL SRAD2 TO DISARM
                         buddy_comm.send(1)
@@ -224,7 +251,8 @@ def main():
 
             try:
                 if (time.time() - last_flight_status_update) > 0.1:  # Flight_status should only be updated at 8hz
-                    print("Time since last flight status update should be .125...: ", time.time() - last_flight_status_update)
+                    print("Time since last flight status update should be .125...: ",
+                          time.time() - last_flight_status_update)
                     flight_status.new_telemetry(data)
                     last_flight_status_update = time.time()
             except:
@@ -284,7 +312,6 @@ def main():
                 main_chute.deploy()
                 main_deployed = True
 
-
             """
             Shutting down the pi (5 seconds after receiving disarm command)
             """
@@ -294,8 +321,11 @@ def main():
                 exit(1)
 
         except Exception as e:
-            print("\n\n     %%%%%MAIN ERROR -- No error should be caught by this, errors should be handled closer to the exception: " + str(e) + "%%%%%%%\n\n")
+            print(
+                "\n\n     %%%%%MAIN ERROR -- No error should be caught by this, errors should be handled closer to the exception: " + str(
+                    e) + "%%%%%%%\n\n")
 
 
 if __name__ == '__main__':
     main()
+    # alt_bat_test()

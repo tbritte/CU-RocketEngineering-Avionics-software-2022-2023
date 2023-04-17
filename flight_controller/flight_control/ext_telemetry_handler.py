@@ -251,7 +251,7 @@ class ExtTelemetryHandler:
         Gets the data from the BNO055 sensor
         :return:  [gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z]
         """
-        print("(BNO )GET BNO DATA CALLED")
+        # print("(BNO )GET BNO DATA CALLED")
         if self.bno is not None:
             try:
                 time_before_just_gyro = time.monotonic()
@@ -274,7 +274,7 @@ class ExtTelemetryHandler:
             gyro_x, gyro_y, gyro_z = 0, 0, 0
             mag_x, mag_y, mag_z = 0, 0, 0
             acl_x, acl_y, acl_z = 0, 0, 0
-        print("(BNO) DATA RETURNED", gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z)
+        # print("(BNO) DATA RETURNED", gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z)
         return gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z
 
     def get_data(self):
@@ -326,7 +326,7 @@ class ExtTelemetryHandler:
             print("    ERROR in get gyro: ", e)
             gyro_data = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-        print("    Accl get time: ", time.monotonic() - time_before_gyro)
+        # print("    Accl get time: ", time.monotonic() - time_before_gyro)
 
 
         gyro_x, gyro_y, gyro_z, acl_x, acl_y, acl_z, mag_x, mag_y, mag_z = gyro_data
@@ -380,5 +380,5 @@ class extTelemThread(Thread):
         while True:
             time.sleep(0.1)
             self.most_recent_data = self.telem.get_data()
-            print("(EXT TELEM Thread) Time since last fresh data: ", time.monotonic() - self.time_of_last_data)
+            # print("(EXT TELEM Thread) Time since last fresh data: ", time.monotonic() - self.time_of_last_data)
             self.time_of_last_data = time.monotonic()
