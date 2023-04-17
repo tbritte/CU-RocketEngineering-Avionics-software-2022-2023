@@ -119,9 +119,9 @@ class Buzzer:
     def main_chute_deploy_alt_buzz(self, main_chute_deploy_alt):
         """
         Beeps for every one hundred feet (1/2 second on, 1/2 second off)
-        Repeats once
+        Repeats once (GIVE ALT IN METERS)
         """
-        beep_count = int(main_chute_deploy_alt / 100)
+        beep_count = int(main_chute_deploy_alt * 3.28084 / 100)
 
         self._add_beep_group(delay_to_start=4, time_between_beeps=.5, duration_of_beep=.5, beep_count=beep_count)
 
@@ -131,5 +131,22 @@ class Buzzer:
     def armed_beeps(self):
         """
         Beeps 20 times really quickly at 1/5 second on, 1/5 second off
+        Also clears beep queue
         """
+        self.clear_beep_queue()
         self._add_beep_group(delay_to_start=4, time_between_beeps=.2, duration_of_beep=.2, beep_count=20)
+
+    def add_status_beeps(self, armed:bool):
+        """
+        If the beep queue is empty, it adds little reminder beeps to the queue
+        When the rocket is unarmed, the beeps are double
+        When the rocket is armed, the beeps are single
+        """
+        try:
+            if len(self.beep_list) == 0:
+                if armed:
+                    self._add_beep_group(2, .5, .1, 1)  # Single beep to indicate it is armed
+                else:
+                    self._add_beep_group(2, .5, .1, 2)  # Double
+        except:
+            print("Status Beep Failure")
