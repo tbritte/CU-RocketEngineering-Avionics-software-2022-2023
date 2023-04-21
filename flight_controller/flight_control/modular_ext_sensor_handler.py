@@ -1,0 +1,55 @@
+from .sensors import bmp180
+from .sensors import gps
+from .sensors import sox
+
+class ModDataHandler:
+    def __init__(self):
+        self.bmp180 = bmp180.BMP180()
+        self.gps = gps.GPS()
+        self.sox = sox.SOX()
+
+    def get_data(self):
+
+        bmp_data = self.bmp180.get_data()
+        gps_data = self.gps.get_data()
+        sox_data = self.sox.get_data()
+
+        altitude = bmp_data[0]
+        bar_pressure = bmp_data[1]
+        bar_temp = bmp_data[2]
+
+        # [longitude, latitude, alt, quality, sat_num, utc_time]
+        longitude = gps_data[0]
+        latitude = gps_data[1]
+        gps_alt = gps_data[2]
+        gps_quality = gps_data[3]
+        gps_sat_num = gps_data[4]
+        utc_time = gps_data[5]
+
+
+        gyro_x = sox_data[0]
+        gyro_y = sox_data[1]
+        gyro_z = sox_data[2]
+
+        acl_x = sox_data[3]
+        acl_y = sox_data[4]
+        acl_z = sox_data[5]
+
+        mag_x = sox_data[6]
+        mag_y = sox_data[7]
+        mag_z = sox_data[8]
+
+        data = {"latitude": latitude, "longitude": longitude,
+                "gps_altitude": gps_alt, "gps_time": utc_time, "gps_quality": gps_quality, "gps_sat_num": gps_sat_num,
+                "altitude": altitude, "bar_pressure": bar_pressure, "bar_temp": bar_temp,
+                "gyro_x": gyro_x, "gyro_y": gyro_y, "gyro_z": gyro_z,
+                "acl_x": acl_x, "acl_y": acl_y, "acl_z": acl_z, "mag_x": mag_x, "mag_y": mag_y, "mag_z": mag_z}
+        return data
+
+    @staticmethod
+    def get_data_header_list():
+        columns = ['time', 'gps_time', 'state', 'altitude', 'gps_altitude', 'data_pulls', 'bar_pressure',
+                   'bar_temp', 'gyro_x', 'gyro_y', 'gyro_z', 'acl_x', 'acl_y', 'acl_z', 'mag_x', 'mag_y', 'mag_z',
+                   'latitude', 'longitude', 'gps_quality', 'gps_sat_num',
+                   'cputemp']
+        return columns
