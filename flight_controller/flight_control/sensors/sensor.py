@@ -3,11 +3,11 @@ import time
 
 
 class Sensor(Thread):
-    def __init__(self):
-        super().__init__()
-        self.functional = True
+    def __init__(self, name):
+        print("Setting up {}".format(name))
+        super().__init__()  # Sets up the thread part of the object
+        self.functional = False
         self.most_recent_data = None
-        self.sensor_name = None
         self.setup()
 
     def setup(self):
@@ -29,7 +29,7 @@ class Sensor(Thread):
     def run(self):
         time_from_last_update = time.monotonic()
         while True:
-            if (time.monotonic() - time_from_last_update) > .125:
+            if (time.monotonic() - time_from_last_update) > .01:
                 self._update_data()
                 time_from_last_update = time.monotonic()
             time.sleep(.01)

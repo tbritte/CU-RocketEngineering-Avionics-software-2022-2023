@@ -5,15 +5,17 @@ import time
 
 class BMP180(Sensor):
     def __init__(self):
-        super().__init__()
         self.base_alt = None  # in meters above sea level
         self.sensor_name = "BMP180"
         self.bmp180 = None
+        super().__init__(self.sensor_name)
 
     def setup(self):
         try:
             self.bmp180 = BMP085.BMP085(busnum=1)
             self.calibrate_initial_altitude()
+            self.functional = True
+            print("    BMP180 setup successful")
         except:
             print("     BMP180 not found, check wiring")
             self.bmp180 = None

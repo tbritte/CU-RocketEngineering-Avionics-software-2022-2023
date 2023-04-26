@@ -3,13 +3,16 @@ import serial
 
 class GPS(Sensor):
     def __init__(self):
-        super().__init__()
         self.sensor_name = "GPS"
         self.gps = None
+        super().__init__(self.sensor_name)
+
 
     def setup(self):
         self.gps = serial.Serial("/dev/ttyS0", baudrate=9600, timeout=0)
         self.gps_buffer = ""
+        self.functional = True
+        print("     GPS setup successful")
 
     def find_gpgga_in_buffer(self):
         """

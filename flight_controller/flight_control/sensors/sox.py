@@ -11,11 +11,11 @@ import adafruit_lis3mdl  # Magnetometer
 
 class SOX(Sensor):
     def __init__(self):
-        super().__init__()
-        self.sensor_name = "SOX"
         self.i2c = busio.I2C(board.SCL, board.SDA)
+        self.sensor_name = "SOX"
         self.lsm6dsox = None
         self.lis3mdl = None
+        super().__init__(self.sensor_name)
 
     def setup(self):
         """
@@ -25,6 +25,8 @@ class SOX(Sensor):
         """
         try:
             self.lsm6dsox = LSM6DSOX(self.i2c)
+            self.functional = True
+            print("    Accelerometer setup successful")
         except ValueError:
             print("    Accelerometer not found, please check wiring!")
             self.lsm6dsox = None
@@ -49,9 +51,9 @@ class SOX(Sensor):
         Gets the new data from the accelerometer and magnetometer
         Returns the data as a tuple
         """
-        gyro = [None, None, None]
-        acceleration = [None, None, None]
-        magnetic_field = [None, None, None]
+        gyro = [0, 0, 0]
+        acceleration = [0, 0, 0]
+        magnetic_field = [0, 0, 0]
 
         if self.lsm6dsox is not None and self.lis3mdl is not None:
             try:
@@ -60,21 +62,18 @@ class SOX(Sensor):
                     acceleration = self.lsm6dsox.acceleration
                 except Exception as e:
                     print("Error getting acceleration: {}".format(e))
-                    acceleration = None
 
                 try:
                     # Get the gyro from the LSM6DSOX sensor
                     gyro = self.lsm6dsox.gyro
                 except Exception as e:
                     print("Error getting gyro: {}".format(e))
-                    gyro = None
 
                 try:
                     # Get the magnetic field from the LIS3MDL sensor
                     magnetic_field = self.lis3mdl.magnetic
                 except Exception as e:
                     print("Error getting magnetic field: {}".format(e))
-                    magnetic_field = None
 
                 return acceleration, gyro, magnetic_field
             except OSError:

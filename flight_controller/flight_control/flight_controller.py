@@ -10,9 +10,10 @@ from .flight_status import Stage
 
 from .telemetry_downlink import TelemetryDownlink
 
-from .telemetry_handler import TelemetryHandler
-from .ext_telemetry_handler import extTelemThread
-from .sim_telemetry_handler import SimTelemetryHandler
+from .telemetry_handler import TelemetryHandler  # The sense hat
+from .ext_telemetry_handler import extTelemThread  # The external sensors, all on one thread
+from .sim_telemetry_handler import SimTelemetryHandler  # Simulated data from Michael
+from .modular_ext_sensor_handler import ModDataHandler  # The external sensors, each with their own thread
 
 from .buddy_comm import BuddyCommSystem
 
@@ -106,7 +107,8 @@ def main():
         if USING_SENSE_HAT:
             telemetry_handler = TelemetryHandler()  # Collects data from the sense hat
         else:
-            telemetry_handler = extTelemThread()  # Collects data from the external sensors
+            # telemetry_handler = extTelemThread()  # Collects data from the external sensors
+            telemetry_handler = ModDataHandler()  # Collects data from the external sensors
 
     # Creates a new data logger for the telemetry data depending on what sensors are being used
     telemetry_logger = DataLogger(date + '-telemetry_log' + "-r" + str(random.randint(1000, 9999)) + '.csv',
@@ -184,9 +186,12 @@ def main():
             print("Data: ", data)
 
             # print("\n\n", data)
-
-            status_bits = flight_status.collect_status_bits(data, drogue_deployed, main_deployed, camera.recording,
+            try:
+                status_bits = flight_status.collect_status_bits(data, drogue_deployed, main_deployed, camera.recording,
                                                             disarmed)
+            except Exception as e:
+                print("Error collecting status bits: ", e)
+                status_bits = 0
             # print(status_bits)
             try:
                 if telemetry_downlink.ser is not None:
