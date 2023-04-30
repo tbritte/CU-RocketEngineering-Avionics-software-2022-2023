@@ -1,5 +1,6 @@
 from .sensor import Sensor
 import serial
+import time
 
 class GPS(Sensor):
     def __init__(self):
@@ -33,6 +34,7 @@ class GPS(Sensor):
                         return spot
 
     def get_new_data(self):
+        time.sleep(.5)
         # print("Getting GPS data...")
         try:
             self.gps_buffer += self.gps.readline().decode("utf-8")
@@ -42,6 +44,8 @@ class GPS(Sensor):
             pass
         except:
             pass
+
+        # print("GPS Buffer: " + self.gps_buffer)
 
         #  Looking through the newest date in the buffer for the GPGGA message
         #  This is the message that contains the GPS data

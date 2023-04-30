@@ -1,6 +1,7 @@
 from .sensors import bmp180
 from .sensors import gps
 from .sensors import sox
+from .sensors import bno08x
 
 class ModDataHandler:
     def __init__(self):
@@ -10,14 +11,20 @@ class ModDataHandler:
         self.gps = gps.GPS()
         self.gps.start()
 
-        self.sox = sox.SOX()
-        self.sox.start()
+        # self.sox = sox.SOX()
+        # self.sox.start()
+
+        self.bno = bno08x.BNO08X()
+        self.bno.start()
 
     def get_data(self):
         try:
             bmp_data = self.bmp180.get_data()
             gps_data = self.gps.get_data()
-            sox_data = self.sox.get_data()
+
+            # Can be swapped with the bno
+            # sox_data = self.sox.get_data()
+            sox_data = self.bno.get_data()
 
             if bmp_data is None:
                 bmp_data = [0, 0, 0]
