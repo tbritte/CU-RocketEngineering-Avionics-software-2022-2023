@@ -16,9 +16,18 @@ import threading
 from multiprocessing import Pool
 import pigpio
 
+"""
+Below are all the modules used that were originally made for SRAD 1
+"""
+
 # Sensors mounted on the PCB
-from sensors import sox
-from sensors import bmp180
+from .sensors import sox
+from .sensors import bmp180
+
+# Using the same buddy_comm module as SRAD 1 for consistency
+from .buddy_comm import BuddyCommSystem
+
+buddy_comm = BuddyCommSystem()  # Used for receiving data operates in a separate thread
 
 sense = SenseHat()
 sense.clear()  # Sense hat needs to be cleared at the start of every run
@@ -28,18 +37,21 @@ CPUtemp = cpu.temperature
 
 GPIO.setmode(GPIO.BCM)
 # Sense Hat uses GPIO 2, 3, 23, 24, 25, 8
-buzzer = 0  # Buzzer connects to GPIO 4 (4 down from top left) and ground (3 down from top right)
+buzzer = 27  # Buzzer connects to GPIO 4 (4 down from top left) and ground (3 down from top right)
 cam2 = 17  # Servo connects to GPIO 17 (6 down from top left), ground (5 down from top left) and 5v source (top right)
 cam3 = 11
-dataWrite = 10
-clockWrite = 9
-dataRead = 22
-clockRead = 27
+
+# NOTE: THESE HAVE BEEN REPLACED BY THE BUDDY COMM MODULE
+# dataWrite = 10
+# clockWrite = 9
+# dataRead = 22
+# clockRead = 27
+
 motorport = 4
-GPIO.setup(dataWrite, GPIO.OUT)
-GPIO.setup(clockWrite, GPIO.OUT)
-GPIO.setup(dataRead, GPIO.IN)
-GPIO.setup(clockRead, GPIO.IN)
+# GPIO.setup(dataWrite, GPIO.OUT)
+# GPIO.setup(clockWrite, GPIO.OUT)
+# GPIO.setup(dataRead, GPIO.IN)
+# GPIO.setup(clockRead, GPIO.IN)
 GPIO.setup(buzzer, GPIO.OUT)
 GPIO.setup(cam2, GPIO.OUT)
 GPIO.setup(cam3, GPIO.OUT)
@@ -284,23 +296,23 @@ WRITING FORMAT:
 '11': GoPro3 is active
 """
 
-
-def writeComm(num):
-    for i in range(2):
-        if num & 0b10:
-            GPIO.output(dataWrite, GPIO.HIGH)
-            print("high")
-        else:
-            GPIO.output(dataWrite, GPIO.LOW)
-            print("low")
-        num = num << 1
-        GPIO.output(clockWrite, GPIO.HIGH)
-        sleep(0.25)
-        GPIO.output(clockWrite, GPIO.LOW)
-        sleep(0.25)
-
-    GPIO.output(dataWrite, GPIO.LOW)
-    GPIO.output(clockWrite, GPIO.LOW)
+# NOTE: Replaced by buddy_comm.send()
+# def writeComm(num):
+#     for i in range(2):
+#         if num & 0b10:
+#             GPIO.output(dataWrite, GPIO.HIGH)
+#             print("high")
+#         else:
+#             GPIO.output(dataWrite, GPIO.LOW)
+#             print("low")
+#         num = num << 1
+#         GPIO.output(clockWrite, GPIO.HIGH)
+#         sleep(0.25)
+#         GPIO.output(clockWrite, GPIO.LOW)
+#         sleep(0.25)
+#
+#     GPIO.output(dataWrite, GPIO.LOW)
+#     GPIO.output(clockWrite, GPIO.LOW)
 
 
 """

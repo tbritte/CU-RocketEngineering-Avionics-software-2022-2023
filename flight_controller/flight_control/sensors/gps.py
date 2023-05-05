@@ -34,7 +34,6 @@ class GPS(Sensor):
                         return spot
 
     def get_new_data(self):
-        time.sleep(.5)
         # print("Getting GPS data...")
         try:
             self.gps_buffer += self.gps.readline().decode("utf-8")

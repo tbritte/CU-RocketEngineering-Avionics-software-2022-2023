@@ -1,7 +1,11 @@
+import time
+
 from .sensors import bmp180
 from .sensors import gps
 from .sensors import sox
 from .sensors import bno08x
+
+from multiprocessing import Process, Queue
 
 class ModDataHandler:
     def __init__(self):
@@ -18,13 +22,17 @@ class ModDataHandler:
         self.bno.start()
 
     def get_data(self):
+        start_time = time.monotonic()
         try:
             bmp_data = self.bmp180.get_data()
+            print("Time to get bmp data: ", time.monotonic() - start_time)
             gps_data = self.gps.get_data()
+            print("Time to get gps data: ", time.monotonic() - start_time)
 
             # Can be swapped with the bno
             # sox_data = self.sox.get_data()
             sox_data = self.bno.get_data()
+            print("Time to get sox data: ", time.monotonic() - start_time)
 
             if bmp_data is None:
                 bmp_data = [0, 0, 0]
@@ -68,7 +76,8 @@ class ModDataHandler:
                 "altitude": altitude, "bar_pressure": bar_pressure, "bar_temp": bar_temp,
                 "gyro_x": gyro_x, "gyro_y": gyro_y, "gyro_z": gyro_z,
                 "acl_x": acl_x, "acl_y": acl_y, "acl_z": acl_z, "mag_x": mag_x, "mag_y": mag_y, "mag_z": mag_z}
-        print("Data being returned: " + str(data))
+        # print("Data being returned: " + str(data))
+        print("Time to get data: " + str(time.monotonic() - start_time))
         return data
 
     @staticmethod

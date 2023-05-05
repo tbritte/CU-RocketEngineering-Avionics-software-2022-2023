@@ -1,14 +1,17 @@
 from threading import Thread
+from multiprocessing import Process, Queue
 import time
 
 
-class Sensor(Thread):
+class Sensor(Process):
     def __init__(self, name):
         print("Setting up {}".format(name))
         super().__init__()  # Sets up the thread part of the object
         self.functional = False
         self.most_recent_data = None
+        self.queue = Queue()
         self.setup()
+
 
     def setup(self):
         raise NotImplementedError
@@ -23,13 +26,13 @@ class Sensor(Thread):
             print("({}) Trying to setup again".format(self.sensor_name))
             self.setup()
 
-    def get_data(self):
-        return self.most_recent_data
+        # Testing how multiprocessing works
+        self.queue.put(self.most_recent_data)
 
     def run(self):
-        time_from_last_update = time.monotonic()
         while True:
-            if (time.monotonic() - time_from_last_update) > .01:
-                self._update_data()
-                time_from_last_update = time.monotonic()
+            self._update_data()
             time.sleep(.01)
+
+    def get_data(self):
+        return self.queue.get()

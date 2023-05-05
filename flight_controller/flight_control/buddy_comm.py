@@ -2,11 +2,28 @@ import RPi.GPIO as GPIO
 import time
 from threading import Thread
 
-DATA_PIN_TO_SRAD2 = 23
-CLOCK_PIN_TO_SRAD2 = 24
+DATA_PIN_TO_BUDDY = 23
+CLOCK_PIN_TO_BUDDY = 24
 
-DATA_PIN_FROM_SRAD2 = 8
-CLOCK_PIN_FROM_SRAD2 = 7
+DATA_PIN_FROM_BUDDY = 8
+CLOCK_PIN_FROM_BUDDY = 7
+
+"""
+Has been modified to work with SRAD 1 and SRAD 2 both running this same code
+
+
+MESSAGES:
+    From SRAD 1 to SRAD 2:
+        00 - apogee
+        01 - disarm
+        10 - turn on gopro 2
+        11 - turn on gopro 3
+    From SRAD 2 to SRAD 1:
+        00 - Payload deployed
+        01 - Ready
+        10 - GoPro 2 on
+        11 - GoPro 3 on
+"""
 
 class BuddyCommSystem:
     def __init__(self):
@@ -16,8 +33,21 @@ class BuddyCommSystem:
         self.writer.start()
         self.reader.start()
 
-    def get_messages(self):
+    def get_all_messages(self):
         return self.reader.messages
+
+    def check_num(self, num) -> bool:
+        """
+        Checks if the given number has been received. Returns False if it has not, and True if it has. Then it clears
+        that number from the list of messages
+        :param num: The integer to check
+        :return: 0 if the number has not been received, 1 if it has
+        """
+        if num in self.reader.messages:
+            self.reader.messages.remove(num)
+            return True
+        else:
+            return False
 
     def has_sent(self, num):
         return self.writer.has_sent(num)
@@ -28,7 +58,7 @@ class BuddyCommSystem:
 
 class BuddyComm:
     """
-    Handles communication with SRAD 2
+    Handles communication with the other SRAD
     """
 
     def __init__(self):
@@ -36,11 +66,11 @@ class BuddyComm:
         GPIO.setmode(GPIO.BCM)
 
         # Setting up all the pins
-        GPIO.setup(DATA_PIN_TO_SRAD2, GPIO.OUT)
-        GPIO.setup(CLOCK_PIN_TO_SRAD2, GPIO.OUT)
+        GPIO.setup(DATA_PIN_TO_BUDDY, GPIO.OUT)
+        GPIO.setup(CLOCK_PIN_TO_BUDDY, GPIO.OUT)
 
-        GPIO.setup(DATA_PIN_FROM_SRAD2, GPIO.IN)
-        GPIO.setup(CLOCK_PIN_FROM_SRAD2, GPIO.IN)
+        GPIO.setup(DATA_PIN_FROM_BUDDY, GPIO.IN)
+        GPIO.setup(CLOCK_PIN_FROM_BUDDY, GPIO.IN)
 
         self.sents = []
 
@@ -49,37 +79,34 @@ class BuddyComm:
 
     def send(self, num):
         """
-        nums:
-        00 - apogee
-        01 - disarm
-        10 - turn on gopro 2
-        11 - turn on gopro 3
+        Sends the given number to the other SRAD
         """
-        print("Sending " + str(num) + " to SRAD2")
+
+        print("Sending " + str(num) + " to my buddy")
         if num not in self.sents:
             self.sents.append(num)  # Keeping track of which nums have been sent at least once
 
         # Sending the number
         for i in range(2):
             if num & 0b10:  # Checking if the first bit is a 1
-                GPIO.output(DATA_PIN_TO_SRAD2, GPIO.HIGH)
+                GPIO.output(DATA_PIN_TO_BUDDY, GPIO.HIGH)
             else:
-                GPIO.output(DATA_PIN_TO_SRAD2, GPIO.LOW)
+                GPIO.output(DATA_PIN_TO_BUDDY, GPIO.LOW)
             num = num << 1  # Shifting the number to the left by 1 bit
             time.sleep(.01)
-            GPIO.output(CLOCK_PIN_TO_SRAD2, GPIO.HIGH)
+            GPIO.output(CLOCK_PIN_TO_BUDDY, GPIO.HIGH)
             time.sleep(0.25)
-            GPIO.output(CLOCK_PIN_TO_SRAD2, GPIO.LOW)
+            GPIO.output(CLOCK_PIN_TO_BUDDY, GPIO.LOW)
             time.sleep(0.25)
 
         # End signal
-        GPIO.output(DATA_PIN_TO_SRAD2, GPIO.LOW)
-        GPIO.output(CLOCK_PIN_TO_SRAD2, GPIO.LOW)
+        GPIO.output(DATA_PIN_TO_BUDDY, GPIO.LOW)
+        GPIO.output(CLOCK_PIN_TO_BUDDY, GPIO.LOW)
 
     @staticmethod
     def receive():
         """
-        Returns the number received, should be ran in a seperate thread
+        Returns just the number received or -1 if there was an error
         """
         try:
             # Receiving the number
@@ -88,14 +115,14 @@ class BuddyComm:
             time_of_getting_first_bit = 0
             num = 0
             for i in range(2):
-                while GPIO.input(CLOCK_PIN_FROM_SRAD2) == GPIO.LOW:  # Waiting for the clock pin to go high
+                while GPIO.input(CLOCK_PIN_FROM_BUDDY) == GPIO.LOW:  # Waiting for the clock pin to go high
                     pass
                 # print("(Buddy Comm) clock is high waiting .1 seconds to see if it stays high")
                 time.sleep(.1)
-                if GPIO.input(CLOCK_PIN_FROM_SRAD2) == GPIO.LOW:
+                if GPIO.input(CLOCK_PIN_FROM_BUDDY) == GPIO.LOW:
                     # print("\n(Buddy Comm) clock went low too quickly\n")
                     return -1
-                if GPIO.input(DATA_PIN_FROM_SRAD2) == GPIO.HIGH:  # Checking if the data pin is high
+                if GPIO.input(DATA_PIN_FROM_BUDDY) == GPIO.HIGH:  # Checking if the data pin is high
                     num = num | 0b1  # Setting the last bit to 1
                 if i == 0:
                     time_of_getting_first_bit = time.time()
@@ -111,7 +138,7 @@ class BuddyComm:
                         return -1
                     pass
                 num = num << 1  # Shifting the number to the left by 1 bit
-                while GPIO.input(CLOCK_PIN_FROM_SRAD2) == GPIO.HIGH:  # Waiting for the clock pin to go low
+                while GPIO.input(CLOCK_PIN_FROM_BUDDY) == GPIO.HIGH:  # Waiting for the clock pin to go low
                     pass
                 print("clock is low")
             return num >> 1  # Shifting the number to the right by 1 bit to get rid of the extra bit

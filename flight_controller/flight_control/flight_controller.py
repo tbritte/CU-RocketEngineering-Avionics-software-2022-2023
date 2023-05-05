@@ -181,9 +181,9 @@ def main():
             data['cputemp'] = cpu.temperature
             data['predicted_apogee'] = 0
 
-            print("STATUS: ", flight_status.current_stage_name())
+            # print("STATUS: ", flight_status.current_stage_name())
             # print("Buddy Comm messages: ", buddy_comm.get_messages())
-            print("Data: ", data)
+            # print("Data: ", data)
 
             # print("\n\n", data)
             try:
@@ -264,23 +264,39 @@ def main():
                 print("Error updating flight status")
 
             """
-            Doing stuff based on messages received from SRAD2
+            Dealing with the messages from SRAD 2
             """
-            bc_messages = buddy_comm.get_messages()
-            if 0 in bc_messages:
-                flight_status.payload_deployed = True
-                if bc_messages.count(0) > 1:
-                    print("Payload arm retracted")
-                print("(buddy) Payload deployed")
-            if 1 in bc_messages:
-                print("(buddy) SRAD2 is armed and flight ready")
-                flight_status.srad2_ready = True
-            if 2 in bc_messages:
-                flight_status.go_pro_2_on = True
-                print("(buddy) GoPro 2 on")
-            if 3 in bc_messages:
-                flight_status.go_pro_3_on = True
-                print("(buddy) GoPro 3 on")
+
+            if buddy_comm.check_num(0):
+                if not flight_status.payload_deployed:
+                    flight_status.payload_deployed = True
+                    print("(buddy) Payload deployed")
+                else:
+                    print("(buddy )Payload arm retracted")
+
+            if buddy_comm.check_num(1):
+                if not flight_status.srad2_ready:
+                    print("(buddy) SRAD2 ready")
+                    flight_status.srad2_ready = True
+                else:
+                    print("(buddy) SRAD2 not ready")
+                    flight_status.srad2_ready = False
+
+            if buddy_comm.check_num(2):
+                if not flight_status.go_pro_2_on:
+                    flight_status.go_pro_2_on = True
+                    print("(buddy) GoPro 2 on")
+                else:
+                    flight_status.go_pro_2_on = False
+                    print("(buddy) GoPro 2 off")
+
+            if buddy_comm.check_num(3):
+                if not flight_status.go_pro_3_on:
+                    flight_status.go_pro_3_on = True
+                    print("(buddy) GoPro 3 on")
+                else:
+                    flight_status.go_pro_3_on = False
+                    print("(buddy) GoPro 3 off")
 
             if led_controller is not None:
                 led_controller.update_lights()

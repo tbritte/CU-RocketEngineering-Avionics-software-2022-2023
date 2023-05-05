@@ -82,7 +82,7 @@ class FlightStatus:
             altitude (float): The altitude to add to the list.
         """
         self.altitude_list.append(altitude)
-        if len(self.altitude_list) == 65:
+        if len(self.altitude_list) == 65:  # 64 samples (8 seconds of data)
             self.altitude_list.pop(0)
         elif len(self.altitude_list) > 65:
             print('CRITICAL ERROR: Too many altitude variables stored')
