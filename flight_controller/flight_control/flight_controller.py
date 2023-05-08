@@ -31,7 +31,7 @@ start_time = time.time()
 date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
 
 # Main chute deploy altitude in meters
-MAIN_CHUTE_DEPLOY_ALT = 304.8
+MAIN_CHUTE_DEPLOY_ALT = 304.8  # 1000 ft
 DROGUE_CHUTE_PIN = 25
 MAIN_CHUTE_PIN = 17
 
@@ -63,7 +63,7 @@ def data_pprint(data: dict):
 
 def alt_bat_test():
     """
-    Tests how long altitude came be collected before the battery drains. Also heat testing
+    Tests how long altitude can be collected before the battery drains. Also heat testing
     """
     input("PRESS ENTER TO START ALT_BAT_TEST")  # Wait for user to press enter to prevent auto start
 
@@ -343,8 +343,8 @@ def main():
 
         except Exception as e:
             print(
-                "\n\n     %%%%%MAIN ERROR -- No error should be caught by this, errors should be handled closer to the exception: " + str(
-                    e) + "%%%%%%%\n\n")
+                "\n\n     %%%%%  FATAL ERROR -- No error should be caught by this, errors should be handled closer to the exception --: " + str(
+                    e) + "     FATAL ERROR %%%%\n\n")
 
 
 if __name__ == '__main__':

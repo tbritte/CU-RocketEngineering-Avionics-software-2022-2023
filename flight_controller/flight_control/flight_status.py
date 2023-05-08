@@ -5,7 +5,7 @@ import time
 
 
 class Stage(Enum):
-    UNARMED = 0
+    UNARMED = 0  # No longer used
     PRE_FLIGHT = 1
     IN_FLIGHT = 2
     DESCENT = 3
@@ -161,7 +161,7 @@ class FlightStatus:
         lm = median(self.altitude_list)  # Entire list, 8 seconds, there is no rush to detect landing
         v_acl = median(self.vertical_acceleration_list)  # Last 4 samples (0.5 seconds)
         # Altitude is already relative to base altitude. Checking if we are below 10 meters above base altitude
-        # and if the vertical acceleration is near gravity (1g)
+        # and if the vertical acceleration is near gravity (1g +- 0.5g)
         return lm < 10 and abs(v_acl - 9.8) < .5
 
     def too_fast_descent(self) -> bool:
@@ -188,6 +188,7 @@ class FlightStatus:
 
             if change_in_alt_from_one_second_ago > 50:  # 50 m/s
                 # We are going down too fast, but let's make sure the velocity is increasing from previous seconds
+                # We shouldn't expect the velocity to be increasing at 9.8 m/s^2 due to drag, so we will check for 8 m/s^2
                 if change_in_alt_from_one_second_ago > change_in_alt_from_two_second_ago + 8:  # Gained 8 m/s in 1 second i.e. 8 m/s^2
                     if change_in_alt_from_two_second_ago > change_in_alt_from_three_second_ago + 8:  # Gained 8 m/s in 1 second i.e. 8 m/s^2
                         return True
