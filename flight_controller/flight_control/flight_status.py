@@ -146,11 +146,12 @@ class FlightStatus:
         Returns:
             bool: True if the rocket has passed the apogee, False otherwise.
         """
-        lm = median(self.altitude_list[64 - 8:])  # Newest 8 samples (1 seconds)
-        fm = median(self.altitude_list[64 - 16:64 - 8])  # Second newest 8 samples 1 to 2 second ago)
+        one_second = median(self.altitude_list[64 - 8:])  # Newest 8 samples (1 seconds)
+        two_second = median(self.altitude_list[64 - 16:64 - 8])  # Second newest 8 samples 1 to 2 second ago)
+        three_second = median(self.altitude_list[64 - 24:64 - 16])  # Third newest 8 samples (2 to 3 seconds ago)
         # v_acl = median(self.vertical_acceleration_list)  # Last 4 samples (0.5 seconds)
         # Vertical acceleration should be close to gravity (1g) because the engine should be off
-        return lm < fm
+        return one_second < two_second < three_second
 
     def check_landed(self) -> bool:
         """Determines if the rocket has landed.
@@ -167,7 +168,7 @@ class FlightStatus:
     def too_fast_descent(self) -> bool:
         """
         Determines if the rocket is descending too fast which implies that the drogue chute failed
-        This is to deploy the main chute to avoid waiting till we are too fast
+        This is to deploy the main chute or to try deploying the drogue again to avoid waiting till we are too fast
 
         The too fast speed is 50 m/s
         """
@@ -184,11 +185,12 @@ class FlightStatus:
             change_in_alt_from_two_second_ago = altitude_two_second_ago_m - altitude_one_second_ago_m
             change_in_alt_from_three_second_ago = altitude_three_second_ago_m - altitude_two_second_ago_m
 
-
-
             if change_in_alt_from_one_second_ago > 50:  # 50 m/s
                 # We are going down too fast, but let's make sure the velocity is increasing from previous seconds
                 # We shouldn't expect the velocity to be increasing at 9.8 m/s^2 due to drag, so we will check for 8 m/s^2
+
+                # WARNING, 8 m/s^2 is a guess, it could definitely be a lower value in the case of a partial chute deployment
+
                 if change_in_alt_from_one_second_ago > change_in_alt_from_two_second_ago + 8:  # Gained 8 m/s in 1 second i.e. 8 m/s^2
                     if change_in_alt_from_two_second_ago > change_in_alt_from_three_second_ago + 8:  # Gained 8 m/s in 1 second i.e. 8 m/s^2
                         return True

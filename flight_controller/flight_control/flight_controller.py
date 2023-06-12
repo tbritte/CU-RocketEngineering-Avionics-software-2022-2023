@@ -38,6 +38,8 @@ MAIN_CHUTE_PIN = 17
 USING_SENSE_HAT = False
 USING_SIM_DATA = False
 
+PRINT_STATUS = True
+
 
 # def startup(telemetry_handler: TelemetryHandler, telemetry_downlink: TelemetryDownlink):
 #     telemetry_handler.setup()
@@ -94,7 +96,7 @@ def alt_bat_test():
 
 
 def main():
-    hello = input("PRESS ENTER TO START")
+    input("PRESS ENTER TO START")  # Prevents autostart
     drogue_deployed = False
     main_deployed = False
 
@@ -181,7 +183,8 @@ def main():
             data['cputemp'] = cpu.temperature
             data['predicted_apogee'] = 0
 
-            # print("STATUS: ", flight_status.current_stage_name())
+            if PRINT_STATUS:
+                print("\n STATUS: ", flight_status.current_stage_name())
             # print("Buddy Comm messages: ", buddy_comm.get_messages())
             # print("Data: ", data)
 

@@ -21,7 +21,7 @@ class SimTelemetryHandler:
 
         # Getting elapsed time to query the csv data with
         elapsed_time = time.time() - self.start_time + 350  # To get to the exciting part of the flight
-        print("Time till apogee: ", 377 - elapsed_time)
+        print("\n(SIM) Time till apogee: ", 377 - elapsed_time, "Time till launch: ", 366.595 - elapsed_time, "\n")
         # Using the time column to find the closest time to the elapsed time and then using that index to get the data
         index = np.abs(self.data[:,0] - elapsed_time).argmin()
 
