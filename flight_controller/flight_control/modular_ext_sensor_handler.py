@@ -15,11 +15,11 @@ class ModDataHandler:
         self.gps = gps.GPS()
         self.gps.start()
 
-        # self.sox = sox.SOX()
-        # self.sox.start()
+        self.sox = sox.SOX()
+        self.sox.start()
 
-        self.bno = bno08x.BNO08X()
-        self.bno.start()
+        # self.bno = bno08x.BNO08X()
+        # self.bno.start()
 
     def get_data(self):
         start_time = time.monotonic()
@@ -31,7 +31,7 @@ class ModDataHandler:
 
             # Can be swapped with the bno
             # sox_data = self.sox.get_data()
-            sox_data = self.bno.get_data()
+            sox_data = self.sox.get_data()
             print("Time to get sox data: ", time.monotonic() - start_time)
 
             if bmp_data is None:
