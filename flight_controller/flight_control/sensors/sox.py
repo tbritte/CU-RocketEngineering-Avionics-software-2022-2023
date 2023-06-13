@@ -7,6 +7,7 @@ from .sensor import Sensor
 import board
 import busio
 from adafruit_lsm6ds.lsm6dsox import LSM6DSOX  # Accelerometer
+
 import adafruit_lis3mdl  # Magnetometer
 
 class SOX(Sensor):

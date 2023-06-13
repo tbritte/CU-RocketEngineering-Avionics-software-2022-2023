@@ -23,6 +23,7 @@ class FlightStatus:
         self.time_of_apogee = 0
 
         self.drogue_failure = False
+        self.time_fired_backup_drogue = 0  # When the backup drogue was fired (only happens if drogue failure)
 
         self.payload_deployed = False
         self.go_pro_1_on = False
@@ -168,6 +169,7 @@ class FlightStatus:
     def too_fast_descent(self) -> bool:
         """
         Determines if the rocket is descending too fast which implies that the drogue chute failed
+        Returns false if it's been less than 3 seconds since apogee to give the drogue chute time to deploy/unravel
         This is to deploy the main chute or to try deploying the drogue again to avoid waiting till we are too fast
 
         The too fast speed is 50 m/s
@@ -222,6 +224,9 @@ class FlightStatus:
             # If we are moving too fast after apogee, we assume the drogue chute failed
             if self.stage.value == Stage.DESCENT.value and self.too_fast_descent():
                 self.drogue_failure = True
+
+
+
 
 
 

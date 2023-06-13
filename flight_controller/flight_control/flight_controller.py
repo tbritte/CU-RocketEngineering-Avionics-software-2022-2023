@@ -3,7 +3,7 @@ import time
 import datetime
 import random
 
-from .parachute import Parachute
+from .parachute import ParachuteHandler  # Handles the deployment of the parachutes
 
 from .flight_status import FlightStatus
 from .flight_status import Stage
@@ -32,7 +32,8 @@ date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
 
 # Main chute deploy altitude in meters
 MAIN_CHUTE_DEPLOY_ALT = 304.8  # 1000 ft
-DROGUE_CHUTE_PIN = 25
+PRIMARY_DROGUE_CHUTE_PIN = 25
+BACKUP_DROGUE_CHUTE_PIN = 5
 MAIN_CHUTE_PIN = 17
 
 USING_SENSE_HAT = False
@@ -100,9 +101,6 @@ def main():
     drogue_deployed = False
     main_deployed = False
 
-    drogue_chute = Parachute(DROGUE_CHUTE_PIN)
-    main_chute = Parachute(MAIN_CHUTE_PIN)
-
     if USING_SIM_DATA:
         telemetry_handler = SimTelemetryHandler()  # Uses previously collected data in a csv file
     else:
@@ -122,6 +120,10 @@ def main():
     buzzer = Buzzer()
 
     flight_status = FlightStatus(buzzer)
+
+    # Sets up the parachute handler
+    parachute_handler = ParachuteHandler(flight_status, MAIN_CHUTE_DEPLOY_ALT,
+                                         PRIMARY_DROGUE_CHUTE_PIN, BACKUP_DROGUE_CHUTE_PIN, MAIN_CHUTE_PIN)
 
     override_mode = False
     disarmed = False
@@ -308,8 +310,6 @@ def main():
             For single threaded temporal handling without using time.sleep() or another thread
             """
             buzzer.update()
-            drogue_chute.update()
-            main_chute.update()
             go_pro_1_cam_servo.update()
 
             """
@@ -321,20 +321,13 @@ def main():
                     camera.start_recording()
             if flight_status.current_stage() == Stage.DESCENT and not buddy_comm.has_sent(0):
                 buddy_comm.send(0)  # Tell SRAD2 that we have reached apogee
-            if flight_status.current_stage() == Stage.DESCENT and not drogue_chute.deployed and not disarmed:
-                print("DROGUE DEPLOYED")
-                drogue_chute.deploy()
-                drogue_deployed = True
-            if flight_status.current_stage() == Stage.DESCENT and flight_status.get_median_altitude_from_last_second() < MAIN_CHUTE_DEPLOY_ALT and not main_chute.deployed and not disarmed:
-                print("MAIN DEPLOY")
-                main_chute.deploy()
-                main_deployed = True
 
-            # Emergency main chute deployment
-            if flight_status.drogue_failure and not main_chute.deployed and not disarmed and flight_status.current_stage() == Stage.DESCENT:
-                print("Emergency main deploy")
-                main_chute.deploy()
-                main_deployed = True
+            """
+            Parachute deployment handling
+            """
+
+            parachute_handler.update(disarmed)
+
 
             """
             Shutting down the pi (5 seconds after receiving disarm command)
