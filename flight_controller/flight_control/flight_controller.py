@@ -43,6 +43,24 @@ USING_SIM_DATA = False
 if '--sim' in sys.argv or '-s' in sys.argv:
     USING_SIM_DATA = True
 
+if '--ej_charges' in sys.argv:
+    from .parachute import Parachute
+    drogue_p = Parachute(PRIMARY_DROGUE_CHUTE_PIN)
+    drogue_b = Parachute(BACKUP_DROGUE_CHUTE_PIN)
+    main = Parachute(MAIN_CHUTE_PIN)
+
+    for t in range(30):
+        print(t)
+        if t == 10:
+            drogue_p.deploy()
+        if t == 15:
+            drogue_b.deploy()
+        if t == 20:
+            main.deploy()
+        time.sleep(1)
+    exit()
+
+
 PRINT_STATUS = True
 
 
