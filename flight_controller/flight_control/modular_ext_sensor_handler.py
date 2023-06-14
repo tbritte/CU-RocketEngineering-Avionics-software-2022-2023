@@ -22,15 +22,16 @@ class ModDataHandler:
         # self.bno.start()
 
     def get_data(self):
-        start_time = time.monotonic()
         try:
+            start_time = time.monotonic()
             bmp_data = self.bmp180.get_data()
             print("Time to get bmp data: ", time.monotonic() - start_time)
+
+            start_time = time.monotonic()
             gps_data = self.gps.get_data()
             print("Time to get gps data: ", time.monotonic() - start_time)
 
-            # Can be swapped with the bno
-            # sox_data = self.sox.get_data()
+            start_time = time.monotonic()
             sox_data = self.sox.get_data()
             print("Time to get sox data: ", time.monotonic() - start_time)
 

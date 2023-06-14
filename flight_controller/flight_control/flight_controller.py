@@ -2,6 +2,7 @@ from subprocess import call
 import time
 import datetime
 import random
+import sys
 
 from .parachute import ParachuteHandler  # Handles the deployment of the parachutes
 
@@ -38,6 +39,9 @@ MAIN_CHUTE_PIN = 17
 
 USING_SENSE_HAT = False
 USING_SIM_DATA = False
+
+if '--sim' in sys.argv or '-s' in sys.argv:
+    USING_SIM_DATA = True
 
 PRINT_STATUS = True
 
