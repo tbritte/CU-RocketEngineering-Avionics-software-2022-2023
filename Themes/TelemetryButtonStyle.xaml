@@ -1,0 +1,22 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+
+    <Style TargetType="{x:Type Button}"
+        x:Key ="TelemetryDataButton">
+
+        <Style.Setters>
+
+            <Setter Property="MinWidth" Value="140"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Background" Value="#FDA126"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontFamily" Value="/Fonts/#Poppins"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+
+        </Style.Setters>
+
+    </Style>
+</ResourceDictionary>
