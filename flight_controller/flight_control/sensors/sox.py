@@ -25,7 +25,7 @@ class SOX(Sensor):
         Called when the class is initialized or when there is bad data
         """
         try:
-            self.lsm6dsox = LSM6DSOX(self.i2c)
+            self.lsm6dsox = LSM6DSOX(self.i2c, address=0x6A)
             self.functional = True
             print("    Accelerometer setup successful")
         except ValueError:
@@ -81,4 +81,8 @@ class SOX(Sensor):
                 print("OSError getting SOX data")
                 return None
         else:
-            return gyro + acceleration + magnetic_field
+            # Combining all of it into a single tuple with 9 values
+            combined = (acceleration[0], acceleration[1], acceleration[2],
+                        gyro[0], gyro[1], gyro[2],
+                        magnetic_field[0], magnetic_field[1], magnetic_field[2])
+            return combined
