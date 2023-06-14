@@ -76,13 +76,9 @@ class SOX(Sensor):
                 except Exception as e:
                     print("Error getting magnetic field: {}".format(e))
 
-                return acceleration, gyro, magnetic_field
+                return acceleration + gyro + magnetic_field
             except OSError:
                 print("OSError getting SOX data")
                 return None
         else:
-            # Combining all of it into a single tuple with 9 values
-            combined = (acceleration[0], acceleration[1], acceleration[2],
-                        gyro[0], gyro[1], gyro[2],
-                        magnetic_field[0], magnetic_field[1], magnetic_field[2])
-            return combined
+            return acceleration + gyro + magnetic_field
