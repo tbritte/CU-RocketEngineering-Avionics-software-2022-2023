@@ -44,7 +44,7 @@ class GPS(Sensor):
         except:
             pass
 
-        # print("GPS Buffer: " + self.gps_buffer)
+        # print("GPSvim  Buffer: " + self.gps_buffer)
 
         #  Looking through the newest date in the buffer for the GPGGA message
         #  This is the message that contains the GPS data
