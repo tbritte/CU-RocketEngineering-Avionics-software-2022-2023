@@ -55,6 +55,7 @@ if '--ej_charges' in sys.argv:
             drogue_p.deploy()
         if t == 15:
             drogue_b.deploy()
+
         if t == 20:
             main.deploy()
         time.sleep(1)
