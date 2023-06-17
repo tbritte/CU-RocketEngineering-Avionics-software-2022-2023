@@ -1,4 +1,4 @@
-from sense_hat import SenseHat
+# from sense_hat import SenseHat
 from time import sleep
 import time
 import math
@@ -28,6 +28,10 @@ from .sensors import bmp180
 from .buddy_comm import BuddyCommSystem
 
 buddy_comm = BuddyCommSystem()  # Used for receiving data operates in a separate thread
+
+"""
+Above are all the modules that came from SRAD 1's code base
+"""
 
 sense = SenseHat()
 sense.clear()  # Sense hat needs to be cleared at the start of every run
@@ -324,41 +328,63 @@ READING FORMAT:
 """
 
 
-def readComm():
-    global t
-    while True:
-        time_bit = 0
-        num = 0
-        for i in range(2):
-            while GPIO.input(clockRead) == GPIO.LOW:
-                sleep(0.0001)
-            sleep(0.05)
-            if GPIO.input(dataRead) == GPIO.HIGH:
-                num = num | 0b1
-            # if i == 0:
-            #     time_bit == time.time()
-            # if i == 1:
-            #     if time.time() - time_bit > 1:
-            #         sleep(0.5)
-            #         i = 3
-            num = num << 1
-            while GPIO.input(clockRead) == GPIO.HIGH:
-                sleep(0.0001)
-        # print("got a bit: ", num)
-        readnum = num >> 1
-        print(readnum)
-        if readnum is 0:
-            print('deploy')
-            drogueconfirm = True
-        if readnum is 1:
-            print('disarm')
-            # t = 4
-        if readnum is 2:
-            print('gopro2')
-            armCam(2)
-        if readnum is 3:
-            print('gopro3')
-            armCam(3)
+# def readComm():
+#     global t
+#     while True:
+#         time_bit = 0
+#         num = 0
+#         for i in range(2):
+#             while GPIO.input(clockRead) == GPIO.LOW:
+#                 sleep(0.0001)
+#             sleep(0.05)
+#             if GPIO.input(dataRead) == GPIO.HIGH:
+#                 num = num | 0b1
+#             # if i == 0:
+#             #     time_bit == time.time()
+#             # if i == 1:
+#             #     if time.time() - time_bit > 1:
+#             #         sleep(0.5)
+#             #         i = 3
+#             num = num << 1
+#             while GPIO.input(clockRead) == GPIO.HIGH:
+#                 sleep(0.0001)
+#         # print("got a bit: ", num)
+#         readnum = num >> 1
+#         print(readnum)
+#         if readnum is 0:
+#             print('deploy')
+#             drogueconfirm = True
+#         if readnum is 1:
+#             print('disarm')
+#             # t = 4
+#         if readnum is 2:
+#             print('gopro2')
+#             armCam(2)
+#         if readnum is 3:
+#             print('gopro3')
+#             armCam(3)
+
+
+def handle_received_buddy_messages():
+    global t, drogueconfirm
+    if buddy_comm.check_num(0):
+        # SRAD 1 thinks we have reached apogee
+        print("SRAD 1 thinks we have reached apogee -- deploying drogue")
+        drogueconfirm = True
+    if buddy_comm.check_num(1):
+        # Disarm message
+        print("Disarm message received")
+        t = 4
+    if buddy_comm.check_num(2):
+        # Need to turn on GoPro 2
+        print("Turning on GoPro 2")
+        armCam(2)
+    if buddy_comm.check_num(3):
+        # Need to turn on GoPro 3
+        print("Turning on GoPro 3")
+        armCam(3)
+
+
 
 
 def armCam(camval):  # Used to arm cameras 2 and 3
@@ -378,7 +404,8 @@ def armCam(camval):  # Used to arm cameras 2 and 3
     cam.ChangeDutyCycle(2)
     sleep(0.5)
     cam.stop()
-    buddyWrite.apply_async(writeComm, [camval])
+    # buddyWrite.apply_async(writeComm, [camval]) OLD
+    buddy_comm.send(camval)
 
 
 sense.show_message("CRE", text_colour=orange, back_colour=purple)  # Function displays "CRE" on LED screen on start
@@ -466,10 +493,11 @@ if telemcheck == 1:  # Modem port via USB, disabled by default but enabled by pr
     ser = serial.Serial("/dev/ttyUSB0", baudrate=57600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
                         bytesize=serial.EIGHTBITS, timeout=0)
 
-buddyRead = threading.Thread(target=readComm)
-buddyRead.start()
-buddyWrite = Pool(processes=1)
-buddyWrite.apply_async(writeComm, [1])
+# buddyRead = threading.Thread(target=readComm)
+# buddyRead.start()
+# buddyWrite = Pool(processes=1)
+# buddyWrite.apply_async(writeComm, [1])
+buddy_comm.send(1)
 beep = Pool(processes=1)
 beep.apply_async(beepAlt)
 
@@ -479,6 +507,9 @@ while t is 0:  # Flight mode loop, all important stuff done here
             t = 3
         else:
             sleep(0.01)
+
+
+
     sense.set_pixel(0, 0, red)  # Gather all basic sensor data
     date = datetime.datetime.now().strftime('%H:%M:%S.%f')
     pressure = sense.get_pressure()  # measured in mbar/hPa
@@ -729,7 +760,9 @@ while t is 0:  # Flight mode loop, all important stuff done here
             print("deploy")
             i = 1
             drogueconfirm = False
-            buddyWrite.apply_async(writeComm, [0])
+            # buddyWrite.apply_async(writeComm, [0])
+            buddy_comm.send(0)
+
             pdtime = datetime.datetime.now().strftime('%H:%M:%S')
         print(deploytimer, "deploy")
         sense.set_pixel(1, 6, (255, 255, 255))  # Pixel near bottom left lights white when payload is deployed
@@ -748,7 +781,8 @@ while t is 0:  # Flight mode loop, all important stuff done here
         motor.set_servo_pulsewidth(motorport, 1600)
         if retracttimer > 500:
             retractcheck = False
-            buddyWrite.apply_async(writeComm, [0])
+            # buddyWrite.apply_async(writeComm, [0])
+            buddy_comm.send(0)
             i = 3
             sense.set_pixel(1, 6, (0, 0, 0))  # light turns off upon retraction
     else:
