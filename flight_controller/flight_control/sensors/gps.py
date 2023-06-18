@@ -10,10 +10,25 @@ class GPS(Sensor):
 
 
     def setup(self):
-        self.gps = serial.Serial("/dev/ttyS0", baudrate=9600, timeout=0)
-        self.gps_buffer = ""
-        self.functional = True
-        print("     GPS setup successful")
+        try:
+            self.gps = serial.Serial("/dev/ttyS0", baudrate=9600, timeout=0)
+            self.gps_buffer = ""
+            self.functional = True
+            print("     GPS setup successful")
+        except serial.SerialException:
+            print("     GPS not found, check wiring")
+            self.gps = None
+            return
+        except FileNotFoundError:
+            print("     GPS not found, check wiring")
+            self.gps = None
+            return
+        except Exception as e:
+            print("     GPS not found, check wiring unknown error below")
+            print(e)
+            self.gps = None
+            return
+
 
     def find_gpgga_in_buffer(self):
         """
