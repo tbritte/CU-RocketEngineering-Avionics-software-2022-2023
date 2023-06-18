@@ -38,6 +38,9 @@ class TelemetryDownlink():
         except serial.serialutil.SerialException:
             print("No USB plugged in, telemetry downlink disabled")
             self.ser = None
+        except Exception as e:
+            print("Error opening serial port: ", e)
+            self.ser = None
 
         self.read_buffer = []
 
