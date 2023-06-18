@@ -26,7 +26,13 @@ class Sensor(Process):
             print("({}) Trying to setup again".format(self.sensor_name))
             self.setup()
 
-        # Testing how multiprocessing works
+        # Clearing the queue such that only the most recent data is stored
+        try:
+            while not self.queue.empty():
+                self.queue.get()
+        except Exception as e:
+            print("Exception clearing queue: ", e)
+
         self.queue.put(self.most_recent_data)
 
     def run(self):

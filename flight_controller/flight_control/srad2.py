@@ -1,4 +1,3 @@
-# from sense_hat import SenseHat
 from time import sleep
 import time
 import math
@@ -27,14 +26,17 @@ from .sensors import bmp180
 # Using the same buddy_comm module as SRAD 1 for consistency
 from .buddy_comm import BuddyCommSystem
 
+sox = sox.SOX()
+sox.start()
+
+bmp180 = bmp180.BMP180()
+bmp180.start()
+
 buddy_comm = BuddyCommSystem()  # Used for receiving data operates in a separate thread
 
 """
 Above are all the modules that came from SRAD 1's code base
 """
-
-sense = SenseHat()
-sense.clear()  # Sense hat needs to be cleared at the start of every run
 
 cpu = CPUTemperature()
 CPUtemp = cpu.temperature
@@ -59,7 +61,6 @@ motorport = 4
 GPIO.setup(buzzer, GPIO.OUT)
 GPIO.setup(cam2, GPIO.OUT)
 GPIO.setup(cam3, GPIO.OUT)
-GPIO.setup(clockRead, GPIO.IN)
 
 motor = pigpio.pi()
 motor.set_PWM_frequency(motorport, 1000)
@@ -100,80 +101,6 @@ blue = (0, 0, 255)
 yellow = (255, 255, 0)
 cyan = (0, 255, 255)
 clear = (0, 0, 0)
-
-
-def wait_screen():  # Code for paw print LED display
-    o = (245, 102, 0)
-    p = (82, 45, 128)
-    paw = [
-        p, p, p, o, o, p, p, p,  # 0000
-        o, o, p, o, o, p, o, o,  # 0000  0000  0000
-        o, o, p, o, p, o, o, o,  # 0000  00  000000
-        o, p, p, p, p, o, o, p,  # 00        0000
-        p, o, o, o, o, p, p, o,  # 00000000    00
-        o, o, o, o, o, p, o, o,  # 0000000000  0000
-        o, o, o, o, o, p, o, o,  # 0000000000  0000
-        p, o, o, o, o, p, p, p,  # 00000000
-    ]
-    sense.set_pixels(paw)
-
-
-def indicator(sensor):  # Function to format temp & altitude on LED display
-    row = 8
-    if sensor is temp:
-        col = 6
-        val = [0, 12.5, 25, 37.5, 50, 62.5, 75, 87.5]  # Temperature range, big problem if max value is reached
-        color = [(255, 0, 0), (252, 79, 0), (242, 118, 0), (226, 151, 0), (202, 181, 0), (170, 208, 0), (125, 232, 0),
-                 (0, 255, 0)]
-    elif sensor is curalt:
-        col = 2
-        val = [-100, 250, 500, 750, 1000, 1250, 1500, 1750]
-        #        val = [-100, 1, 2, 3, 4, 5, 6, 7]           # Altitude range, needs to be adjusted before flight
-        color = [(0, 0, 255), (0, 85, 255), (0, 104, 255), (0, 108, 214), (0, 108, 152), (0, 106, 92), (0, 104, 42),
-                 (0, 100, 0)]
-    if sensor is accel:
-        col = 7
-        sensor = abs(sensor) - 1
-        val = [-0.1, 0.25, 0.75, 1, 1.5, 2, 3, 4]  # Vertical acceleration range, only works vertically
-        color = [(255, 255, 0), (255, 229, 0), (255, 202, 0), (255, 173, 0), (255, 144, 0), (255, 112, 0), (255, 75, 0),
-                 (255, 0, 0)]
-    for x in val:
-        row = row - 1
-        if sensor > x:
-            sense.set_pixel(col, row, color[row])
-        else:
-            sense.set_pixel(col, row, clear)
-
-
-def check_orient(dir):  # Function to format gyro on LED display
-    if dir is orol:
-        pos = 5
-        for i in range(-4, 4):
-            if dir >= (i * 0.7854) and dir < ((i + 1) * 0.7854):
-                sense.set_pixel(pos, i + 4, yellow)
-            else:
-                sense.set_pixel(pos, i + 4, clear)
-    elif dir is opit:
-        pos = 4
-        for i in range(-4, 4):
-            # print(i*0.7854/2)
-            if dir >= (i * 0.7854 / 2) and dir < ((i + 1) * 0.7854 / 2):
-                sense.set_pixel(pos, i + 4, yellow)
-            else:
-                sense.set_pixel(pos, i + 4, clear)
-
-    elif dir is oyaw:
-        pos = 3
-        for i in range(-4, 4):
-            if dir >= (i * 0.7854) and dir < ((i + 1) * 0.7854):
-                sense.set_pixel(pos, i + 4, yellow)
-            else:
-                sense.set_pixel(pos, i + 4, clear)
-    # for i in range(0,8):
-    #    if dir >= (i*0.7854) and dir < ((i+1)*0.7854):       # LEDs update depending on orientation, increments of 45 degrees
-    #        sense.set_pixel(pos,i,yellow)                    # 45 degrees = 0.7854 rad
-    #    else:
-    #        sense.set_pixel(pos,i,clear)
 
 
 def maxmin(var):  # Gathers max/min of variables for Flight Summary
@@ -407,12 +334,9 @@ def armCam(camval):  # Used to arm cameras 2 and 3
     # buddyWrite.apply_async(writeComm, [camval]) OLD
     buddy_comm.send(camval)
 
-
-sense.show_message("CRE", text_colour=orange, back_colour=purple)  # Function displays "CRE" on LED screen on start
 sleep(0.15)
 t = 0
 GPIO.output(buzzer, GPIO.HIGH)
-wait_screen()  # Display paw print
 sleep(5)
 GPIO.output(buzzer, GPIO.LOW)
 telemcheck = 0
@@ -437,14 +361,12 @@ motor.set_servo_pulsewidth(motorport, 1500)
 #            sleep(0.01)
 #    wait_screen()
 
-sense.clear()  # Clear LED display and setup variables
-sense.set_imu_config(True, True, True)
 sleep(0.25)
 trigtime = round(time.time() * 1000)
 trigdate = datetime.datetime.now().strftime('%H:%M:%S')
-startpressure = sense.get_pressure()  # All these values are used as starting values
-starttemp = sense.get_temperature()  # They serve little purpose other than comparing launchsite conditions to the rest of the flight
-starthumidity = sense.get_humidity()
+
+startalt, startpressure, starttemp = bmp180.get_data()
+
 starttime = round(time.time() * 1000)
 curtime = round(time.time() * 1000)
 curtimeap = curtime
@@ -465,8 +387,8 @@ descenttime = 0
 landdate = 0
 maxaccel = 0
 minaccel = 0
-maxvar = [1, starttemp, startpressure, starthumidity, 0, 0, CPUtemp]
-minvar = [1, starttemp, startpressure, starthumidity, 0, 0, CPUtemp]
+maxvar = [1, starttemp, startpressure, startalt, 0, 0, CPUtemp]
+minvar = [1, starttemp, startpressure, startalt, 0, 0, CPUtemp]
 maxtime = [startdate, startdate, startdate, startdate, startdate, startdate, startdate]
 mintime = [startdate, startdate, startdate, startdate, startdate, startdate, startdate]
 alt = (288.15 / -0.0065 * (((startpressure / 1013.25) ** 0.1903) - 1))
@@ -501,61 +423,24 @@ buddy_comm.send(1)
 beep = Pool(processes=1)
 beep.apply_async(beepAlt)
 
-while t is 0:  # Flight mode loop, all important stuff done here
-    for event in sense.stick.get_events():  # Trigger to manually end flight mode
-        if event.action == "pressed":  # Activate by pressing joystick
-            t = 3
-        else:
-            sleep(0.01)
-
-
-
-    sense.set_pixel(0, 0, red)  # Gather all basic sensor data
+while t == 0:  # Flight mode loop, all important stuff done here
     date = datetime.datetime.now().strftime('%H:%M:%S.%f')
-    pressure = sense.get_pressure()  # measured in mbar/hPa
-    temp = sense.get_temperature()  # measured in celsius, gets residual heat from the CPU
-    humidity = sense.get_humidity()  # measured in %
-    sense.set_pixel(0, 1, red)  # Gather complex accel/gyro data
-    acceleration = sense.get_accelerometer_raw()
-    az = -acceleration['x']  # 'x' is a line running from usb ports to sd card, long-ways on the pi
-    ay = acceleration['y']  # 'y' is a line running from GPIO to hdmi port, short-ways on the pi
-    ax = acceleration['z']  # 'z' is a line running up and down on the pi, perpendicular to the board
+
+    ax, ay, az = sox.get_data()[:3]
     accel = math.sqrt(ax ** 2 + ay ** 2 + az ** 2)
-    orient = sense.get_orientation_radians()
-    opit = orient['pitch']  # pitch orientation (0-90, 180-270, rotation around y-axis)
-    orol = orient['roll']  # roll orientation (0-360, rotation around x-axis)
-    oyaw = orient['yaw']  # yaw orientation (0-360, rotation around z-axis)
-    gyro = sense.get_gyroscope_raw()
-    vrol = gyro['x']  # roll velocity, radial velocity around x-axis
-    vpit = gyro['y']  # pitch velocity, radial velocity around y-axis
-    vyaw = gyro['z']  # yaw velocity, radial velocity around z-axis
 
-    # axtrue = ax*(cos(oyaw)*cos(opit)) + ay*(cos(oyaw)*sin(opit)*sin(orol)-sin(oyaw)*cos(orol)) + az*(cos(oyaw)*sin(opit)*cos(orol)+sin(oyaw)*sin(opit))
-    # aytrue = ax*(sin(oyaw)*cos(opit)) + ay*(sin(oyaw)*sin(opit)*sin(orol)+cos(oyaw)*cos(orol)) + az*(sin(oyaw)*sin(opit)*cos(orol)-cos(orol)*sin(opit))
-    # aztrue = -ax*sin(opit) + ay*cos(opit)*sin(orol) + az*cos(opit)*cos(orol)
+    print("accel:", accel)
 
-    # axtrue = round(axtrue, 2)
-    # aytrue = round(aytrue, 2)
-    # aztrue = round(aztrue, 2)
-
-    azvect = az * sin(opit) + ay * cos(opit) * sin(orol) + ax * cos(opit) * cos(
-        orol)  # True vertical acceleration, ignores rocket orientation
-    # print(azvect)
-
-    # print(accel)
-
-    sense.set_pixel(0, 2, red)  # Calculate altitude/predict apogee
     lastalt = curaltm
     lastvel = curvel
     lasttime = looptime
     looptime = round(time.time() * 1000)
     timedif = (looptime - lasttime) / 1000
     if state is 'launchpad':
-        alt = (288.15 / -0.0065 * (
-                    ((pressure / 1013.25) ** 0.1903) - 1))  # Base altitude, or whatever altitude the rocket starts at
+        alt = bmp180.get_data()[0] # Base altitude, or whatever altitude the rocket starts at
         curvel = 0  # Base altitude constantly adjusted at launchpad to prevent drift in readings
-    curaltm = (288.15 / -0.0065 * (
-                ((pressure / 1013.25) ** 0.1903) - 1)) - alt  # Current altitude relative to launchpad
+    curaltm = bmp180.get_data()[0]  # Gets current altitude from BMP180
+
     curalt = curaltm * 3.28
     apaz = (azvect - 1) * 9.81  # True vertical acceleration, removes normal force from accelerometer
     # if apaz < 0.01 or apaz > -0.01:
@@ -572,82 +457,7 @@ while t is 0:  # Flight mode loop, all important stuff done here
 
     velcheck = (curaltm - lastalt) * 3.28 / timedif
 
-    sense.set_pixel(0, 3, red)  # Send telemetry, round all values
-
-    # print(apaz)
-
-    # Telemetry runs regardless of it being enabled, but data will only be transmitted if enabled
-    # Telemetry data will be printed onto a text file in case it's disabled
-    telem_data = [bin(ord(c))[2:].rjust(8, '0') for c in strstart]
-    for c in range(0, 8):
-        telem_data.append('0')
-    numbin = bin(MFC1)[2:].rjust(8, '0')  # Counters to determine how many loops have passed
-    telem_data.insert(3, numbin)  # A total of 65535 loops can be run in the program
-    telem_data.pop(4)  # This is almost 2 hours of runtime
-    numbin = bin(MFC2)[2:].rjust(8,
-                                 '0')  # This will only be maxxed if the rocket idles on the launchpad for over 100 minutes
-    telem_data.insert(4, numbin)  # If maxxed out, the timer resets
-    telem_data.pop(5)
-    MFC1 += 1
-    if MFC1 == 256:
-        MFC2 += 1
-        MFC1 = 0
-    if MFC2 == 256:
-        MFC2 = 0
-        MFC1 = 0
-    statestr = bin(statebyt)[2:].rjust(8,
-                                       '0')  # Instead of the state string, a byte will be used to communicate rocket's state
-    telem_data.insert(5, statestr)  # '0' for launchpad, '1' for launch, '2' for apogee, '3' for descent, '4' for landed
-    telem_data.pop(6)
-    data = [appred, accel, temp, pressure, curalt]  # Data that's being transmitted
-    for c in range(0, 5):  # All of these variables are converted to 4-byte binary
-        numbin = numtobin(data[c])
-        telem_data.insert(c + 6, numbin)
-        telem_data.pop(c + 7)
-    telem_data.insert(11, checksum(curalt,
-                                   pressure))  # checksum adds bytes of pressure and curalt to check if data is correct
-    telemstr = ''.join(telem_data)  # This is the final string being transmitted
-    with open(loc + "Telemetry {}.txt".format(startdate), "a") as file5:  # Print telemetry data to a file
-        file5.write("{}".format(telemstr))
-    if telemcheck == 1:
-        ser.write(telemstr)
-    # print(telem_data)
-
-    accel = round(accel, 3)  # Rounding all variables, placed after the telemetry for precision
-    temp = round(temp, 2)
-    pressure = round(pressure, 3)
-    humidity = round(humidity, 2)
-    ax = round(ax, 3)
-    ay = round(ay, 3)
-    az = round(az, 3)
-    vrol = round(vrol, 3)
-    vpit = round(vpit, 3)
-    vyaw = round(vyaw, 3)
-    orol = round(orol, 2)
-    opit = round(opit, 2)
-    oyaw = round(oyaw, 2)
-    curalt = round(curalt, 2)
-    curvel = round(curvel, 3)
-    appred = round(appred, 2)
-    azvect = round(azvect, 2)
-    apaz = round(apaz, 3)
-    timedif = round(timedif, 5)
-    sense.set_pixel(1, 7, clear)  # Clears transmission LED, can go anywhere
-
-    # print(axtrue, aytrue, aztrue)
-
-    sense.set_pixel(0, 4, red)  # Functions to update LED display
-
-    check_orient(orol)  # check_orient() displays a single LED based on the orientation of each axis
-    check_orient(opit)
-    check_orient(oyaw)
-    indicator(temp)  # indicator() displays its values on a range, filling a bar as the value increases
-    indicator(curalt)
-    indicator(accel)
-
-    sense.set_pixel(0, 5, red)  # Update flight states
     if state is 'launchpad':  # Rocket on launchpad
-        sense.set_pixel(1, 0, (0, 255, 255))
         timeint = 5000  # Printing interval on launchpad, set to 5 seconds
         padtime = (curtime - trigtime) / 1000  # Time rocket is on pad
         launchstart = curtime  # Time of launch, constantly updated until launch is detected
@@ -661,7 +471,6 @@ while t is 0:  # Flight mode loop, all important stuff done here
                 camera.rotation = 180
                 camera.start_recording(loc + 'video{}.h264'.format(startdate))  # Uncomment if cam used
     if state is 'launch':  # Climbing altitude
-        sense.set_pixel(1, 1, (0, 255, 255))
         timeint = 125  # Printing interval during flight, set to 0.25 seconds
         launchtime = (curtime - launchstart) / 1000  # Time in 'launch' state
         statebyt = 1
@@ -675,7 +484,6 @@ while t is 0:  # Flight mode loop, all important stuff done here
             apstart = round(time.time() * 1000)
             # drogueconfirm = True
     if state is 'apogee':  # Beginning descent, drogue deployed
-        sense.set_pixel(1, 2, (0, 255, 255))
         aptime = (curtime - apstart) / 1000  # Time between drogue deployment and main deployment
         statebyt = 2
         if drogueconfirm is False and curalt <= 2500 and curalt > 1000 and i is 0:
@@ -694,7 +502,6 @@ while t is 0:  # Flight mode loop, all important stuff done here
             descentdate = datetime.datetime.now().strftime('%H:%M:%S')  # Time main chute deploys
             descentstart = round(time.time() * 1000)
     if state is 'descent':  # Main chute deployed
-        sense.set_pixel(1, 3, (0, 255, 255))
         descenttime = (curtime - descentstart) / 1000  # Time between main chute and landing
         statebyt = 3
         if curalt < 100 and azvect < 1.1:  # Altitude needs to be less than 100ft above launchsite and standard vertical acceleration sustained
