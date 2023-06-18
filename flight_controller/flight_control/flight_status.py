@@ -153,7 +153,10 @@ class FlightStatus:
         three_second = median(self.altitude_list[64 - 24:64 - 16])  # Third newest 8 samples (2 to 3 seconds ago)
         # v_acl = median(self.vertical_acceleration_list)  # Last 4 samples (0.5 seconds)
         # Vertical acceleration should be close to gravity (1g) because the engine should be off
-        return one_second < two_second < three_second
+
+        # Taking the average of the two_second and three_second medians for sooner apogee detection compared to
+        # making sure one_second is less than both of them.
+        return one_second < (two_second + three_second) / 2
 
     def check_landed(self) -> bool:
         """Determines if the rocket has landed.

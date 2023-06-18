@@ -44,6 +44,8 @@ def main():
             last_flight_status_update = time.time()
             flight_status.new_telemetry(data)
 
+        print(flight_status.stage, flight_status.altitude_list[-1])
+
         """Checking if I should deploy the payload"""
         if not deployed_payload and flight_status.stage == Stage.DESCENT:
             deployed_payload = True
