@@ -38,13 +38,15 @@ def main():
     last_flight_status_update = time.time()
 
     while not terminate:
+        time.sleep(.01)
+
         """Data and flight status update"""
         data = data_handler.get_data()
         if time.time() - last_flight_status_update > .125:  # Update flight status every 1/8th of a second
             last_flight_status_update = time.time()
             flight_status.new_telemetry(data)
 
-        print(flight_status.stage, flight_status.altitude_list[-1])
+        print(flight_status.stage, flight_status.altitude_list[-1] if len(flight_status.altitude_list) > 0 else None)
 
         """Checking if I should deploy the payload"""
         if not deployed_payload and flight_status.stage == Stage.DESCENT:
