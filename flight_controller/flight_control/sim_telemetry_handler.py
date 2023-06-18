@@ -27,9 +27,16 @@ class SimTelemetryHandler:
 
         # Using the index to get data
         altitude = self.data[index, 1]
+        altitude_next = self.data[index + 1, 1]
 
         # Average of the three axis, only one axis is significant, so the avg doesn't have a difference from vertical
         acl_avg = self.data[index, 2]
+        acl_avg_next = self.data[index + 1, 2]
+
+        # Taking a combination of the two data points with more weight based on how close the elapsed time is to the data point
+        # This is to make the data more realistic
+        altitude = altitude * (1 - (elapsed_time - self.data[index, 0]) / (self.data[index + 1, 0] - self.data[index, 0])) + altitude_next * ((elapsed_time - self.data[index, 0]) / (self.data[index + 1, 0] - self.data[index, 0]))
+        acl_avg = acl_avg * (1 - (elapsed_time - self.data[index, 0]) / (self.data[index + 1, 0] - self.data[index, 0])) + acl_avg_next * ((elapsed_time - self.data[index, 0]) / (self.data[index + 1, 0] - self.data[index, 0]))
 
         # print("USEFUL DATA FROM SIMULATION: ", elapsed_time, altitude, acl_avg)
 
