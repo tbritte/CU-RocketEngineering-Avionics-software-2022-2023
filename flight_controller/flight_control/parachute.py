@@ -52,6 +52,7 @@ class ParachuteHandler:
         self.drogue_backup = Parachute(backup_drogue_pin)
 
         self.main = Parachute(main_pin)
+        self.did_emergency_main = False
 
     def update(self, disarmed):
         if self.flight_status.current_stage() == Stage.DESCENT and not disarmed:
@@ -83,3 +84,4 @@ class ParachuteHandler:
                     # we deploy the main chute early
                     print("(Parachute Handler) EMERGENCY MAIN DEPLOY")
                     self.main.deploy()
+                    self.did_emergency_main = True

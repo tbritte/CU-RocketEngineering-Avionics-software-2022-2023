@@ -26,13 +26,6 @@ class Sensor(Process):
             print("({}) Trying to setup again".format(self.sensor_name))
             self.setup()
 
-        # Clearing the queue such that only the most recent data is stored
-        try:
-            while not self.queue.empty():
-                self.queue.get()
-        except Exception as e:
-            print("Exception clearing queue: ", e)
-
         self.queue.put(self.most_recent_data)
 
     def run(self):
@@ -41,4 +34,8 @@ class Sensor(Process):
             time.sleep(.01)
 
     def get_data(self):
-        return self.queue.get()
+        # Getting the most recent of the queue
+        data = None
+        while not self.queue.empty():
+            data = self.queue.get()
+        return data

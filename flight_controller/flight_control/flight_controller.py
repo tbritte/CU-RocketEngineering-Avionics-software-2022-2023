@@ -3,6 +3,7 @@ import time
 import datetime
 import random
 import sys
+import RPi.GPIO as GPIO
 
 from .parachute import ParachuteHandler  # Handles the deployment of the parachutes
 
@@ -215,8 +216,9 @@ def main():
 
             # print("\n\n", data)
             try:
-                status_bits = flight_status.collect_status_bits(data, drogue_deployed, main_deployed, camera.recording,
-                                                            disarmed)
+                status_bits = flight_status.collect_status_bits(data, drogue_deployed, main_deployed,
+                                                            disarmed, parachute_handler.drogue_backup.deployed,
+                                                                parachute_handler.did_emergency_main)
             except Exception as e:
                 print("Error collecting status bits: ", e)
                 status_bits = 0
@@ -367,5 +369,15 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("Keyboard interrupt")
+    except Exception as e:
+        print("\n\n\nMain error, FATAL", e)
+    finally:
+        print("running GPIO.cleanup()")
+        GPIO.cleanup()
+        print("GPIO.cleanup() complete")
+        print("Shutting down")
     # alt_bat_test()

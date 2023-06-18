@@ -33,7 +33,8 @@ class FlightStatus:
         self.srad2_ready = False
 
 
-    def collect_status_bits(self, data, drouge_deployed, main_deployed, camera_recording, disarmed):
+    def collect_status_bits(self, data, drouge_deployed, main_deployed, disarmed, backup_drogue_deployed,
+                            emergency_main_deployed):
         try:
             e_spin = sum(abs(data["gyro_x"]) + abs(data["gyro_y"]) + abs(data["gyro_z"])) > 720
         except TypeError:
@@ -50,8 +51,8 @@ class FlightStatus:
                        "main deployed": main_deployed,
                        "touchdown": self.stage.value > Stage.DESCENT.value,
                        "payload deployed": self.payload_deployed,
-                       "Pi Cam 1 On": camera_recording,
-                        "Pi Cam 2 On": self.pi_cam2_on,
+                       "backup drogue": backup_drogue_deployed,
+                        "emergency main": emergency_main_deployed,
                         "Go Pro 1 On": self.go_pro_1_on,
                         "Go Pro 2 On": self.go_pro_2_on,
                         "Go Pro 3 On": self.go_pro_3_on,
