@@ -2,13 +2,13 @@
 import RPi.GPIO as GPIO
 import time
 
-CAM_SERVO_PIN = 22
+CAM_SERVO_PIN = 22  # Default pin for the camera servo, but can be changed in the constructor
 
 class CamServoController:
-    def __init__(self):
+    def __init__(self, pin=CAM_SERVO_PIN):
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(CAM_SERVO_PIN, GPIO.OUT)
-        self.pwm = GPIO.PWM(CAM_SERVO_PIN, 50)
+        GPIO.setup(pin, GPIO.OUT)
+        self.pwm = GPIO.PWM(pin, 50)
         self.pwm.start(2.5)  # Puts the servo where it's far from pushing the button
         self.button_depressed = False
         self.activated_time = 0

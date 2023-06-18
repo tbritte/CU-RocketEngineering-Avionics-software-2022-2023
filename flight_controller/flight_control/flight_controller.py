@@ -372,12 +372,12 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        print("Keyboard interrupt")
+        print("Keyboard interrupt exception caught")
     except Exception as e:
         print("\n\n\nMain error, FATAL", e)
     finally:
         print("running GPIO.cleanup()")
         GPIO.cleanup()
         print("GPIO.cleanup() complete")
-        print("Shutting down")
+        print("---\n---Shutdown---\n---")
     # alt_bat_test()
