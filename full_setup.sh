@@ -13,6 +13,10 @@ pip3 install adafruit-circuitpython-bno08x  # Alternative IMU
 pip3 install adafruit-circuitpython-lis3mdl
 pip3 install adafruit-circuitpython-lsm6ds
 
+# Library for payload motor control
+pip3 install TMC-2209-Raspberry-Pi
+
+
 
 
 

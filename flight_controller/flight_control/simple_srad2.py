@@ -13,6 +13,7 @@ from .flight_status import FlightStatus, Stage
 from .cam_servo import CamServoController
 from .buddy_comm import BuddyCommSystem
 from .buzzer import Buzzer
+from .payload_motor import Payload
 
 cam2 = 17  # Servo connects to GPIO 17 (6 down from top left), ground (5 down from top left) and 5v source (top right)
 cam3 = 11
@@ -23,6 +24,7 @@ def main():
     buddy_comm = BuddyCommSystem()
     buzzer = Buzzer()
     flight_status = FlightStatus(buzzer)
+    payload_controller = Payload()
 
     gopro_2 = CamServoController(cam2)
     gopro_3 = CamServoController(cam3)
@@ -48,9 +50,10 @@ def main():
 
         print(flight_status.stage, flight_status.altitude_list[-1] if len(flight_status.altitude_list) > 0 else None)
 
-        """Checking if I should deploy the payload"""
-        if not deployed_payload and flight_status.stage == Stage.DESCENT:
+        """Checking if I should deploy the payload which occurs 2 seconds after apogee"""
+        if not deployed_payload and flight_status.stage == Stage.DESCENT and time.time() - flight_status.time_of_apogee > 2:
             deployed_payload = True
+            payload_controller.deploy_payload()
             buddy_comm.send(0)  # 00 - Payload deployed
             print("----Deploying payload----")
             # STUFF NEEDS TO GO HERE AT SOME POINT
@@ -64,6 +67,9 @@ def main():
         # Updating the GoPros' servo positions
         gopro_2.update()
         gopro_3.update()
+
+        # Updating the payload motor
+        payload_controller.update()
 
 
 if __name__ == "__main__":
