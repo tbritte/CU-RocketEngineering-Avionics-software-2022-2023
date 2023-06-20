@@ -384,7 +384,7 @@ def main():
             """
             try:
                 if not flight_status.payload_deployed:
-                    if flight_status.has_hit_floor_alt and parachute_handler.main.deployed and time.time() - parachute_handler.main.deployed_time > 1.5:
+                    if flight_status.has_hit_floor_alt and parachute_handler.main.deployed and time.time() - parachute_handler.main.deploy_time > 1.5:
                         print("Deploying payload")
                         GPIO.output(PAYLOAD_PIN, GPIO.HIGH)
                         flight_status.payload_deployed = True

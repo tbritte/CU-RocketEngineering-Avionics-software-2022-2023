@@ -40,7 +40,7 @@ class SimTelemetryHandler:
 
         # print("USEFUL DATA FROM SIMULATION: ", elapsed_time, altitude, acl_avg)
 
-        altitude *= 2  # To get data more similar to a larger rocket
+        altitude *= 20  # To get data more similar to a larger rocket
 
         # Most value are zero
         data = {"latitude": 1345, "longitude": 7832,
