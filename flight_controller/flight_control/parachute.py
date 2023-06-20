@@ -91,5 +91,5 @@ class ParachuteHandler:
                     # We are still falling at a critical speed 2 seconds after trying the backup drogue,
                     # we deploy the main chute early
                     print("(Parachute Handler) EMERGENCY MAIN DEPLOY")
-                    self.main.deploy()
+                    # self.main.deploy()
                     self.did_emergency_main = True

@@ -29,13 +29,14 @@ class BMP180(Sensor):
         alts = []
         for _ in range(64):
             alts.append(self.get_new_data()[0])
-            time.sleep(0.01)
+            time.sleep(0.1)
 
         # Getting the median altitude to deal with outliers
         self.base_alt = np.median(alts)
         print("     BMP180 calibrated to {} meters".format(self.base_alt))
 
     def get_new_data(self):
+        time.sleep(0.1)
         if self.bmp180 is not None:
             try:
                 # Get the altitude from the BMP180 sensor

@@ -303,7 +303,7 @@ def main():
                 print("Error reading/using data from ground station " + str(e))
 
             try:
-                # Log the data to a csv file happens at 16hz
+                # Log the data to a csv file
                 telemetry_logger.log_data(data)
             except:
                 print("Error logging data")
