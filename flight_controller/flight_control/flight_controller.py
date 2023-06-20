@@ -416,6 +416,7 @@ if __name__ == '__main__':
         print("\n\n\nMain error, FATAL", e)
     finally:
         print("running GPIO.cleanup()")
+        GPIO.output(PAYLOAD_PIN, GPIO.LOW)
         GPIO.cleanup()
         print("GPIO.cleanup() complete")
         print("---\n---Shutdown---\n---")
