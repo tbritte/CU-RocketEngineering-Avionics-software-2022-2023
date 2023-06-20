@@ -316,7 +316,7 @@ def main():
                     last_flight_status_update = time.time()
             except:
                 print("Error updating flight status")
-
+            print("(flight_status) alt: ", flight_status.get_median_altitude_from_last_second())
             """
             Dealing with the messages from SRAD 2
             """

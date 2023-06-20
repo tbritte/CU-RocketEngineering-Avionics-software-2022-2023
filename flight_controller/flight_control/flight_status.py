@@ -220,7 +220,6 @@ class FlightStatus:
         Args:
             telemetry (dict): Current telemetry from the Sense Hat.
         """
-        print("(flight_status) alt: ", self.get_median_altitude_from_last_second())
         self.add_altitude(telemetry['altitude'])
         self.add_vertical_acceleration(abs(telemetry['acl_x']))
 
