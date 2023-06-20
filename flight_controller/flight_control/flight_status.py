@@ -3,6 +3,9 @@ from enum import Enum
 from statistics import median
 import time
 
+"""
+Mach lock
+"""
 
 class Stage(Enum):
     UNARMED = 0  # No longer used
@@ -31,6 +34,8 @@ class FlightStatus:
         self.go_pro_3_on = False
         self.pi_cam2_on = False
         self.srad2_ready = False
+
+        self.has_hit_floor_alt = False  # Has the rocket been to at least 2000 ft (609.9 meters)
 
 
     def collect_status_bits(self, data, drouge_deployed, main_deployed, disarmed, backup_drogue_deployed,
@@ -144,10 +149,15 @@ class FlightStatus:
         
         If the median of the last second of altitude values is less than the
         median of the previous values, declare apogee has passed
+
+        We also must pass the altitude floor to ensure we are not detecting apogee way too early.
         
         Returns:
             bool: True if the rocket has passed the apogee, False otherwise.
         """
+        if not self.has_hit_floor_alt:
+            return False
+
         one_second = median(self.altitude_list[64 - 8:])  # Newest 8 samples (1 seconds)
         two_second = median(self.altitude_list[64 - 16:64 - 8])  # Second newest 8 samples 1 to 2 second ago)
         three_second = median(self.altitude_list[64 - 24:64 - 16])  # Third newest 8 samples (2 to 3 seconds ago)
@@ -228,6 +238,11 @@ class FlightStatus:
             # If we are moving too fast after apogee, we assume the drogue chute failed
             if self.stage.value == Stage.DESCENT.value and self.too_fast_descent():
                 self.drogue_failure = True
+
+            # Checking if we have passed 2000 ft
+            if not self.has_hit_floor_alt and self.get_median_altitude_from_last_second() > 609.6:
+                print("(flight status) we have passed 2000ft (609.6 meters)")
+                self.has_hit_floor_alt = True
 
 
 

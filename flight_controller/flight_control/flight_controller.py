@@ -34,12 +34,18 @@ date = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
 
 # Main chute deploy altitude in meters
 MAIN_CHUTE_DEPLOY_ALT = 304.8  # 1000 ft
-PRIMARY_DROGUE_CHUTE_PIN = 25
-BACKUP_DROGUE_CHUTE_PIN = 5
-MAIN_CHUTE_PIN = 17
+PRIMARY_DROGUE_CHUTE_PIN = 100 # 25
+BACKUP_DROGUE_CHUTE_PIN = 100 # 5
+MAIN_CHUTE_PIN = 100 # 17
+PAYLOAD_PIN = 5
 
 USING_SENSE_HAT = False
 USING_SIM_DATA = False
+
+# Setting up the payload pin for output
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(PAYLOAD_PIN, GPIO.OUT)
+GPIO.output(PAYLOAD_PIN, GPIO.LOW)
 
 if '--sim' in sys.argv or '-s' in sys.argv:
     USING_SIM_DATA = True
@@ -139,7 +145,7 @@ def main():
                                   telemetry_handler.get_data_header_list(), start_time)
 
     telemetry_downlink = TelemetryDownlink()
-    buddy_comm = BuddyCommSystem()  # Used for receiving data operates in a separate thread
+    # buddy_comm = BuddyCommSystem()  # Used for receiving data operates in a separate thread
 
     buzzer = Buzzer()
 
@@ -156,7 +162,9 @@ def main():
     cpu = CPUTemperature()  # For getting the CPU temperature
 
     camera = Camera()
-    go_pro_1_cam_servo = CamServoController()
+    go_pro_1_cam_servo = CamServoController(1)
+    go_pro_2_cam_servo = CamServoController(2)
+    go_pro_3_cam_servo = CamServoController(3)
 
     # Only set up the LED controller if the sense hat is being used
     if USING_SENSE_HAT:
@@ -248,10 +256,26 @@ def main():
 
                     elif read_val == 2:
                         # TELL SRAD2 TO TURN GOPRO2 ON
-                        buddy_comm.send(2)
+                        # buddy_comm.send(2)
+                        # nvm, I turn it o
+                        print("Trying to start GoPro 2")
+                        go_pro_2_cam_servo.activate_camera()
+                        if flight_status.go_pro_2_on:
+                            flight_status.go_pro_2_on = False
+                        else:
+                            flight_status.go_pro_2_on = True
+
                     elif read_val == 3:
                         # TELL SRAD2 TO TURN GOPRO3 ON
-                        buddy_comm.send(3)
+                        # buddy_comm.send(3)
+                        # nvm, I turn it on
+                        print("Trying to start GoPro 3")
+                        go_pro_3_cam_servo.activate_camera()
+                        if flight_status.go_pro_3_on:
+                            flight_status.go_pro_3_on = False
+                        else:
+                            flight_status.go_pro_3_on = True
+
                     elif read_val == "RDY":
                         pass
                         # TELL SRAD2 TO BE READY
@@ -264,7 +288,7 @@ def main():
                               flight_status.current_stage_name())
 
                         # TELL SRAD2 TO DISARM
-                        buddy_comm.send(1)
+                        # buddy_comm.send(1)
 
                         # Disable parachute deployment systems
                         disarmed = True  # Also affect status bits
@@ -297,36 +321,36 @@ def main():
             Dealing with the messages from SRAD 2
             """
 
-            if buddy_comm.check_num(0):
-                if not flight_status.payload_deployed:
-                    flight_status.payload_deployed = True
-                    print("(buddy) Payload deployed")
-                else:
-                    print("(buddy )Payload arm retracted")
+            # if buddy_comm.check_num(0):
+            #     if not flight_status.payload_deployed:
+            #         flight_status.payload_deployed = True
+            #         print("(buddy) Payload deployed")
+            #     else:
+            #         print("(buddy )Payload arm retracted")
 
-            if buddy_comm.check_num(1):
-                if not flight_status.srad2_ready:
-                    print("(buddy) SRAD2 ready")
-                    flight_status.srad2_ready = True
-                else:
-                    print("(buddy) SRAD2 not ready")
-                    flight_status.srad2_ready = False
+            # if buddy_comm.check_num(1):
+            #     if not flight_status.srad2_ready:
+            #         print("(buddy) SRAD2 ready")
+            #         flight_status.srad2_ready = True
+            #     else:
+            #         print("(buddy) SRAD2 not ready")
+            #         flight_status.srad2_ready = False
 
-            if buddy_comm.check_num(2):
-                if not flight_status.go_pro_2_on:
-                    flight_status.go_pro_2_on = True
-                    print("(buddy) GoPro 2 on")
-                else:
-                    flight_status.go_pro_2_on = False
-                    print("(buddy) GoPro 2 off")
+            # if buddy_comm.check_num(2):
+            #     if not flight_status.go_pro_2_on:
+            #         flight_status.go_pro_2_on = True
+            #         print("(buddy) GoPro 2 on")
+            #     else:
+            #         flight_status.go_pro_2_on = False
+            #         print("(buddy) GoPro 2 off")
 
-            if buddy_comm.check_num(3):
-                if not flight_status.go_pro_3_on:
-                    flight_status.go_pro_3_on = True
-                    print("(buddy) GoPro 3 on")
-                else:
-                    flight_status.go_pro_3_on = False
-                    print("(buddy) GoPro 3 off")
+            # if buddy_comm.check_num(3):
+            #     if not flight_status.go_pro_3_on:
+            #         flight_status.go_pro_3_on = True
+            #         print("(buddy) GoPro 3 on")
+            #     else:
+            #         flight_status.go_pro_3_on = False
+            #         print("(buddy) GoPro 3 off")
 
             if led_controller is not None:
                 led_controller.update_lights()
@@ -336,6 +360,8 @@ def main():
             """
             buzzer.update()
             go_pro_1_cam_servo.update()
+            go_pro_2_cam_servo.update()
+            go_pro_3_cam_servo.update()
 
             """
             Stage change handling
@@ -344,14 +370,27 @@ def main():
             if flight_status.current_stage().value >= Stage.IN_FLIGHT.value:  # If we have taken off, then start recording
                 if not camera.recording:
                     camera.start_recording()
-            if flight_status.current_stage() == Stage.DESCENT and not buddy_comm.has_sent(0):
-                buddy_comm.send(0)  # Tell SRAD2 that we have reached apogee
+            # if flight_status.current_stage() == Stage.DESCENT and not buddy_comm.has_sent(0):
+            #     buddy_comm.send(0)  # Tell SRAD2 that we have reached apogee
 
             """
             Parachute deployment handling
             """
 
             parachute_handler.update(disarmed)
+
+            """
+            Payload deployment handling
+            """
+            try:
+                if not flight_status.payload_deployed:
+                    if flight_status.has_hit_floor_alt and parachute_handler.main.deployed:
+                        print("Deploying payload")
+                        GPIO.output(PAYLOAD_PIN, GPIO.HIGH)
+                        flight_status.payload_deployed = True
+            except Exception as e:
+                print("Error deploying payload: ", e)
+
 
 
             """

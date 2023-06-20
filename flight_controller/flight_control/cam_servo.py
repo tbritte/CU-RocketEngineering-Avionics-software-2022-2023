@@ -2,10 +2,15 @@
 import RPi.GPIO as GPIO
 import time
 
-CAM_SERVO_PIN = 22  # Default pin for the camera servo, but can be changed in the constructor
+CAM_SERVO_PINS = [22, 23, 24]
 
 class CamServoController:
-    def __init__(self, pin=CAM_SERVO_PIN):
+    def __init__(self, gopro_num):
+        """
+        :param gopro_num: The number of the GoPro (1, 2, or 3)
+        """
+        pin = CAM_SERVO_PINS[gopro_num - 1]
+
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(pin, GPIO.OUT)
         self.pwm = GPIO.PWM(pin, 50)

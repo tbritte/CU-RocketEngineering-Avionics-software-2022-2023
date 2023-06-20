@@ -16,6 +16,15 @@ pip3 install adafruit-circuitpython-lsm6ds
 # Library for payload motor control
 pip3 install TMC-2209-Raspberry-Pi
 
+# Put this in /boot/config.txt
+#enable_uart=1
+#dtoverlay=uart0
+#dtoverlay=uart1
+#dtoverlay=uart2
+#dtoverlay=uart3
+#dtoverlay=uart4
+#dtoverlay=uart5
+
 
 
 

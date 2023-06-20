@@ -1,3 +1,9 @@
+"""
+For controlling the TMC_2209 stepper driver
+Well likely not be used because an arduino will control it instead
+"""
+
+
 from TMC_2209.TMC_2209_StepperDriver import *
 import time
 
@@ -34,6 +40,8 @@ class Payload:
         self.deployed = False
         self.deploying = False
         self.deploying_start_time = 0
+
+        print("(payload motor) payload motor initialized")
 
     def deploy_payload(self):
         if not self.deployed and not self.deploying:

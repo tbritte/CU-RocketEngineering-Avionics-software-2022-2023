@@ -21,6 +21,7 @@ cam3 = 11
 use_sim = False
 
 def main():
+
     buddy_comm = BuddyCommSystem()
     buzzer = Buzzer()
     flight_status = FlightStatus(buzzer)
@@ -53,7 +54,6 @@ def main():
         """Checking if I should deploy the payload which occurs 2 seconds after apogee"""
         if not deployed_payload and flight_status.stage == Stage.DESCENT and time.time() - flight_status.time_of_apogee > 2:
             deployed_payload = True
-            payload_controller.deploy_payload()
             buddy_comm.send(0)  # 00 - Payload deployed
             print("----Deploying payload----")
             # STUFF NEEDS TO GO HERE AT SOME POINT

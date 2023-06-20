@@ -40,6 +40,8 @@ class SimTelemetryHandler:
 
         # print("USEFUL DATA FROM SIMULATION: ", elapsed_time, altitude, acl_avg)
 
+        altitude *= 2  # To get data more similar to a larger rocket
+
         # Most value are zero
         data = {"latitude": 1345, "longitude": 7832,
                 "gps_altitude": 0, "gps_time": 0, "gps_quality": 0, "gps_sat_num": 0,

@@ -2,22 +2,29 @@ import RPi.GPIO as GPIO
 from .flight_status import Stage
 import time
 
+# mach lock at 1500 ft.
+# must have been above 2000 ft to consider payload
+# after main is payload
+# Remove buddy comm stuff
 
 class Parachute:
+    """
+    All of the pinouts have been disabled because those pins are now being reused for other functions
+    """
     def __init__(self, pin) -> None:
-        self.pin = pin
-        GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.pin, GPIO.OUT)
-        GPIO.output(self.pin, GPIO.LOW)
+        # self.pin = pin
+        # GPIO.setwarnings(False)
+        # GPIO.setmode(GPIO.BCM)
+        # GPIO.setup(self.pin, GPIO.OUT)
+        # GPIO.output(self.pin, GPIO.LOW)
         self.deployed = False
         self.deploy_time = 0
 
     def deploy(self):
         """Deploys the parachute.
         """
-        print("(Parachute)  DEPLOY CALLED PIN IS", self.pin)
-        GPIO.output(self.pin, GPIO.HIGH)
+        print("(Parachute)  DEPLOY")
+        # GPIO.output(self.pin, GPIO.HIGH)
         self.deployed = True
         self.deploy_time = time.time()
 
@@ -31,7 +38,8 @@ class Parachute:
     def _kill_signal(self):
         """Kills the parachute signal to save electricity and prevent anything weird from happening.
         """
-        GPIO.output(self.pin, GPIO.LOW)
+        # GPIO.output(self.pin, GPIO.LOW)
+        pass
 
 
 class ParachuteHandler:
