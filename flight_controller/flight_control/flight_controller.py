@@ -68,6 +68,28 @@ if '--ej_charges' in sys.argv:
         time.sleep(1)
     exit()
 
+if '--servo' in sys.argv:
+    """
+    Testing all of the camera servos
+    """
+    print("Running Servo Test")
+    servos = []
+    for i in [1, 2, 3]:
+        print("Setting up cam servo {}".format(i))
+        servos.append(CamServoController(i))
+    print("All Cam Servos Setup")
+    time.sleep(1)
+
+    for i in [1, 2, 3]:
+        print("Activating Servo {}".format(i))
+        servos[i-1].activate_camera()
+        time.sleep(5)
+
+    print("DONE, cleaning GPIO")
+    GPIO.cleanup()
+    exit()
+
+
 
 PRINT_STATUS = True
 
@@ -307,7 +329,6 @@ def main():
                 telemetry_logger.log_data(data)
             except:
                 print("Error logging data")
-
             try:
                 if (time.time() - last_flight_status_update) > 0.1:  # Flight_status should only be updated at 8hz
                     print("Time since last flight status update should be .125...: ",

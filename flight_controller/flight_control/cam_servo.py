@@ -2,13 +2,14 @@
 import RPi.GPIO as GPIO
 import time
 
-CAM_SERVO_PINS = [22, 23, 24]
+CAM_SERVO_PINS = [26, 23, 16]   # cam servos 1, 2, and 3's pins
 
 class CamServoController:
     def __init__(self, gopro_num):
         """
         :param gopro_num: The number of the GoPro (1, 2, or 3)
         """
+        self.num = gopro_num
         pin = CAM_SERVO_PINS[gopro_num - 1]
 
         GPIO.setmode(GPIO.BCM)
@@ -20,7 +21,7 @@ class CamServoController:
         self.deactivated_time = 0
 
     def activate_camera(self):
-        print("\n\nACTIVATING CAMERA\n\n")
+        print("\n\nACTIVATING CAMERA {}\n\n".format(self.num))
         self.pwm.start(13)
         self.pwm.ChangeDutyCycle(13)
         self.button_depressed = True
