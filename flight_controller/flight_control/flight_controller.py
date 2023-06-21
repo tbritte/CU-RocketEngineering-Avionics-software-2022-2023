@@ -82,7 +82,7 @@ if '--servo' in sys.argv:
     i = 0
     start_time = time.time()
     while time.time() - start_time < 20:
-        if time.time() - st > 5:
+        if time.time() - st > 5 and i < len(servos):
             print("Activating camera {}".format(i + 1))
             st = time.time()
             servos[i].activate_camera()
