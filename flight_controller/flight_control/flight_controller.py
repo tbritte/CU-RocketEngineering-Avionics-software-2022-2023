@@ -19,7 +19,7 @@ from .modular_ext_sensor_handler import ModDataHandler  # The external sensors, 
 
 from .buddy_comm import BuddyCommSystem
 
-from .dacdta_logging import DataLogger
+from .data_logging import DataLogger
 
 from .camera import Camera
 from .cam_servo import CamServoController
