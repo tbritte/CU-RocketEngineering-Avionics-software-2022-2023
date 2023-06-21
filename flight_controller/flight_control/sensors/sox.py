@@ -81,4 +81,5 @@ class SOX(Sensor):
                 print("OSError getting SOX data")
                 return None
         else:
+            print("SOX not setup")
             return acceleration + gyro + magnetic_field

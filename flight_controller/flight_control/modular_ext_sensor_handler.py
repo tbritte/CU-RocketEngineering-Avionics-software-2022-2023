@@ -25,21 +25,22 @@ class ModDataHandler:
         try:
             start_time = time.monotonic()
             bmp_data = self.bmp180.get_data()
-            print("Time to get bmp data: ", time.monotonic() - start_time)
+            # print("Time to get bmp data: ", time.monotonic() - start_time)
 
             start_time = time.monotonic()
             gps_data = self.gps.get_data()
-            print("Time to get gps data: ", time.monotonic() - start_time)
+            # print("Time to get gps data: ", time.monotonic() - start_time)
 
             start_time = time.monotonic()
             sox_data = self.sox.get_data()
-            print("Time to get sox data: ", time.monotonic() - start_time)
+            # print("Time to get sox data: ", time.monotonic() - start_time)
 
             if bmp_data is None:
                 bmp_data = [0, 0, 0]
             if gps_data is None:
                 gps_data = [0, 0, 0, 0, 0, 0]
             if sox_data is None:
+                print("sox_data is None")
                 sox_data = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
             print("sox_data: ", sox_data)

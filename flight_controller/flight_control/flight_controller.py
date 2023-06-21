@@ -264,7 +264,7 @@ def main():
             try:
                 if telemetry_downlink.ser is not None:
                     # DON'T CHANGE DOWNLINK SPEED UNLESS YOU CHANGE GPS SAME TIME INCREMENT AMOUNT FROM .125
-                    if (time.time() - last_downlink_send) > 0:  # Downlink should only be sent at 8hz
+                    if (time.time() - last_downlink_send) > 0.016:  # Downlink should only be sent at 60hz
                         print("Time since last send: ", time.time() - last_downlink_send)
                         telemetry_downlink.send_data(data, status_bits)
                         last_downlink_send = time.time()
