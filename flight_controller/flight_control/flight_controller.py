@@ -331,8 +331,13 @@ def main():
                     
                     elif read_val == "PYLD":
                         print("Deploy payload because of PYLD command from ground station")
-                        GPIO.output(PAYLOAD_PIN, GPIO.HIGH)
-                        flight_status.payload_deployed = True
+                        if flight_status.payload_deployed:
+                            GPIO.output(PAYLOAD_PIN, GPIO.LOW)
+                            flight_status.payload_deployed = False
+
+                        elif not flight_status.payload_deployed:
+                            GPIO.output(PAYLOAD_PIN, GPIO.HIGH)
+                            flight_status.payload_deployed = True
 
 
             except Exception as e:
@@ -352,7 +357,7 @@ def main():
             except:
                 print("Error updating flight status")
             print("(flight_status) alt: ", flight_status.get_median_altitude_from_last_second())
-            print("All alts: ", flight_status.altitude_list)
+            # print("All alts: ", flight_status.altitude_list)
             """
             Dealing with the messages from SRAD 2
             """
