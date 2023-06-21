@@ -338,6 +338,7 @@ def main():
                         elif not flight_status.payload_deployed:
                             GPIO.output(PAYLOAD_PIN, GPIO.HIGH)
                             flight_status.payload_deployed = True
+                        # input()
 
 
             except Exception as e:
