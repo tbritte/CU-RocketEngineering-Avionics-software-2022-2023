@@ -77,12 +77,13 @@ if '--servo' in sys.argv:
     for i in [1, 2, 3]:
         print("Setting up cam servo {}".format(i))
         servos.append(CamServoController(i))
-    print("All Cam Servos Setup")
+    print("All Cam Servos Setup, giving them a chance to neutralize")
+    time.sleep(3)
     st = 0
     i = 0
     start_time = time.time()
-    while time.time() - start_time < 20:
-        if time.time() - st > 5 and i < len(servos):
+    while time.time() - start_time < 28:
+        if time.time() - st > 7 and i < len(servos):
             print("Activating camera {}".format(i + 1))
             st = time.time()
             servos[i].activate_camera()
