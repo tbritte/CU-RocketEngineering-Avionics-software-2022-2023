@@ -19,7 +19,7 @@ from .modular_ext_sensor_handler import ModDataHandler  # The external sensors, 
 
 from .buddy_comm import BuddyCommSystem
 
-from .data_logging import DataLogger
+from .dacdta_logging import DataLogger
 
 from .camera import Camera
 from .cam_servo import CamServoController
@@ -78,16 +78,23 @@ if '--servo' in sys.argv:
         print("Setting up cam servo {}".format(i))
         servos.append(CamServoController(i))
     print("All Cam Servos Setup")
-    time.sleep(1)
+    st = 0
+    i = 0
+    start_time = time.time()
+    while time.time() - start_time < 20:
+        if time.time() - st > 5:
+            print("Activating camera {}".format(i + 1))
+            st = time.time()
+            servos[i].activate_camera()
+            i += 1
 
-    for i in [1, 2, 3]:
-        print("Activating Servo {}".format(i))
-        servos[i-1].activate_camera()
-        time.sleep(5)
+        for s in servos:
+            s.update()
 
-    print("DONE, cleaning GPIO")
+    print("done")
     GPIO.cleanup()
     exit()
+
 
 
 
