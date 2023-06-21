@@ -36,6 +36,7 @@ class ModDataHandler:
             # print("Time to get sox data: ", time.monotonic() - start_time)
 
             if bmp_data is None:
+                print("\n\nBMP DATA IS NONE\n\n")
                 bmp_data = [0, 0, 0]
             if gps_data is None:
                 gps_data = [0, 0, 0, 0, 0, 0]

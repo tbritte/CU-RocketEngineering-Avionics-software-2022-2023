@@ -9,6 +9,7 @@ class Sensor(Process):
         super().__init__()  # Sets up the thread part of the object
         self.functional = False
         self.most_recent_data = None
+        self.most_recent_quality_data = None
         self.queue = Queue()
         self.setup()
 
@@ -38,4 +39,9 @@ class Sensor(Process):
         data = None
         while not self.queue.empty():
             data = self.queue.get()
-        return data
+
+        # Sometimes data is None becasue the queue was empty, so just use the most recent data that had been used
+        if data is not None:
+            self.most_recent_quality_data = data
+
+        return self.most_recent_quality_data

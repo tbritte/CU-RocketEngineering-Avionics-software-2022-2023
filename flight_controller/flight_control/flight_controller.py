@@ -264,7 +264,7 @@ def main():
             try:
                 if telemetry_downlink.ser is not None:
                     # DON'T CHANGE DOWNLINK SPEED UNLESS YOU CHANGE GPS SAME TIME INCREMENT AMOUNT FROM .125
-                    if (time.time() - last_downlink_send) > 0.016:  # Downlink should only be sent at 60hz
+                    if (time.time() - last_downlink_send) > 0.125:  # Downlink should only be sent at 8hz
                         print("Time since last send: ", time.time() - last_downlink_send)
                         telemetry_downlink.send_data(data, status_bits)
                         last_downlink_send = time.time()
@@ -328,6 +328,12 @@ def main():
                         go_pro_1_cam_servo.activate_camera()  # Turns off the camera
                         flight_status.go_pro_1_on = False
                         camera.stop_recording()  # Stops the pi camera
+                    
+                    elif read_val == "PYLD":
+                        print("Deploy payload because of PYLD command from ground station")
+                        GPIO.output(PAYLOAD_PIN, GPIO.HIGH)
+                        flight_status.payload_deployed = True
+
 
             except Exception as e:
                 print("Error reading/using data from ground station " + str(e))
@@ -338,7 +344,7 @@ def main():
             except:
                 print("Error logging data")
             try:
-                if (time.time() - last_flight_status_update) > 0.1:  # Flight_status should only be updated at 8hz
+                if (time.time() - last_flight_status_update) > 0.015625:  # Flight_status should only be updated at 8hz
                     print("Time since last flight status update should be .125...: ",
                           time.time() - last_flight_status_update)
                     flight_status.new_telemetry(data)
@@ -346,6 +352,7 @@ def main():
             except:
                 print("Error updating flight status")
             print("(flight_status) alt: ", flight_status.get_median_altitude_from_last_second())
+            print("All alts: ", flight_status.altitude_list)
             """
             Dealing with the messages from SRAD 2
             """

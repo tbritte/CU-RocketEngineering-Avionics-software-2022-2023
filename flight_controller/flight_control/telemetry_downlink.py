@@ -109,6 +109,9 @@ class TelemetryDownlink():
         elif message[3:7] == 'WXNO':
             print("----Received OVRD message----")
             return "OVRD"
+        elif message[3:7] == 'PYLD':
+            print("----Received PYLD message----")
+            return "PYLD"
         else:
             print("Unknown message, I don't know what to do with it...")
 
