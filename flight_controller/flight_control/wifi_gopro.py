@@ -37,4 +37,8 @@ class WifiGoProSystem(Thread):
             if len(self.activation_queue) > 0:
                 self._turn_on_gopro(self.activation_queue.pop(0))
 
+            """
+            Maybe send keep alive packets to the gopros here
+            """
+
 
