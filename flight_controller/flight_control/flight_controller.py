@@ -157,7 +157,7 @@ def alt_bat_test():
 
 
 def main():
-    input("PRESS ENTER TO START")  # Prevents autostart
+    # input("PRESS ENTER TO START")  # Prevents autostart
     drogue_deployed = False
     main_deployed = False
 
