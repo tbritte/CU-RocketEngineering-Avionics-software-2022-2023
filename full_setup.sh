@@ -16,6 +16,10 @@ pip3 install adafruit-circuitpython-lsm6ds
 # Library for payload motor control
 pip3 install TMC-2209-Raspberry-Pi
 
+# For controlling the GoPros over bluetooth
+pip3 install open-gopro
+
+
 # Put this in /boot/config.txt
 #enable_uart=1
 #dtoverlay=uart0

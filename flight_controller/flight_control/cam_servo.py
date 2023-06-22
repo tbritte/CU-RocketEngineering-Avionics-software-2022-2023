@@ -2,7 +2,7 @@
 import RPi.GPIO as GPIO
 import time
 
-CAM_SERVO_PINS = [26, 8, 23]   # cam servos 1, 2, and 3's pins
+CAM_SERVO_PINS = [26, 23, 8]   # cam servos 1, 2, and 3's pins
 
 class CamServoController:
     def __init__(self, gopro_num):
