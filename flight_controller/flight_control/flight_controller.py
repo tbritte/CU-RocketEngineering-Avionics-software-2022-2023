@@ -23,6 +23,7 @@ from .data_logging import DataLogger
 
 from .camera import Camera
 from .cam_servo import CamServoController
+from .cam_bones import CamBones
 
 from .LED_controller import LEDController
 from .buzzer import Buzzer
@@ -194,7 +195,7 @@ def main():
     camera = Camera()
     go_pro_1_cam_servo = CamServoController(1)
     go_pro_2_cam_servo = CamServoController(2)
-    go_pro_3_cam_servo = CamServoController(3)
+    go_pro_bones = CamBones(8)
 
     # Only set up the LED controller if the sense hat is being used
     if USING_SENSE_HAT:
@@ -283,7 +284,6 @@ def main():
                             flight_status.go_pro_1_on = False
                         else:
                             flight_status.go_pro_1_on = True
-
                     elif read_val == 2:
                         # TELL SRAD2 TO TURN GOPRO2 ON
                         # buddy_comm.send(2)
@@ -294,17 +294,25 @@ def main():
                             flight_status.go_pro_2_on = False
                         else:
                             flight_status.go_pro_2_on = True
-
                     elif read_val == 3:
-                        # TELL SRAD2 TO TURN GOPRO3 ON
-                        # buddy_comm.send(3)
-                        # nvm, I turn it on
-                        print("Trying to start GoPro 3")
-                        go_pro_3_cam_servo.activate_camera()
+                        go_pro_bones.activate_camera()
                         if flight_status.go_pro_3_on:
                             flight_status.go_pro_3_on = False
                         else:
                             flight_status.go_pro_3_on = True
+
+                    
+
+                    # elif read_val == 3:
+                    #     # TELL SRAD2 TO TURN GOPRO3 ON
+                    #     # buddy_comm.send(3)
+                    #     # nvm, I turn it on
+                    #     print("Trying to start GoPro 3")
+                    #     go_pro_3_cam_servo.activate_camera()
+                    #     if flight_status.go_pro_3_on:
+                    #         flight_status.go_pro_3_on = False
+                    #     else:
+                    #         flight_status.go_pro_3_on = True
 
                     elif read_val == "RDY":
                         pass
@@ -403,7 +411,7 @@ def main():
             buzzer.update()
             go_pro_1_cam_servo.update()
             go_pro_2_cam_servo.update()
-            go_pro_3_cam_servo.update()
+            go_pro_bones.update()
 
             """
             Stage change handling
